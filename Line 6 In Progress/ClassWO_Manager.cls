@@ -56,8 +56,9 @@ Private woDWGno As String           '               - DWG Number for item
 'Private woCScost As String          '               - Unused Column
 'Private woSBTavg As String          '               - Unused Column
 
-Private woStartTime As String       ' Start time of WO
-Private woEndTime As String         ' Finish / Not-Finish Time of WO
+Private woLastStartTime As String       ' Start time of WO
+Private woLastEndTime As String         ' Not-Finish Time of WO
+Private woTotalTime As String       ' Total time since last Finish
 
 
 
@@ -109,6 +110,15 @@ If frmLine6.Text_Enter_WO.Text <> frmLine6.Text_Enter_WO.Tag And frmLine6.Text_E
         Let Date1$ = Date$
         Write #1, InString$, Date1$
         Close #1
+        
+        'Create temp file to store wo time data
+        Let woTempData = woTempDirectory & woNum & "6.tmp"
+        
+        If Dir(woTempData) = "" Then
+            Call updTemp("New")
+        Else
+            Call updTemp("Load")
+        End If
 
 End If
 
@@ -145,9 +155,13 @@ Public Sub clearWO()
     
     'Kill WO temp files (if they exist)
     If Dir(woTempMain) <> "" Then Kill woTempMain
-    If Dir(woTempData) <> "" Then Kill woTempData
+    If Dir(woTempData) <> "" Then
+        Kill woTempData
+        woTempData = ""
+    End If
     
     frmLine6.Refresh
+    
 End Sub
 
 ' -- chkActiveWO - Function to be called when loading program to check for a temporary file containing the currently active work order. ------------------------------------------------
@@ -401,10 +415,84 @@ Select Case Punch
         Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, PRICE!, Tc!, STLCOST!, AvgTime!
         Close #1
         
+    Case Else
+        MsgBox ("Error in Punch Handler")
+        
 End Select
 
 End Sub
 
+' -- updTemp() - updates temp file to track work-order progress between Start and Finish punches
+Private Sub updTemp(cmd As String)
+
+Select Case cmd
+    Case "New"
+    
+        Open woTempData For Output As #2
+        Write #2, woNum, woLastStartTime, 0, 0  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
+        
+        Close #2
+        
+    Case "Load"
+    
+        Open woTempData For Input As #2
+        Input #2, woNumTemp, woLastStartTimeTemp, woLastEndTimeTemp, woTotalTimeTemp  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
+        
+        woLastStartTime = woLastStartTimeTemp
+        woLastEndTime = woLastEndTimeTemp
+        woTotalTime = woTotalTimeTemp
+        
+        Close #2
+        
+    Case "Start"
+        
+        ' Load last Start punch timestamp from woTempData
+        Open woTempData For Input As #2
+        Input #2, woNumTemp, woLastStartTimeTemp, woLastEndTimeTemp, woTotalTimeTemp  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
+        
+        ' If the timestamp does not match the one stored in the class, there is probably an error
+        If woLastStartTime <> woLastStartTimeTemp Then MsgBox ("Start time match error")
+        
+        ' Get current time as Start time
+        woLastStartTime = Now()
+        
+        Close #2
+        
+        ' Store values back in temp file
+        Open woTempData For Output As #2
+        Write #2, woNum, woLastStartTime, woLastEndTime, woTotalTime  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
+    
+        Close #2
+        
+    Case "End"
+    
+        ' Load last Start punch timestamp from woTempData
+        Open woTempData For Input As #2
+        Input #2, woNumTemp, woLastStartTimeTemp, woLastEndTimeTemp, woTotalTimeTemp  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
+        
+        ' If the timestamp does not match the one stored in the class, there is probably an error
+        If woLastStartTime <> woLastStartTimeTemp Then MsgBox ("Start time match error")
+        
+        ' Get current time as N/F time
+        woLastEndTime = Now()
+        
+        ' Generate new total time based on last start time, current N/F time, and previous total time
+        woTotalTime = DateDiff("s", woLastEndTime, woLastStartTime) + woTotalTimeTemp
+        
+        Close #2
+        
+        ' Store values back in temp file
+        Open woTempData For Output As #2
+        Write #2, woNum, woLastStartTime, woLastEndTime, woTotalTime  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
+    
+        Close #2
+        
+    Case Else
+        MsgBox ("Error in Temp File Handler")
+End Select
+    
+    
+End Sub
 
 ' -- runCalcs() - Runs calculations necessary to push WO data out when finish is pressed.
 Private Sub runCalcs()
@@ -426,7 +514,7 @@ Let STYPE$ = "0"
 
 Let TCCOST! = 0.171821
 Let HOCOST! = 404!
-Let TTime! = TTime! / 60
+Let TTime! = woTotalTime / 60
 Let AvgTime! = Format$((TTime! / Qty!), "CURRENCY")
 Let TCCOST! = Format$((TCCOST! * Tc!), "CURRENCY")
 Let HORATE! = 0.5
