@@ -68,6 +68,10 @@ Private Const joySelect As Long = Input22
 Private Const joyRelease As Long = Input23
 Private Const joyToggle As Long = Input24
 
+'Constants for Water Flow Counter
+Private Const H2Ocount As Integer = 5   'Time between loss of signal and stopping machine, in seconds
+Private Const H2Oconst As Integer = 20  'FSM Period in Hz
+
 '-- Class Private Variables
 
 Private FSinputState As Long      'Variable to store FastStatus input Data
@@ -79,6 +83,8 @@ Private joyActive As Boolean     'Boolean to determine if the joystick is active
 Private joyStr As String        'String to describe current joystick state
 
 Private setE_Stop As Boolean    'Local E-stop variable
+Private chkH2O As Boolean       'Local Water Sensor Boolean
+Private countH2O As Integer     'Water Flow Counter
 
 '============================================================ Class Setup ==================================================================================================
 Public Sub Enable()
@@ -157,6 +163,28 @@ Public Sub testDrives()
     c6k.Write "JOG000000:PSET0,0,0,0,0,0" & Chr$(13)
     c6k.Write ("D1,1,1,1,1,1:GO111111:WAIT(MOV=b0000)" & Chr$(13))
     c6k.Write ("T2:D-1,-1,-1,-1,-1,-1:GO111111:WAIT(MOV=b0000)" & Chr$(13))
+
+End Sub
+
+'-- homeMachine() -
+Public Sub setMachineHome()
+    'Set position to 0 for all axes except the oscillator (drive #4)
+    c6k.Write "JOG000000:PSET0,0,0,x,0,0" & Chr$(13)
+End Sub
+
+'-- homeOsc() - Homes the oscillator
+Public Sub homeOsc()
+
+' Set osc limit switch pin (pin 18) to be the home limit for the oscilator axis (drive #4)
+c6k.Write ("1INFNC18-4T:" & Chr$(13))
+'Set motion parameters for osc axis and give go command to move the drive away from home
+c6k.Write ("A4.10:AD4.10:V4.4:D4.-.3:GO000100:" & Chr$(13))
+'set home motion parameters
+c6k.Write ("HOMA4.1:HOMAD4.50:@HOMZ0:HOMV4.1:HOMVF4.1:" & Chr$(13))
+'Adtl motion parameters, call home function
+c6k.Write ("HOMBAC111011:HOMEDG111111:HOMDF000100:HOM,,,0,,:" & Chr$(13))
+'Wait until homing motion has stopped, then move back to standby position
+c6k.Write ("WAIT(6AS=XXX1X):T.1:D,,,-2.375,,:GO0001000:" & Chr$(13))
 
 End Sub
 
@@ -243,17 +271,23 @@ Select Case output
         End If
     Case "Argon"
         If value Then
+            c6k.Write ("1OUT.12-1" & Chr$(13))
+        Else
+            c6k.Write ("1OUT.12-0" & Chr$(13))
+        End If
+    Case "Exhaust"
+        If value Then
             c6k.Write ("1OUT.13-1" & Chr$(13))
         Else
             c6k.Write ("1OUT.13-0" & Chr$(13))
         End If
-    Case "Exhaust"
+    Case "TC Feeder"
         If value Then
             c6k.Write ("1OUT.14-1" & Chr$(13))
         Else
             c6k.Write ("1OUT.14-0" & Chr$(13))
         End If
-    Case "TC Feeder"
+    Case "Water Pump"
         If value Then
             c6k.Write ("1OUT.15-1" & Chr$(13))
         Else
@@ -271,6 +305,10 @@ End Select
 
 End Sub
 
+' -- setOutputNum() - Function to set the state of a single output pin
+'   - Inputs:
+'       - output - Integer corresponding to the output pin to be set. Valid values are 9-16 and 25-32
+'       - value - boolean for the desired state of the output (true for on, false for off)
 Public Sub setOutputNum(output As Integer, value As Boolean)
 
 Select Case output
@@ -376,7 +414,7 @@ Select Case output
 End Select
 End Sub
 
-'============================================================ E-Stop Handler ==========================================================================================
+'============================================================ E-Stop & H2O Sensor Handler ==========================================================================================
 '-- chkE_Stop() - Emergency Stop Check function - checks c6k inputs for E-Stop and sets flag accordingly
 '   - Inputs: None
 '   - Outputs: Boolean containing value of setE_Stop
@@ -415,6 +453,16 @@ End If
                                                     ' Then do nothing
 
 chkE_Stop = setE_Stop
+
+End Function
+
+Public Function chkH2O()
+
+    If Not fsUpToDate Then
+        Call updFastStatus
+    End If
+    
+    
 
 End Function
 
@@ -639,4 +687,32 @@ XSpeedSHOW = (fsinfo.MotorVel(2))
     Let Text18.Text = Format((Text18.Text / XcalV), "0.000")
     
 End Function
+
+'============================================================ Drive Main Operation =================================================================================================
+
+Public Sub strikeArc()
+
+'Capture position of z-axis - further z inputs will be relative to strike (which should be surface of blade)
+c6k.Write "PSETX,0,0,X:" & Chr$(13)
+'Turn on inputs as necessary
+Call setOutput("Argon", True)
+Call setOutput("Airblade", True)
+
+'Close contacts and Move main z-axis up by 0.9"
+c6k.Write "A,10:AD,3:V,13:D,0.9:GO01:1OUT.16-1:WAIT(MOV=b000000):JOG100001" & Chr$(13)
+
+End Sub
+
+Public Sub runPass(passType As String)
+
+Select Case passType
+    Case "Blade"
+        
+    
+    
+End Select
+
+End Sub
+
+
 

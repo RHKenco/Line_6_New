@@ -661,7 +661,7 @@ temp = MsgBox("Set Machine Home?", 1, "Set 0")
 
 If temp = 0 Then
     'Send command to 6k to set 0 position on all axes
-    c6k.Write "JOG000000:PSET0,0,0,0,0,0" & Chr$(13)
+    Call c6kOps.setMachineHome
 End If
 
 End Sub
