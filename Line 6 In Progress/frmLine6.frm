@@ -7,8 +7,8 @@ Begin VB.Form frmLine6
    ClientTop       =   810
    ClientWidth     =   17385
    LinkTopic       =   "Form6"
-   ScaleHeight     =   20835
-   ScaleWidth      =   38280
+   ScaleHeight     =   6660
+   ScaleWidth      =   17385
    StartUpPosition =   3  'Windows Default
    Begin VB.OptionButton Option_Auger_Direction 
       BackColor       =   &H00C00000&
@@ -544,6 +544,9 @@ Call c6kOps.Enable
 
 '-- Run motor setup subroutine
 Call c6kOps.bootDrives
+
+'-- Check for previously active WO
+Call woMgr.chkActiveWO
 
 '-- Start Airblade & Exhaust Fan
 Call c6kOps.setOutput("Airblade", True)

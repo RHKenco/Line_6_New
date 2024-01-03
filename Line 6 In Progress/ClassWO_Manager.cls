@@ -21,9 +21,27 @@ Attribute VB_Exposed = False
 
 Option Explicit
 
+' Constant Values
 Private Const woTimeoutTime = 300   'Work Order Timeout Clock Time in Seconds
 Private Const woTimeoutCalib = 20   'Calibration constant - cycle of timer in Hz
 
+
+' Filepaths utilized in multiple locations
+Private Const woFormASCpath As String = "F:\MFG\FORM.ASC"
+Private Const woBarDataPath As String = "F:\MFG\Bar_Data.dta"
+Private Const woGrossPITpath As String = "F:\MFG\GROSSPIT.GPA"
+Private Const woGaryPath As String = "F:\mfg\GARY.GPA"
+Private Const woGoalPath As String = "F:\mfg\GOAL.GPA"
+Private Const woTempMain As String = "F:\BARCODE\temp6.temp"
+Private Const woTempDir As String = "F:\BARCODE\"
+
+Private woTempData As String        ' Varible to store path to WO temp data
+
+'Const Strings for File Write
+Private Const machineNo = 6
+
+
+'Internal Variables
 Private woActive As Boolean         ' Work Order Active flag
 Private woCountdownTime As Integer  ' Countdown timer variable for timeout time
 
@@ -85,6 +103,12 @@ If frmLine6.Text_Enter_WO.Text <> frmLine6.Text_Enter_WO.Tag And frmLine6.Text_E
         btnState ("Active")
         
         frmLine6.Refresh
+        
+        'Set up temporary file to save current active work-order (in case of program crashing)
+        Open woTempMain For Output As #1
+        Let Date1$ = Date$
+        Write #1, InString$, Date1$
+        Close #1
 
 End If
 
@@ -119,10 +143,56 @@ Public Sub clearWO()
     'Update Buttons
     btnState ("Inactive")
     
+    'Kill WO temp files (if they exist)
+    If Dir(woTempMain) <> "" Then Kill woTempMain
+    If Dir(woTempData) <> "" Then Kill woTempData
+    
     frmLine6.Refresh
 End Sub
 
-'-- btnState - Function to handle visibility and enabling of Enter, Go, Start, N/F, and Finish Buttons -------------------------------------
+' -- chkActiveWO - Function to be called when loading program to check for a temporary file containing the currently active work order. ------------------------------------------------
+'                - Allows for work-order to be maintained if program is shut down improperly
+Public Sub chkActiveWO()
+
+' Check to see if temp file exists. If it does not, exit subroutine. Else,
+ If Dir(woTempMain) = "" Then
+   chkActiveWO() = ""
+   Exit Sub
+Else
+    ' Load temp file to check WOnum (temp6) and Date
+    Open (woTempMain) For Input As #2
+    Input #2, temp6, DAT
+    Close #2
+    
+    ' Load backup data temp file & store in mgr variables
+    
+    
+    
+    
+    
+    
+    
+    
+    ' ***** ADD CODE HERE ***** Pseudocode:
+        ' Loads temporary file with necessary WO start time data
+        ' Checks current time - if the current time is more than timeout time different from the temp file,
+        ' Punch a not-finish on the WO with time based on the timeout period & Exit Sub
+        
+        
+        
+        
+        
+        
+        
+    
+    ' Update Form text and call function to load WO
+    frmLine6.Text_Enter_WO.Text = temp6
+    Call loadWO
+   
+End Sub
+
+'-- btnState() - Function to handle visibility and enabling of Enter, Go, Start, N/F, and Finish Buttons -------------------------------------
+'   - Inputs: btn_State - string containing desired button state
 Public Sub btnState(btn_state As String)
     
     If btn_state = "Inactive" Then
@@ -206,161 +276,26 @@ Public Sub btnState(btn_state As String)
 
 End Sub
 
-Private Sub notfinishWO()
-
+Public Sub startWO()
+    Call writeData("Start")
 End Sub
 
-Private Sub finishWO()
+Public Sub notfinishWO()
+    Call writeData("N/F")
+End Sub
 
-Dim DAT As String
+Public Sub finishWO()
+    Call writeData("Finish")
+End Sub
 
-'-- Check to make sure a WO has been loaded
-If Dir("F:\BARCODE\temp6.tmp") = "" Then
-    'FileExists = False
-     MsgBox ("No Active Work Order "), , ("ERROR")
-     Exit Sub
-End If
-
-'-- Ask user quantity finished
-Let Qty! = Val(InputBox("ENTER QTY FINISHED", "Qty", 0, 4000, 1500))
-If Qty! = 0 Then Exit Sub
-    
-    
-    
-Open "f:\mfg\FORM.ASC" For Input As #5
-Do Until EOF(5)
-Input #5, WOK$, PartNumber, TQTY!, PRICE!, Tc!, COMM$, DAT$, DWG$, CSCOST!, SBT_AvgTime!
-   If InString$ = WOK$ Then
-      If TQTY! < Qty! Then
-        MsgBox ("You Entered More Than The Work Order QTY"), , ("ERROR")
-      Close #5
-      Exit Sub
-     End If
-    Exit Do
-    Else
-    Let WOK$ = "": PartNumber = "": TQTY! = 0: PRICE! = 0.00001: Tc! = 0: COMM$ = "": DAT$ = "": DWG$ = "no_dwg": CSCOST! = 0
-   End If
- Loop
- Close #5
-If PartNumber = "" Then Let PartNumber = InString$ & " Override"
-Open "F:\BARCODE\temp6.tmp" For Input As #2
-Input #2, temp6, DAT
-Close #2
-
-Open "F:\BARCODE\" + temp6 + "6.tmp" For Input As #2
-Input #2, InString1, STIME!, ETIME!, TTime!, Com2$
-Close #2
-            
-'Compute Elapsed Time
-Let ETIME! = Timer: Let TTime! = ((ETIME! - STIME!) / 60) + TTime!
-
-Kill "F:\BARCODE\" + temp6 + "6.tmp"
-Let STIME! = STIME! / 3600: Let ETIME! = ETIME! / 3600:
-Label21.Caption = "RunMode - OFF"
-Label17.Caption = Format(Now, "SHORT TIME")
-            
-            
-Kill "F:\BARCODE\temp6.tmp"
-'********** relay off **********
-' ULStat% = cbDBitOut%(0, 10, 2, 0)
-'   If ULStat% <> 0 Then Stop
- Timer2.Enabled = False
-'Text4.Visible = False
-'Label19.Visible = False
- Label21.Caption = "Press Start  or  Ganged  "
-
-
-Command6.Enabled = True
-Command8.Enabled = True
-Command13.Enabled = True
-
-
-
-
-Let STYPE$ = "0"
-
-
-'*********************CALC
-'T.C COST/LB        4.81
-'INCHES/LB         28.00
-'T.C. COST/SQ"     $0.172
-'MACH.P/DAY     $1344.00
-'LABOR P/DAY    $1888.00
-'TOTAL P/DAY    $3232.00
-'CAP. UTIL%        80.00
-'CAP.DAILY COST $3232.00
-'PLANT COST/HR    404.00
-'*************************************************************************
-
-Let TCCOST! = 0.171821
-Let HOCOST! = 404!
-Let TTime! = TTime! / 60
-Let AvgTime! = Format$((TTime! / Qty!), "CURRENCY")
-Let TCCOST! = Format$((TCCOST! * Tc!), "CURRENCY")
-Let HORATE! = 0.5
-
-
-Let CONVCOST! = Format$((HOCOST! * AvgTime! * HORATE!), "CURRENCY")
-Let UNITCOST! = Format$((TCCOST! + CONVCOST! + STLCOST!), "CURRENCY")
-Let UNITPROFIT! = Format$((PRICE! - UNITCOST!), "CURRENCY")
-'Let GROSSPROFIT! = Format$(((UNITPROFIT! / PRICE!) * 100), "CURRENCY")
-Let TSALES! = Qty! * PRICE!
-Let TTC! = Tc! * Qty!
-Let TTCCOST! = TCCOST! * Qty!
-Let TSTLCOST! = STLCOST! * Qty!
-Let TCONVCOST! = CONVCOST! * Qty!
-Let TOTALCOST! = UNITCOST! * Qty!
-Let TOTALPROFIT! = UNITPROFIT! * Qty!
-Let COM$ = COM1$ + Com2$ + Com3$ + COM4$ + COM5$ + COM6$ + COM7$
-
-Let diff = SBT_AvgTime! - AvgTime!
-If AvgTime! < SBT_AvgTime! Then Let diffcom = " Faster  "
-If AvgTime! > SBT_AvgTime! Then Let diffcom = " Slower  "
-MSFlexGrid1.AddItem InString$ & Chr(9) & PartNumber & Chr(9) & "4" & Chr(9) & Qty! & Chr(9) & SBT_AvgTime! & Chr(9) & AvgTime! & Chr(9) & Format((diff * 60), "####0.00") & diffcom & Chr(9) & COM$, 1
-Open "F:\MFG\Bar_Data.dta" For Append As #1
-If RunCondition5 = "TimeOut" Then
-    RunCondition5 = ""
-    Write #1, InString$, "6", "Finish", Format(Now, "yy-mm-dd"), "Timed Out", PartNumber, Qty!, AvgTime!, STLCOST!, GROSSPROFIT! & "%", COM$
-Else
-    Write #1, InString$, "6", "Finish", Format(Now, "yy-mm-dd"), Format$(Time, "hh:mm:ss"), PartNumber, Qty!, AvgTime!, STLCOST!, GROSSPROFIT! & "%", COM$
-End If
-Close #1
-
-Let Sta$ = "6"
-
-19495 Open "F:\MFG\GROSSPIT.GPA" For Append As #1
-Write #1, WOK$, PartNumber, TQTY!, Qty!, Sta$, Date$, PRICE!, Tc!, STLCOST!, AvgTime!, TCCOST!, CONVCOST!, UNITCOST!, UNITPROFIT!, GROSSPROFIT!, COM$, TTime!, TSALES!, TTC!, TTCCOST!, TSTLCOST!, TCONVCOST!, TOTALCOST!, TOTALPROFIT!, DAT$, DWG$, CSCOST!
-Close #1
-
-Open "F:\mfg\GARY.GPA" For Append As #1
-Write #1, WOK$, PartNumber, TQTY!, Qty!, Sta$, Date$, PRICE!, Tc!, STLCOST!, AvgTime!
-Close #1
-Open "F:\mfg\GOAL.GPA" For Append As #1
-Write #1, WOK$, PartNumber, TQTY!, Qty!, Sta$, Date$, PRICE!, Tc!, STLCOST!, AvgTime!
-Close #1
-
-Let TTime! = 0: Let ATSALES! = 0: Let ATTC! = 0: Let BTTIME! = 0: Let BTSALES! = 0: Let BTTC! = 0: Let CTTIME! = 0: Let CTSALES! = 0: Let CTTC! = 0: Let TUNITPROFIT! = 0
-Let TTC! = 0
-Let COM1$ = "": Let Com2$ = "": Let Com3$ = "": Let COM4$ = "": Let COM5$ = "": Let COM6$ = "": Let COM7$ = ""
-Let STIME! = 0: Let ETIME! = 0: Let Qty! = 0: Let TTime! = 0: Let C$ = "": Let B$ = "": Let A$ = ""
-Let WOK$ = ""
-Let InString1 = ""
-
-Exit Sub
-errorhand:
-If Err.Number = 70 Then
-Form7.Show 1
-Resume 0
-Else
-Resume Next
-End If
-
+Public Sub timeoutWO()
+    Call writeData("TimeOut")
 End Sub
 
 Private Function pullFormASC(WORK_ORDER As String) As Boolean
 
 ' Load FORM.ASC
-Open "F:\MFG\FORM.ASC" For Input As #1
+Open woFormASCpath For Input As #1
 '
 Do While WORK_ORDER <> WOK$
      Input #1, WOK$, PartNumber, TQTY!, PRICE!, Tc!, COMM$, DAT$, DWG$, UNUSED_1!, UNUSED_2!
@@ -403,6 +338,128 @@ Loop
 Close #1
 
 End Function
+
+'-- writeData() - Function to write data to the various files necessary for operations.
+'   - Inputs: Punch - string describing the type of punch delivered, from which data will be directed to the appropriate files
+Private Sub writeData(Punch As String)
+
+'Load Bar_Data
+Open woBarDataPath For Append As #1
+
+Select Case Punch
+    Case "Start"
+        
+        'Write Start punch to Bar_Data
+        Write #1, woNum, machineNo, "Start", Format(Now, "yy-mm-dd"), Format$(Time, "hh:mm:ss")
+        
+        Close #1
+        
+    Case "N/F"
+    
+        'Write Not-Finished punch to Bar_Data
+        Write #1, woNum, machineNo, "N\F", Format(Now, "yy-mm-dd"), Format$(Time, "hh:mm:ss")
+        
+        Close #1
+    
+    Case "TimeOut"
+        
+        'Write Time-Out Punch to Bar_Data
+        Write #1, woNum, machineNo, "Timed Out", Format(Now, "yy-mm-dd"), Format$(Time, "hh:mm:ss")
+        
+        Close #1
+
+    Case "Finished"
+        
+        'Prompt User for Quantity Finished
+        Dim FinishedQty As Integer
+        FinishedQty = Val(InputBox("ENTER QTY FINISHED", "Qty", 0, 4000, 1500))
+        
+        If FinishedQty < 1 Then
+            MsgBox ("Finish Punch Canceled")
+            Exit Sub
+        End If
+        
+        Call runCalcs
+        
+        'Write Finished Punch & Data to Bar_Data
+        Write #1, woNum, machineNo, "Finish", Format(Now, "yy-mm-dd"), Format$(Time, "hh:mm:ss"), woPartNum, FinishedQty, AvgTime!, STLCOST!, GROSSPROFIT! & "%", COM$
+        
+        Close #1
+        
+        'Output to GROSSPIT
+        Open woGrossPITpath For Append As #1
+        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, PRICE!, Tc!, STLCOST!, AvgTime!, TCCOST!, CONVCOST!, UNITCOST!, UNITPROFIT!, GROSSPROFIT!, COM$, TTime!, TSALES!, TTC!, TTCCOST!, TSTLCOST!, TCONVCOST!, TOTALCOST!, TOTALPROFIT!, DAT$, DWG$, CSCOST!
+        Close #1
+        
+        'Output to GARY
+        Open woGaryPath For Append As #1
+        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, PRICE!, Tc!, STLCOST!, AvgTime!
+        Close #1
+        
+        'Output to GOAL
+        Open woGoalPath For Append As #1
+        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, PRICE!, Tc!, STLCOST!, AvgTime!
+        Close #1
+        
+End Select
+
+End Sub
+
+
+' -- runCalcs() - Runs calculations necessary to push WO data out when finish is pressed.
+Private Sub runCalcs()
+    
+Let STYPE$ = "0"
+
+
+'*********************CALC
+'T.C COST/LB        4.81
+'INCHES/LB         28.00
+'T.C. COST/SQ"     $0.172
+'MACH.P/DAY     $1344.00
+'LABOR P/DAY    $1888.00
+'TOTAL P/DAY    $3232.00
+'CAP. UTIL%        80.00
+'CAP.DAILY COST $3232.00
+'PLANT COST/HR    404.00
+'*************************************************************************
+
+Let TCCOST! = 0.171821
+Let HOCOST! = 404!
+Let TTime! = TTime! / 60
+Let AvgTime! = Format$((TTime! / Qty!), "CURRENCY")
+Let TCCOST! = Format$((TCCOST! * Tc!), "CURRENCY")
+Let HORATE! = 0.5
+
+
+Let CONVCOST! = Format$((HOCOST! * AvgTime! * HORATE!), "CURRENCY")
+Let UNITCOST! = Format$((TCCOST! + CONVCOST! + STLCOST!), "CURRENCY")
+Let UNITPROFIT! = Format$((PRICE! - UNITCOST!), "CURRENCY")
+'Let GROSSPROFIT! = Format$(((UNITPROFIT! / PRICE!) * 100), "CURRENCY")
+Let TSALES! = Qty! * PRICE!
+Let TTC! = Tc! * Qty!
+Let TTCCOST! = TCCOST! * Qty!
+Let TSTLCOST! = STLCOST! * Qty!
+Let TCONVCOST! = CONVCOST! * Qty!
+Let TOTALCOST! = UNITCOST! * Qty!
+Let TOTALPROFIT! = UNITPROFIT! * Qty!
+Let COM$ = COM1$ + Com2$ + Com3$ + COM4$ + COM5$ + COM6$ + COM7$
+
+Let diff = SBT_AvgTime! - AvgTime!
+If AvgTime! < SBT_AvgTime! Then Let diffcom = " Faster  "
+If AvgTime! > SBT_AvgTime! Then Let diffcom = " Slower  "
+MSFlexGrid1.AddItem InString$ & Chr(9) & PartNumber & Chr(9) & "4" & Chr(9) & Qty! & Chr(9) & SBT_AvgTime! & Chr(9) & AvgTime! & Chr(9) & Format((diff * 60), "####0.00") & diffcom & Chr(9) & COM$, 1
+
+
+Let TTime! = 0: Let ATSALES! = 0: Let ATTC! = 0: Let BTTIME! = 0: Let BTSALES! = 0: Let BTTC! = 0: Let CTTIME! = 0: Let CTSALES! = 0: Let CTTC! = 0: Let TUNITPROFIT! = 0
+Let TTC! = 0
+Let COM1$ = "": Let Com2$ = "": Let Com3$ = "": Let COM4$ = "": Let COM5$ = "": Let COM6$ = "": Let COM7$ = ""
+Let STIME! = 0: Let ETIME! = 0: Let Qty! = 0: Let TTime! = 0: Let C$ = "": Let B$ = "": Let A$ = ""
+Let WOK$ = ""
+Let InString1 = ""
+
+
+End Sub
 
 Public Function woTimer(timerCmd As String) As Integer
 
