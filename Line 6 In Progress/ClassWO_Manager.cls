@@ -153,14 +153,14 @@ Public Sub clearWO()
     'Update Buttons
     btnState ("Inactive")
     
+    frmLine6.Refresh
+    
     'Kill WO temp files (if they exist)
     If Dir(woTempMain) <> "" Then Kill woTempMain
     If Dir(woTempData) <> "" Then
         Kill woTempData
         woTempData = ""
     End If
-    
-    frmLine6.Refresh
     
 End Sub
 
@@ -291,18 +291,22 @@ Public Sub btnState(btn_state As String)
 End Sub
 
 Public Sub startWO()
+    Call updTemp("Start")
     Call writeData("Start")
 End Sub
 
 Public Sub notfinishWO()
+    Call updTemp("End")
     Call writeData("N/F")
 End Sub
 
 Public Sub finishWO()
+    Call updTemp("End")
     Call writeData("Finish")
 End Sub
 
 Public Sub timeoutWO()
+    Call updTemp("End")
     Call writeData("TimeOut")
 End Sub
 
@@ -536,7 +540,6 @@ Let COM$ = COM1$ + Com2$ + Com3$ + COM4$ + COM5$ + COM6$ + COM7$
 Let diff = SBT_AvgTime! - AvgTime!
 If AvgTime! < SBT_AvgTime! Then Let diffcom = " Faster  "
 If AvgTime! > SBT_AvgTime! Then Let diffcom = " Slower  "
-MSFlexGrid1.AddItem InString$ & Chr(9) & PartNumber & Chr(9) & "4" & Chr(9) & Qty! & Chr(9) & SBT_AvgTime! & Chr(9) & AvgTime! & Chr(9) & Format((diff * 60), "####0.00") & diffcom & Chr(9) & COM$, 1
 
 
 Let TTime! = 0: Let ATSALES! = 0: Let ATTC! = 0: Let BTTIME! = 0: Let BTSALES! = 0: Let BTTC! = 0: Let CTTIME! = 0: Let CTSALES! = 0: Let CTTC! = 0: Let TUNITPROFIT! = 0

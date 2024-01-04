@@ -86,6 +86,21 @@ Private setE_Stop As Boolean    'Local E-stop variable
 Private chkH2O As Boolean       'Local Water Sensor Boolean
 Private countH2O As Integer     'Water Flow Counter
 
+Private passSpeed(3) As String      'Array to store pass speeds at different pass witdths
+Private Const passSpeed0 = ".125"       ' - Defaults
+Private Const passSpeed1 = ".119"
+Private Const passSpeed2 = ".100"
+Private Const passSpeed3 = ".075"
+
+Private oscSpeed(3) As String   'Array to store oscillation speeds at different pass widths
+Private Const oscSpeed0 = "3.5"
+Private Const oscSpeed1 = "3.4"
+Private Const oscSpeed2 = "3.0"
+Private Const oscSpeed3 = "2.8"
+
+Private Const speedSetupPath As String = "F:\apps\exe\line 6\files\speedSetup6.asc"
+
+
 '============================================================ Class Setup ==================================================================================================
 Public Sub Enable()
 
@@ -103,7 +118,79 @@ joyStr = ""
 
 setE_Stop = False
 
+Call loadPassSpeed
+
 End Sub
+
+Public Sub defaultPassSpeed()
+
+passSpeed(0) = passSpeed0
+passSpeed(1) = passSpeed1
+passSpeed(2) = passSpeed2
+passSpeed(3) = passSpeed3
+
+oscSpeed(0) = oscSpeed0
+oscSpeed(1) = oscSpeed1
+oscSpeed(2) = oscSpeed2
+oscSpeed(3) = oscSpeed3
+
+' If prior user-input file exists, delete it
+If Dir(speedSetupPath) <> "" Then Kill speedSetupPath
+    
+End Sub
+
+Public Sub loadPassSpeed()
+
+'If no prior user-defined speed profile is set, reset speeds to default
+If Dir(speedSetupPath) = "" Then
+    Call defaultPassSpeed
+Else
+    ' If it does exist, load the speeds
+    Open speedSetupPath For Input As #1
+    Input #1, spdP0$, spdP1$, spdP2$, spdP3$, spdO0$, spdO1$, spdO2$, spdO3$
+    
+    passSpeed(0) = spdP0$
+    passSpeed(1) = spdP1$
+    passSpeed(2) = spdP2$
+    passSpeed(3) = spdP3$
+    
+    oscSpeed(0) = spdO0$
+    oscSpeed(1) = spdO1$
+    oscSpeed(2) = spdO2$
+    oscSpeed(3) = spdO3$
+    
+    Close #1
+    
+    End If
+
+End Sub
+
+Public Sub setPassSpeed(spdP0$, spdP1$, spdP2$, spdP3$, spdO0$, spdO1$, spdO2$, spdO3$)
+
+passSpeed(0) = spdP0$
+passSpeed(1) = spdP1$
+passSpeed(2) = spdP2$
+passSpeed(3) = spdP3$
+
+oscSpeed(0) = spdO0$
+oscSpeed(1) = spdO1$
+oscSpeed(2) = spdO2$
+oscSpeed(3) = spdO3$
+
+End Sub
+
+Public Sub savePassSpeed()
+
+Open speedSetupPath For Output As #1
+
+Write #1, passSpeed(0), passSpeed(1), passSpeed(2), passSpeed(3), oscSpeed(0), oscSpeed(1), oscSpeed(2), oscSpeed(3)
+
+Close #1
+
+End Sub
+
+
+
 
 '============================================================ c6k Generic =================================================================================================
 
@@ -260,48 +347,30 @@ Public Sub stopAllOut()
     c6k.Write "JOG000000:1OUTALL9,16,0:1OUTALL25,32,0:T2" & Chr$(13)
 End Sub
 
+
 Public Sub setOutput(output As String, value As Boolean)
+
+Dim outputTemp As Integer
 
 Select Case output
     Case "Airblade"
-        If value Then
-            c6k.Write ("1OUT.9-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.9-0" & Chr$(13))
-        End If
+        outputTemp = 9
     Case "Argon"
-        If value Then
-            c6k.Write ("1OUT.12-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.12-0" & Chr$(13))
-        End If
+        outputTemp = 12
     Case "Exhaust"
-        If value Then
-            c6k.Write ("1OUT.13-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.13-0" & Chr$(13))
-        End If
+        outputTemp = 13
     Case "TC Feeder"
-        If value Then
-            c6k.Write ("1OUT.14-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.14-0" & Chr$(13))
-        End If
+        outputTemp = 14
     Case "Water Pump"
-        If value Then
-            c6k.Write ("1OUT.15-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.15-0" & Chr$(13))
-        End If
+        outputTemp = 15
     Case "Welder Contact"
-        If value Then
-            c6k.Write ("1OUT.16-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.16-0" & Chr$(13))
-        End If
+        outputTemp = 16
     Case Else
         MsgBox ("Error in Output Handler:" & Chr$(13) & "Invalid Input - " & output)
+        Exit Sub
 End Select
+
+Call setOutputNum(outputTemp, value)
 
 End Sub
 
@@ -311,107 +380,18 @@ End Sub
 '       - value - boolean for the desired state of the output (true for on, false for off)
 Public Sub setOutputNum(output As Integer, value As Boolean)
 
-Select Case output
-    Case 9
-        If value Then
-            c6k.Write ("1OUT.9-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.9-0" & Chr$(13))
-        End If
-    Case 10
-        If value Then
-            c6k.Write ("1OUT.10-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.10-0" & Chr$(13))
-        End If
-    Case 11
-        If value Then
-            c6k.Write ("1OUT.11-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.11-0" & Chr$(13))
-        End If
-    Case 12
-        If value Then
-            c6k.Write ("1OUT.12-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.12-0" & Chr$(13))
-        End If
-    Case 13
-        If value Then
-            c6k.Write ("1OUT.13-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.13-0" & Chr$(13))
-        End If
-    Case 14
-        If value Then
-            c6k.Write ("1OUT.14-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.14-0" & Chr$(13))
-        End If
-    Case 15
-        If value Then
-            c6k.Write ("1OUT.15-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.15-0" & Chr$(13))
-        End If
-    Case 16
-        If value Then
-            c6k.Write ("1OUT.16-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.16-1" & Chr$(13))
-        End If
-    Case 25
-        If value Then
-            c6k.Write ("1OUT.25-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.25-0" & Chr$(13))
-        End If
-    Case 26
-        If value Then
-            c6k.Write ("1OUT.26-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.26-0" & Chr$(13))
-        End If
-    Case 27
-        If value Then
-            c6k.Write ("1OUT.27-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.27-0" & Chr$(13))
-        End If
-    Case 28
-        If value Then
-            c6k.Write ("1OUT.28-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.28-0" & Chr$(13))
-        End If
-    Case 29
-        If value Then
-            c6k.Write ("1OUT.29-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.29-0" & Chr$(13))
-        End If
-    Case 30
-        If value Then
-            c6k.Write ("1OUT.30-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.30-0" & Chr$(13))
-        End If
-    Case 31
-        If value Then
-            c6k.Write ("1OUT.31-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.31-0" & Chr$(13))
-        End If
-    Case 32
-        If value Then
-            c6k.Write ("1OUT.32-1" & Chr$(13))
-        Else
-            c6k.Write ("1OUT.32-0" & Chr$(13))
-        End If
-        
-    Case Else
-        MsgBox ("Error in Output Handler:" & Chr$(13) & "Invalid Input - " & output)
-End Select
+' If the output indicated is in either of the two output ranges, set according to the boolean input
+If (output >= 9 And output <= 16) Or (output >= 25 And output <= 32) Then
+    If value Then
+        c6k.Write ("1OUT." & output & "-1" & Chr$(13))
+    Else
+        c6k.Write ("1OUT." & output & "-0" & Chr$(13))
+    End If
+    
+Else
+    MsgBox ("Error in Output Handler:" & Chr$(13) & "Invalid Input - " & output)
+End If
+
 End Sub
 
 '============================================================ E-Stop & H2O Sensor Handler ==========================================================================================
