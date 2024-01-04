@@ -59,9 +59,10 @@ End Sub
 
 Private Sub runState1()
 
-'Call Fast Status
+'-- Call Fast Status
 Call c6kOps.updFastStatus
 
+'-- Run Joystick if active
 If c6kOps.getJoyActive And Not c6kOps.chkE_Stop() Then
 
     'Run JoyRun function, and if it returns true,
@@ -81,6 +82,11 @@ If c6kOps.getJoyActive And Not c6kOps.chkE_Stop() Then
 'frmLine6.Var_Label_Joystick_Status.Caption = c6kOps.getInputState
 'frmLine6.Var_Label_Joystick_Status.Visible = True
     
+End If
+
+'-- Run Timeout Timer if Start has been pressed
+If woMgr.isWOstarted Then
+    woMgr.woTimer ("Count")
 End If
 
 'Reset Fast Status Update Flag

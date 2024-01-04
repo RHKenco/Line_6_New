@@ -489,6 +489,16 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Private Sub Button_Start_Click()
+
+'Start Punch
+Call woMgr.startWO
+
+'Enable Timeout Timer
+
+    
+End Sub
+
 Private Sub Button_WO_Enter_Clear_Click()
 
 If Not woMgr.isWOactive() Then

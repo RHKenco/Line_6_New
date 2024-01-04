@@ -46,6 +46,7 @@ Private woTotalTime As String       ' Total time since last Finish
 
 'Internal Variables
 Private woActive As Boolean         ' Work Order Active flag
+Private woStarted As Boolean        ' Work Order Started Flag
 Private woCountdownTime As Integer  ' Countdown timer variable for timeout time
 
 Private woNum As String             'Form.ASC Data: - Work Order Number
@@ -90,6 +91,10 @@ Private TOTALPROFIT!
 
 Public Function isWOactive() As Boolean
     isWOactive = woActive
+End Function
+
+Public Function isWOstarted() As Boolean
+    isWOstarted = woStarted
 End Function
 
 Public Function getWOnum() As String
@@ -319,21 +324,42 @@ End Sub
 Public Sub startWO()
     Call updTemp("Start")
     Call writeData("Start")
+    Call btnState("Started")
+    
+    'Start Timeout Timer
+    Call woTimer("Start")
+    woStarted = True
+            
 End Sub
 
 Public Sub notfinishWO()
     Call updTemp("End")
     Call writeData("N/F")
+    Call btnState("Active")
+    
+    frmLine6.Var_Label_System_Status.Caption = "N/F Pressed - Press Start to Resume"
+    frmLine6.Var_Label_System_Status.Refresh
+
 End Sub
 
 Public Sub finishWO()
     Call updTemp("End")
     Call writeData("Finish")
+    Call btnState("Active")
+    
+    frmLine6.Var_Label_System_Status.Caption = "N/F Pressed - Press Start to Resume"
+    frmLine6.Var_Label_System_Status.Refresh
+
+
 End Sub
 
-Public Sub timeoutWO()
-    Call updTemp("End")
+Private Sub timeoutWO()
     Call writeData("TimeOut")
+    Call btnState("Active")
+    
+    frmLine6.Var_Label_System_Status.Caption = "Finished - Press Start to Run Adtl Parts"
+    frmLine6.Var_Label_System_Status.Refresh
+
 End Sub
 
 Private Function pullFormASC(WORK_ORDER As String) As Boolean
@@ -555,8 +581,20 @@ Select Case timerCmd
         If woCountdownTime > 0 Then
             woCountdownTime = woCountdownTime - 1
             
+            Dim tempMin As Integer
+            Dim tempSec As Integer
+            tempMin = woCountdownTime \ 60
+            tempSec = woCountdownTime - tempMin * 60
+            
+            frmLine6.Var_Label_System_Status.Caption = "Started - " & CStr(tempMin) & ":" & CStr(tempSec) & " Remaining"
+            frmLine6.Var_Label_System_Status.Refresh
+            
         Else
-            'Add Code for Timeout Here
+            
+            frmLine6.Var_Label_System_Status.Caption = "Timed Out - Press Start When Ready"
+            frmLine6.Var_Label_System_Status.Refresh
+            
+            Call timeoutWO
         End If
     
     Case Else
