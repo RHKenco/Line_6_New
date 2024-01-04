@@ -40,6 +40,9 @@ Private woTempData As String        ' Varible to store path to WO temp data
 'Const Strings for File Write
 Private Const machineNo = 6
 
+Private woLastStartTime As String       ' Start time of WO
+Private woLastEndTime As String         ' Not-Finish Time of WO
+Private woTotalTime As String       ' Total time since last Finish
 
 'Internal Variables
 Private woActive As Boolean         ' Work Order Active flag
@@ -56,9 +59,32 @@ Private woDWGno As String           '               - DWG Number for item
 'Private woCScost As String          '               - Unused Column
 'Private woSBTavg As String          '               - Unused Column
 
-Private woLastStartTime As String       ' Start time of WO
-Private woLastEndTime As String         ' Not-Finish Time of WO
-Private woTotalTime As String       ' Total time since last Finish
+
+Private Const cTCcostLB As Single = 4.81        'Calculation Constants: - T.C COST/LB        4.81
+Private Const cTCinLB As Single = 28#           '                       - INCHES/LB         28.00
+Private Const cTCcostSQ As Single = 0.171821    '                       - T.C. COST/SQ"     $0.172
+Private Const cCapUtil As Single = 80#          '                       - CAP. UTIL%        80.00
+Private Const cDayCost As Single = 3232#        '                       - CAP.DAILY COST $3232.00  - 'MACH.P/DAY     $1344.00, 'LABOR P/DAY    $1888.00, 'TOTAL P/DAY    $3232.00
+Private Const cHrCost As Single = 404           '                       - PLANT COST/HR    404.00
+Private Const cHrRate As Single = 0.5           '                       - ?
+
+
+
+Private TTime!
+Private AvgTime!
+
+Private CONVCOST!
+Private UNITCOST!
+Private UNITPROFIT!
+Private GROSSPROFIT!
+Private TSALES!
+Private TTC!
+Private TTCCOST!
+Private TSTLCOST!
+Private TCONVCOST!
+Private TOTALCOST!
+Private TOTALPROFIT!
+
 
 
 
@@ -406,7 +432,7 @@ Select Case Punch
         
         'Output to GROSSPIT
         Open woGrossPITpath For Append As #1
-        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, PRICE!, Tc!, STLCOST!, AvgTime!, TCCOST!, CONVCOST!, UNITCOST!, UNITPROFIT!, GROSSPROFIT!, COM$, TTime!, TSALES!, TTC!, TTCCOST!, TSTLCOST!, TCONVCOST!, TOTALCOST!, TOTALPROFIT!, DAT$, DWG$, CSCOST!
+        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, PRICE!, Tc!, STLCOST!, AvgTime!, cTCcostSQ, CONVCOST!, UNITCOST!, UNITPROFIT!, GROSSPROFIT!, COM$, TTime!, TSALES!, TTC!, TTCCOST!, TSTLCOST!, TCONVCOST!, TOTALCOST!, TOTALPROFIT!, DAT$, DWG$, CSCOST!
         Close #1
         
         'Output to GARY
@@ -500,55 +526,23 @@ End Sub
 
 ' -- runCalcs() - Runs calculations necessary to push WO data out when finish is pressed.
 Private Sub runCalcs()
-    
-Let STYPE$ = "0"
 
-
-'*********************CALC
-'T.C COST/LB        4.81
-'INCHES/LB         28.00
-'T.C. COST/SQ"     $0.172
-'MACH.P/DAY     $1344.00
-'LABOR P/DAY    $1888.00
-'TOTAL P/DAY    $3232.00
-'CAP. UTIL%        80.00
-'CAP.DAILY COST $3232.00
-'PLANT COST/HR    404.00
-'*************************************************************************
-
-Let TCCOST! = 0.171821
-Let HOCOST! = 404!
 Let TTime! = woTotalTime / 60
-Let AvgTime! = Format$((TTime! / Qty!), "CURRENCY")
-Let TCCOST! = Format$((TCCOST! * Tc!), "CURRENCY")
-Let HORATE! = 0.5
+Let AvgTime! = Format$((TTime! / FinishedQty), "CURRENCY")
+Let cTCcostSQ = Format$((cTCcostSQ * Tc!), "CURRENCY")
 
 
-Let CONVCOST! = Format$((HOCOST! * AvgTime! * HORATE!), "CURRENCY")
-Let UNITCOST! = Format$((TCCOST! + CONVCOST! + STLCOST!), "CURRENCY")
+Let CONVCOST! = Format$((cHrCost * AvgTime! * cHrRate), "CURRENCY")
+Let UNITCOST! = Format$((cTCcostSQ + CONVCOST! + STLCOST!), "CURRENCY")
 Let UNITPROFIT! = Format$((PRICE! - UNITCOST!), "CURRENCY")
-'Let GROSSPROFIT! = Format$(((UNITPROFIT! / PRICE!) * 100), "CURRENCY")
-Let TSALES! = Qty! * PRICE!
-Let TTC! = Tc! * Qty!
-Let TTCCOST! = TCCOST! * Qty!
-Let TSTLCOST! = STLCOST! * Qty!
-Let TCONVCOST! = CONVCOST! * Qty!
-Let TOTALCOST! = UNITCOST! * Qty!
-Let TOTALPROFIT! = UNITPROFIT! * Qty!
-Let COM$ = COM1$ + Com2$ + Com3$ + COM4$ + COM5$ + COM6$ + COM7$
-
-Let diff = SBT_AvgTime! - AvgTime!
-If AvgTime! < SBT_AvgTime! Then Let diffcom = " Faster  "
-If AvgTime! > SBT_AvgTime! Then Let diffcom = " Slower  "
-
-
-Let TTime! = 0: Let ATSALES! = 0: Let ATTC! = 0: Let BTTIME! = 0: Let BTSALES! = 0: Let BTTC! = 0: Let CTTIME! = 0: Let CTSALES! = 0: Let CTTC! = 0: Let TUNITPROFIT! = 0
-Let TTC! = 0
-Let COM1$ = "": Let Com2$ = "": Let Com3$ = "": Let COM4$ = "": Let COM5$ = "": Let COM6$ = "": Let COM7$ = ""
-Let STIME! = 0: Let ETIME! = 0: Let Qty! = 0: Let TTime! = 0: Let C$ = "": Let B$ = "": Let A$ = ""
-Let WOK$ = ""
-Let InString1 = ""
-
+Let GROSSPROFIT! = Format$(((UNITPROFIT! / PRICE!) * 100), "CURRENCY")
+Let TSALES! = FinishedQty * PRICE!
+Let TTC! = Tc! * FinishedQty
+Let TTCCOST! = cTCcostSQ * FinishedQty
+Let TSTLCOST! = STLCOST! * FinishedQty
+Let TCONVCOST! = CONVCOST! * FinishedQty
+Let TOTALCOST! = UNITCOST! * FinishedQty
+Let TOTALPROFIT! = UNITPROFIT! * FinishedQty
 
 End Sub
 
@@ -557,11 +551,13 @@ Public Function woTimer(timerCmd As String) As Integer
 Select Case timerCmd
     Case "Start", "Reset"
         woCountdownTime = woTimeoutTime * woTimeoutCalib
-    Case "Decrement"
+    Case "Count"
         If woCountdownTime > 0 Then
             woCountdownTime = woCountdownTime - 1
+            
+        Else
+            'Add Code for Timeout Here
         End If
-    Case "Get"
     
     Case Else
         MsgBox ("Inproper Input in woTimer Function")
