@@ -64,6 +64,7 @@ Option Explicit
 '-- Constants for readability of Inputs
 
 Private Const inEstop As Long = Input20
+Private Const inH2O As Long = Input19
 Private Const joySelect As Long = Input22
 Private Const joyRelease As Long = Input23
 Private Const joyToggle As Long = Input24
@@ -86,6 +87,8 @@ Private setE_Stop As Boolean    'Local E-stop variable
 Private chkH2O As Boolean       'Local Water Sensor Boolean
 Private countH2O As Integer     'Water Flow Counter
 
+Private passWidth As String     'Pass Width variable
+
 Private passSpeed(3) As String      'Array to store pass speeds at different pass witdths
 Private Const passSpeed0 = ".125"       ' - Defaults
 Private Const passSpeed1 = ".119"
@@ -97,6 +100,11 @@ Private Const oscSpeed0 = "3.5"
 Private Const oscSpeed1 = "3.4"
 Private Const oscSpeed2 = "3.0"
 Private Const oscSpeed3 = "2.8"
+
+Private passThreshold(2) As String
+Private Const passThresh0 = "1.25"
+Private Const passThresh1 = "2.00"
+Private Const passThresh2 = "2.50"
 
 Private Const speedSetupPath As String = "F:\apps\exe\line 6\files\speedSetup6.asc"
 
@@ -134,6 +142,10 @@ oscSpeed(1) = oscSpeed1
 oscSpeed(2) = oscSpeed2
 oscSpeed(3) = oscSpeed3
 
+passThreshold(0) = passThresh0
+passThreshold(1) = passThresh1
+passThreshold(2) = passThresh2
+
 ' If prior user-input file exists, delete it
 If Dir(speedSetupPath) <> "" Then Kill speedSetupPath
     
@@ -147,7 +159,7 @@ If Dir(speedSetupPath) = "" Then
 Else
     ' If it does exist, load the speeds
     Open speedSetupPath For Input As #1
-    Input #1, spdP0$, spdP1$, spdP2$, spdP3$, spdO0$, spdO1$, spdO2$, spdO3$
+    Input #1, spdP0$, spdP1$, spdP2$, spdP3$, spdO0$, spdO1$, spdO2$, spdO3$, thr0$, thr1$, thr2$
     
     passSpeed(0) = spdP0$
     passSpeed(1) = spdP1$
@@ -159,13 +171,17 @@ Else
     oscSpeed(2) = spdO2$
     oscSpeed(3) = spdO3$
     
+    passThreshold(0) = thr0$
+    passThreshold(1) = thr1$
+    passThreshold(2) = thr2$
+    
     Close #1
     
     End If
 
 End Sub
 
-Public Sub setPassSpeed(spdP0$, spdP1$, spdP2$, spdP3$, spdO0$, spdO1$, spdO2$, spdO3$)
+Public Sub setPassSpeed(spdP0$, spdP1$, spdP2$, spdP3$, spdO0$, spdO1$, spdO2$, spdO3$, thr0$, thr1$, thr2$)
 
 passSpeed(0) = spdP0$
 passSpeed(1) = spdP1$
@@ -177,20 +193,54 @@ oscSpeed(1) = spdO1$
 oscSpeed(2) = spdO2$
 oscSpeed(3) = spdO3$
 
+passThreshold(0) = thr0$
+passThreshold(1) = thr1$
+passThreshold(2) = thr2$
+
 End Sub
 
 Public Sub savePassSpeed()
 
 Open speedSetupPath For Output As #1
 
-Write #1, passSpeed(0), passSpeed(1), passSpeed(2), passSpeed(3), oscSpeed(0), oscSpeed(1), oscSpeed(2), oscSpeed(3)
+Write #1, passSpeed(0), passSpeed(1), passSpeed(2), passSpeed(3), oscSpeed(0), oscSpeed(1), oscSpeed(2), oscSpeed(3), passThreshold(0), passThreshold(1), passThreshold(2)
 
 Close #1
 
 End Sub
 
+Private Function setSpeeds(cmd As String) As String
 
+'Create temp variables
+Dim myPassSpeed As String
+Dim myOscSpeed As String
 
+If (CSng(passWidth) > 0) And (CSng(passWidth) < CSng(passThreshold(0))) Then
+    myPassSpeed = passSpeed(0)
+    myOscSpeed = oscSpeed(0)
+ElseIf (CSng(passWidth) >= CSng(passThreshold(0))) And (CSng(passWidth) < CSng(passThreshold(1))) Then
+    myPassSpeed = passSpeed(1)
+    myOscSpeed = oscSpeed(1)
+ElseIf CSng(passWidth) >= CSng(passThreshold(1)) And (CSng(passWidth) < CSng(passThreshold(2))) Then
+    myPassSpeed = passSpeed(2)
+    myOscSpeed = oscSpeed(2)
+ElseIf CSng(passWidth) >= CSng(passThreshold(2)) Then
+    myPassSpeed = passSpeed(3)
+    myOscSpeed = oscSpeed(3)
+Else
+    MsgBox ("Error in Speed Selection")
+    Exit Function
+End If
+
+If cmd = "Pass" Then
+    setSpeeds = myPassSpeed
+ElseIf cmd = "Osc" Then
+    setSpeeds = myOscSpeed
+Else
+    MsgBox ("Inproper Input in Speed Selection")
+End If
+
+End Function
 
 '============================================================ c6k Generic =================================================================================================
 
@@ -415,6 +465,7 @@ If (isEstopPressed And Not setE_Stop) Then          'If Estop is pressed and the
     'Raise E-Stop Flag, disable jog mode on all axes, shut down all c6k outputs, and wait 2 seconds before accepting further commands
     setE_Stop = True
     Call stopAllOut
+    frmLine6.Label_Estop.Caption = "E-Stop Has Been Pressed!"
     frmLine6.Label_Estop.Visible = True
     frmLine6.Label_Estop.Refresh
     
@@ -436,12 +487,50 @@ chkE_Stop = setE_Stop
 
 End Function
 
-Public Function chkH2O()
+Public Function chkH2Oflow() As Boolean
 
     If Not fsUpToDate Then
         Call updFastStatus
     End If
     
+
+Dim isWaterFlowing As Boolean
+
+isWaterFlowing = (FSinputState And inH2O)
+
+'E-Stop supersedes this algorithm - if the E-stop is pressed, H2O processing is irrelevant
+If Not setE_Stop Then
+    If Not isWaterFlowing Then                          'If Water is flowing, ensure count is 0
+        countH2O = 0
+    
+    ElseIf (isWaterFlowing And Not chkH2O) Then         'If H2O not flowing and the H2O fault flag was not set last time the function ran
+        
+        'If the H2O counter has not reached the trigger point, increment the count
+        If countH2O >= (H2Ocount * H2Oconst) Then
+            countH2O = countH2O + 1
+        Else
+            'Raise H2O Fault Flag, disable jog mode on all axes, shut down all c6k outputs, and wait 2 seconds before accepting further commands
+            chkH2O = True
+            Call stopAllOut
+            frmLine6.Label_Estop.Caption = "Insufficient Water Flow!"
+            frmLine6.Label_Estop.Visible = True
+            frmLine6.Label_Estop.Refresh
+        End If
+        
+    ElseIf (Not isWaterFlowing And chkH2O) Then        'If Estop is not pressed but was pressed the last time the function ran
+    
+        'Lower E-Stop Flag and re-enable airblade and blower fan
+        chkH2O = False
+        countH2O = 0
+        Call setOutput("Airblade", True)
+        Call setOutput("Exhaust", True)
+        frmLine6.Label_Estop.Visible = False
+        frmLine6.Label_Estop.Refresh
+        
+    End If
+End If
+
+chkH2Oflow = chkH2O
     
 
 End Function
@@ -538,31 +627,31 @@ If (mode + 1) <> mode_Last Then
     Select Case mode
         Case 0, 4  ' No Keys Pressed or Toggle Only - X-Y Mode
         
-            c6k.Write ("JOG000000" & Chr$(13))
+            c6k.Write ("JOG000X00" & Chr$(13))
         
             c6k.Write ("1INFNC1-1J:1INFNC2-1K:1INFNC3-6J:1INFNC4-6K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 1 ; Set inputs 3 & 4 for +/- Axis 6
 
-            c6k.Write ("JOG1111111" & Chr$(13)) 'Set Axes 1 & 5 to Jog Mode
+            c6k.Write ("JOG100X01" & Chr$(13)) 'Set Axes 1 & 5 to Jog Mode
             
             joyStr = "X-Y"
             
         Case 1 ' Select Key Pressed
         
-            c6k.Write ("JOG000000" & Chr$(13))
+            c6k.Write ("JOG000X00" & Chr$(13))
             
             c6k.Write ("1INFNC1-1J:1INFNC2-1K:1INFNC3-2J:1INFNC4-2K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 1 ; Set inputs 3 & 4 for +/- Axis 2
             
-            c6k.Write ("JOG110000" & Chr$(13)) 'Set Axes 2 & 5 to Jog Mode
+            c6k.Write ("JOG110X00" & Chr$(13)) 'Set Axes 2 & 5 to Jog Mode
             
             joyStr = "X-Z"
           
         Case 5 ' Toggle Flipped and Select Pressed
         
-            c6k.Write ("JOG000000" & Chr$(13))
+            c6k.Write ("JOG000X00" & Chr$(13))
             
             c6k.Write ("1INFNC1-1J:1INFNC2-1K:1INFNC3-3J:1INFNC4-3K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 1 ; Set inputs 3 & 4 for +/- Axis 3
             
-            c6k.Write ("JOG101000" & Chr$(13)) 'Set Axes 3 & 5 to Jog Mode
+            c6k.Write ("JOG101XS00" & Chr$(13)) 'Set Axes 3 & 5 to Jog Mode
             
             joyStr = "X-Za"
         
@@ -593,10 +682,10 @@ End Function
 Private Sub startJoy()
 
 'Immediately (!) disable jog mode for all axes
-c6k.Write ("!JOG000000" & Chr$(13))
+c6k.Write ("!JOG000X00" & Chr$(13))
 
 'Set motion parameters for Joystick Motion
-c6k.Write ("JOG000000:JOGA4,5,5,1,5,5:JOGAD50,99,99,99,99,15:JOGVH8,8,10,2,5,3:JOGVL8,15,10,5,5,5" & Chr$(13))
+c6k.Write ("JOG00X000:JOGA4,5,5,1,5,5:JOGAD50,99,99,99,99,15:JOGVH8,8,10,2,5,3:JOGVL8,15,10,5,5,5" & Chr$(13))
 
 joyActive = True
 
@@ -687,7 +776,17 @@ Public Sub runPass(passType As String)
 
 Select Case passType
     Case "Blade"
+    
+    Case "Blade Alt"
         
+        
+    Case "Auger Edge"
+    
+    
+    Case "Auger Face"
+    
+    
+    Case Else
     
     
 End Select
