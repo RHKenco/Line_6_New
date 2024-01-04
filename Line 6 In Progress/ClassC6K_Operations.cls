@@ -87,24 +87,37 @@ Private setE_Stop As Boolean    'Local E-stop variable
 Private chkH2O As Boolean       'Local Water Sensor Boolean
 Private countH2O As Integer     'Water Flow Counter
 
-Private passWidth As String     'Pass Width variable
+Private passWidth As Single     'Pass Width variable
 
-Private passSpeed(3) As String      'Array to store pass speeds at different pass witdths
-Private Const passSpeed0 = ".125"       ' - Defaults
-Private Const passSpeed1 = ".119"
-Private Const passSpeed2 = ".100"
-Private Const passSpeed3 = ".075"
+Private passSpeed(3) As Single      'Array to store pass speeds at different pass witdths
+Private Const passSpeed0 As Single = 0.125      ' - Defaults
+Private Const passSpeed1 As Single = 0.119
+Private Const passSpeed2 As Single = 0.1
+Private Const passSpeed3 As Single = 0.075
 
-Private oscSpeed(3) As String   'Array to store oscillation speeds at different pass widths
-Private Const oscSpeed0 = "3.5"
-Private Const oscSpeed1 = "3.4"
-Private Const oscSpeed2 = "3.0"
-Private Const oscSpeed3 = "2.8"
+Private oscSpeed(3) As Single   'Array to store oscillation speeds at different pass widths
+Private Const oscSpeed0 As Single = 3.5
+Private Const oscSpeed1 As Single = 3.4
+Private Const oscSpeed2 As Single = 3#
+Private Const oscSpeed3 As Single = 2.8
 
-Private passThreshold(2) As String
-Private Const passThresh0 = "1.25"
-Private Const passThresh1 = "2.00"
-Private Const passThresh2 = "2.50"
+Private passThreshold(2) As Single 'Array to store pass witdth thresholds for determining base speeds
+Private Const passThresh0 As Single = 1.25
+Private Const passThresh1 As Single = 2#
+Private Const passThresh2 As Single = 2.5
+
+
+Private basePassSpeed As String     'Variables to store base speeds
+Private baseOscSpeed As String
+Private baseRotVel As String
+Private baseVelY As String
+Private baseVelZ As String
+
+Private userSpeedMult As Single     'Speed Multiplier to be applied to speed for varying pass speeds on the fly
+
+Private augerPitch As String        'Auger Pitch & Angle
+Private augerAngle As String
+
 
 Private Const speedSetupPath As String = "F:\apps\exe\line 6\files\speedSetup6.asc"
 
@@ -209,36 +222,50 @@ Close #1
 
 End Sub
 
-Private Function setSpeeds(cmd As String) As String
+Private Sub setSpeeds()
 
-'Create temp variables
-Dim myPassSpeed As String
-Dim myOscSpeed As String
-
-If (CSng(passWidth) > 0) And (CSng(passWidth) < CSng(passThreshold(0))) Then
-    myPassSpeed = passSpeed(0)
-    myOscSpeed = oscSpeed(0)
-ElseIf (CSng(passWidth) >= CSng(passThreshold(0))) And (CSng(passWidth) < CSng(passThreshold(1))) Then
-    myPassSpeed = passSpeed(1)
-    myOscSpeed = oscSpeed(1)
-ElseIf CSng(passWidth) >= CSng(passThreshold(1)) And (CSng(passWidth) < CSng(passThreshold(2))) Then
-    myPassSpeed = passSpeed(2)
-    myOscSpeed = oscSpeed(2)
-ElseIf CSng(passWidth) >= CSng(passThreshold(2)) Then
-    myPassSpeed = passSpeed(3)
-    myOscSpeed = oscSpeed(3)
+'Set speed to match osc pass width based on set thresholds
+If (passWidth > 0) And (passWidth < passThreshold(0)) Then
+    basePassSpeed = passSpeed(0)
+    baseOscSpeed = oscSpeed(0)
+ElseIf (passWidth >= passThreshold(0)) And (passWidth < passThreshold(1)) Then
+    basePassSpeed = passSpeed(1)
+    baseOscSpeed = oscSpeed(1)
+ElseIf (passWidth >= passThreshold(1)) And (passWidth < passThreshold(2)) Then
+    basePassSpeed = passSpeed(2)
+    baseOscSpeed = oscSpeed(2)
+ElseIf passWidth >= passThreshold(2) Then
+    basePassSpeed = passSpeed(3)
+    baseOscSpeed = oscSpeed(3)
 Else
     MsgBox ("Error in Speed Selection")
-    Exit Function
+    Exit Sub
 End If
 
-If cmd = "Pass" Then
-    setSpeeds = myPassSpeed
-ElseIf cmd = "Osc" Then
-    setSpeeds = myOscSpeed
-Else
-    MsgBox ("Inproper Input in Speed Selection")
+'If auger pitch has been declared, then
+If augerPitch <> "" Then
+
+    'Set speed values for Auger operations
+    baseRotVel = basePassSpeed / augerPitch
+    
+    baseVelY = (augerPitch / (2 * PI)) * Sin(augerAngle) * baseRotVel
+    baseVelZ = (augerPitch / (2 * PI)) * Cos(augerAngle) * baseRotVel
+    
 End If
+
+End Sub
+
+Public Function setAugerParam(augerPitchIn As String, augerDiamIn As String) As String
+
+    'Compute Auger Angle from Pitch and Diameter
+    augerAngle = Atn(augerPitchIn / (augerDiamIn * PI))
+
+    'Store Auger Pitch and Store auger angle after rounding
+    augerPitch = augerPitchIn
+    augerAngle = round2toString(augerAngle)
+    
+    'Return auger angle
+    setAugerParam = augerAngle
 
 End Function
 
@@ -681,7 +708,7 @@ End Function
 
 Private Sub startJoy()
 
-'Immediately (!) disable jog mode for all axes
+'Immediately (!) disable jog mode for all axes except oscillator
 c6k.Write ("!JOG000X00" & Chr$(13))
 
 'Set motion parameters for Joystick Motion
@@ -772,19 +799,22 @@ c6k.Write "A,10:AD,3:V,13:D,0.9:GO01:1OUT.16-1:WAIT(MOV=b000000):JOG100001" & Ch
 
 End Sub
 
-Public Sub runPass(passType As String)
+Public Sub runPass(passType As String, passRunState As Boolean)
+
+    Call setPassVel(passType)
 
 Select Case passType
     Case "Blade"
-    
-    Case "Blade Alt"
+        c6k.Write "MC100000:"
         
+    Case "Blade Alt"
+        c6k.Write "MC000001:"
         
     Case "Auger Edge"
-    
+        c6k.Write "MC000011:"
     
     Case "Auger Face"
-    
+        c6k.Write "MC011011:"
     
     Case Else
     
@@ -793,5 +823,38 @@ End Select
 
 End Sub
 
+Public Sub setPassVel(passType As String)
 
+Dim currentPassSpeed As String
+Dim currentRotSpeed As String
+currentPassSpeed = roundToStr((basePassSpeed * userSpeedMult), 3)
+currentRotSpeed = roundToStr((baseRotVel * userSpeedMult), 3)
+
+Select Case passType
+    Case "Blade"
+    
+        c6k.Write "V" & currentPassSpeed & ",,,,," & Chr$(13)
+        
+    Case "Blade Alt"
+    
+        c6k.Write "V,,,,," & currentPassSpeed & Chr$(13)
+        
+    Case "Auger Edge"
+    
+        c6k.Write "V,,,," & currentRotSpeed & "," & currentPassSpeed & Chr$(13)
+    
+    Case "Auger Face"
+        
+        Dim currentSpeedY As String
+        Dim currentSpeedZ As String
+        currentSpeedY = roundToStr((baseVelY * userSpeedMult), 3)
+        currentSpeedZ = roundToStr((baseVelZ * userSpeedMult), 3)
+    
+        c6k.Write "V," & currentSpeedZ & ",,," & currentRotSpeed & "," & currentSpeedY & Chr$(13)
+    
+    Case Else
+    
+End Select
+
+End Sub
 

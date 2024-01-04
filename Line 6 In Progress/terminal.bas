@@ -134,7 +134,7 @@ Public Xoffset1 As Single
 Public Yoffset1 As Single
 Public Xoffset2 As Single
 Public Yoffset2 As Single
-Public PassWidth As Single
+Public passWidth As Single
 Public CalTig_X As Single
 Public CalTig_Y As Single
 Public XSpeed As String
@@ -151,17 +151,19 @@ Public JogOn As Boolean
 Public JogInput1 As Boolean
 Public JogInput2 As Boolean
 ' Rick
+Public Const PI As Single = 3.1416
 Public c6kOps As New ClassC6K_Operations
 Public fsmMain As New FSM_Line6
 Public fsmRun As New FSM_Line6_Run
 Public woMgr As New ClassWO_Manager
 
 
+Function roundToString(math As Double, places As Integer) As String
 
+'Convert to string with 2 decimal places by truncating input * 10 ^ places, then dividing by 10 ^ places
+roundToString = CStr(Fix(math * (10 ^ places)) / (10 ^ places))
 
-
-
-
+End Function
 
 
 
