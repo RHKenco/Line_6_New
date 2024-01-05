@@ -138,7 +138,7 @@ If frmLine6.Text_Enter_WO.Text <> frmLine6.Text_Enter_WO.Tag And frmLine6.Text_E
         
         'Set up temporary file to save current active work-order (in case of program crashing)
         Open woTempMain For Output As #1
-        Write #1, InString$, Date$
+        Write #1, woNum, Now
         Close #1
         
         'Create temp file to store wo time data
@@ -202,35 +202,28 @@ Public Sub chkActiveWO()
 If Dir(woTempMain) = "" Then
    Exit Sub
 Else
+    
+    Dim DAT As String
+    
     ' Load temp file to check WOnum (temp6) and Date
-    'Open (woTempMain) For Input As #2
-    'Input #2, temp6, DAT
-    'Close #2
+    Open (woTempMain) For Input As #2
+    Input #2, woNum, DAT
+    Close #2
     
     ' Load backup data temp file & store in mgr variables
-    
-    
-    
-    
-    
-    
+    Call updTemp("Load")
     
     
     ' ***** ADD CODE HERE ***** Pseudocode:
-        ' Loads temporary file with necessary WO start time data
         ' Checks current time - if the current time is more than timeout time different from the temp file,
         ' Punch a not-finish on the WO with time based on the timeout period & Exit Sub
         
-        
-        
-        
-        
-        
-        
     
     ' Update Form text and call function to load WO
-    'frmLine6.Text_Enter_WO.Text = temp6
-    'Call loadWO
+    frmLine6.Text_Enter_WO.Text = temp6
+    
+    Call loadWO
+    
 End If
 
 End Sub
