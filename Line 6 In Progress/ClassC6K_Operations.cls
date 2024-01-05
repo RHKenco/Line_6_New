@@ -181,22 +181,7 @@ If Dir(speedSetupPath) = "" Then
 Else
     ' If it does exist, load the speeds
     Open speedSetupPath For Input As #1
-    Input #1, spdP0$, spdP1$, spdP2$, spdP3$, spdO0$, spdO1$, spdO2$, spdO3$, thr0$, thr1$, thr2$
-    
-    passSpeed(0) = spdP0$
-    passSpeed(1) = spdP1$
-    passSpeed(2) = spdP2$
-    passSpeed(3) = spdP3$
-    
-    oscSpeed(0) = spdO0$
-    oscSpeed(1) = spdO1$
-    oscSpeed(2) = spdO2$
-    oscSpeed(3) = spdO3$
-    
-    passThreshold(0) = thr0$
-    passThreshold(1) = thr1$
-    passThreshold(2) = thr2$
-    
+    Input #1, passSpeed(0), passSpeed(1), passSpeed(2), passSpeed(3), oscSpeed(0), oscSpeed(1), oscSpeed(2), oscSpeed(3), passThreshold(0), passThreshold(1), passThreshold(2)
     Close #1
     
     End If
@@ -224,9 +209,7 @@ End Sub
 Public Sub savePassSpeed()
 
 Open speedSetupPath For Output As #1
-
 Write #1, passSpeed(0), passSpeed(1), passSpeed(2), passSpeed(3), oscSpeed(0), oscSpeed(1), oscSpeed(2), oscSpeed(3), passThreshold(0), passThreshold(1), passThreshold(2)
-
 Close #1
 
 End Sub
