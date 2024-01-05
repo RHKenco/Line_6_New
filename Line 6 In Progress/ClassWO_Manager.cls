@@ -107,10 +107,10 @@ Public Sub loadWO()
 If frmLine6.Text_Enter_WO.Text <> frmLine6.Text_Enter_WO.Tag And frmLine6.Text_Enter_WO.Text <> "" Then
 
     'Pull WO Number entered in text box
-    WORK_ORDER$ = frmLine6.Text_Enter_WO.Text
+    woNum = frmLine6.Text_Enter_WO.Text
     
     'Load data from FORM.ASC; if successful, then
-    If pullFormASC(WORK_ORDER$) Then
+    If pullFormASC(woNum) Then
         
         'Raise WO Active flag
         woActive = True
@@ -138,26 +138,25 @@ If frmLine6.Text_Enter_WO.Text <> frmLine6.Text_Enter_WO.Tag And frmLine6.Text_E
         
         'Set up temporary file to save current active work-order (in case of program crashing)
         Open woTempMain For Output As #1
-        Let Date1$ = Date$
-        Write #1, InString$, Date1$
+        Write #1, InString$, Date$
         Close #1
         
         'Create temp file to store wo time data
-        Let woTempData = woTempDirectory & woNum & "6.tmp"
+        Let woTempData = woTempDir & woNum & "6.tmp"
         
         If Dir(woTempData) = "" Then
             Call updTemp("New")
         Else
             Call updTemp("Load")
         End If
-
+    End If
 End If
 
 End Sub
 
 Public Sub clearWO()
     '-- Clear All Fields and Reset Button to Enter ------------------------------------------------
-    frmLine6.Text_Enter_WO.Text = Text_Enter_WO.Tag
+    frmLine6.Text_Enter_WO.Text = frmLine6.Text_Enter_WO.Tag
     frmLine6.Text_Enter_WO.Locked = False
     
     frmLine6.Text_Pop_Part_Num.Text = ""
@@ -165,7 +164,7 @@ Public Sub clearWO()
     frmLine6.Text_Pop_Due_Date.Text = ""
 
     'Update Work Order Status & System Status Labels
-    frmLine6.Var_Label_WO_Active.Caption = Var_Label_WO_Active.Tag
+    frmLine6.Var_Label_WO_Active.Caption = frmLine6.Var_Label_WO_Active.Tag
     frmLine6.Var_Label_WO_Active.Visible = True
     
     frmLine6.Var_Label_System_Status.Visible = False
@@ -200,14 +199,13 @@ End Sub
 Public Sub chkActiveWO()
 
 ' Check to see if temp file exists. If it does not, exit subroutine. Else,
- If Dir(woTempMain) = "" Then
-   chkActiveWO() = ""
+If Dir(woTempMain) = "" Then
    Exit Sub
 Else
     ' Load temp file to check WOnum (temp6) and Date
-    Open (woTempMain) For Input As #2
-    Input #2, temp6, DAT
-    Close #2
+    'Open (woTempMain) For Input As #2
+    'Input #2, temp6, DAT
+    'Close #2
     
     ' Load backup data temp file & store in mgr variables
     
@@ -231,9 +229,10 @@ Else
         
     
     ' Update Form text and call function to load WO
-    frmLine6.Text_Enter_WO.Text = temp6
-    Call loadWO
-   
+    'frmLine6.Text_Enter_WO.Text = temp6
+    'Call loadWO
+End If
+
 End Sub
 
 '-- btnState() - Function to handle visibility and enabling of Enter, Go, Start, N/F, and Finish Buttons -------------------------------------
@@ -366,21 +365,16 @@ Private Function pullFormASC(WORK_ORDER As String) As Boolean
 
 ' Load FORM.ASC
 Open woFormASCpath For Input As #1
-'
-Do While WORK_ORDER <> WOK$
-     Input #1, WOK$, PartNumber, TQTY!, PRICE!, Tc!, COMM$, DAT$, DWG$, UNUSED_1!, UNUSED_2!
-        If WORK_ORDER = WOK$ Then
+
+Dim WOK$
+Dim UNUSED_1!
+Dim UNUSED_2!
+
+Do While woNum <> WOK$
+     Input #1, WOK$, woPartNum, woTqty, woPrice, woTCinch, woComments, woDate, woDWGno, UNUSED_1!, UNUSED_2!
+        If woNum = WOK$ Then
             
             Close #1
-            
-            woNum = WOK$
-            woPartNum = PartNumber
-            woTqty = TQTY!
-            woPrice = PRICE!
-            woTCinch = Tc!
-            woComments = COMM$
-            woDate = DAT$
-            woDWGno = DWG$
             
             pullFormASC = True
             
@@ -481,6 +475,11 @@ End Sub
 ' -- updTemp() - updates temp file to track work-order progress between Start and Finish punches
 Private Sub updTemp(cmd As String)
 
+Dim woNumTemp$
+Dim woLastStartTimeTemp
+Dim woLastEndTimeTemp
+Dim woTotalTimeTemp
+
 Select Case cmd
     Case "New"
     
@@ -490,13 +489,9 @@ Select Case cmd
         Close #2
         
     Case "Load"
-    
-        Open woTempData For Input As #2
-        Input #2, woNumTemp, woLastStartTimeTemp, woLastEndTimeTemp, woTotalTimeTemp  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
         
-        woLastStartTime = woLastStartTimeTemp
-        woLastEndTime = woLastEndTimeTemp
-        woTotalTime = woTotalTimeTemp
+        Open woTempData For Input As #2
+        Input #2, woNumTemp$, woLastStartTime, woLastEndTime, woTotalTime  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
         
         Close #2
         
