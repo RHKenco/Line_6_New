@@ -54,11 +54,11 @@ Private woPartNum As String         '               - Part Number
 Private woTqty As Single            '               - Total WO Quantity
 Private woPrice As Single           '               - Price of Item
 Private woTCinch As Single          '               - TC Inches on part
-Private woComments As String        '               - Comments in Form.ASC
+Private woFormASCcom As String        '             - Comments in Form.ASC
 Private woDate As String            '               - Due Date on WO
 Private woDWGno As String           '               - DWG Number for item
-'Private woCScost As String          '               - Unused Column
-'Private woSBTavg As String          '               - Unused Column
+Private woCScost As String          '               - Unused Column
+Private woSBTavg As String          '               - Unused Column
 
 
 Private Const cTCcostLB As Single = 4.81        'Calculation Constants: - T.C COST/LB        4.81
@@ -364,7 +364,7 @@ Dim UNUSED_1!
 Dim UNUSED_2!
 
 Do While woNum <> WOK$
-     Input #1, WOK$, woPartNum, woTqty, woPrice, woTCinch, woComments, woDate, woDWGno, UNUSED_1!, UNUSED_2!
+     Input #1, WOK$, woPartNum, woTqty, woPrice, woTCinch, woFormASCcom, woDate, woDWGno, UNUSED_1!, UNUSED_2!
         If woNum = WOK$ Then
             
             Close #1
@@ -438,24 +438,32 @@ Select Case Punch
         
         Call runCalcs
         
-        'Write Finished Punch & Data to Bar_Data
-        Write #1, woNum, machineNo, "Finish", Format(Now, "yy-mm-dd"), Format$(Time, "hh:mm:ss"), woPartNum, FinishedQty, AvgTime!, STLCOST!, GROSSPROFIT! & "%", COM$
+        'Sta$ appears to indicate the line on which a part was impregnated
+        'Alternative values could occur if the temp file comment is set to specific values, but the comment is never set in this program
+        Dim Sta$
+        Let Sta$ = "6"
         
+        'STLCost! appears in some of the grosspit calculations. Looking at the data in grosspit, however, STLCost appears to only be set in the Line 2 and Line 3 programs.
+        Dim STLCost!
+        Let STLCost! = 0
+        
+        'Write Finished Punch & Data to Bar_Data
+        Write #1, woNum, machineNo, "Finish", Format(Now, "yy-mm-dd"), Format$(Time, "hh:mm:ss"), woPartNum, FinishedQty, AvgTime!, STLCost!, GROSSPROFIT! & "%", woFormASCcom
         Close #1
         
         'Output to GROSSPIT
         Open woGrossPITpath For Append As #1
-        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, PRICE!, Tc!, STLCOST!, AvgTime!, cTCcostSQ, CONVCOST!, UNITCOST!, UNITPROFIT!, GROSSPROFIT!, COM$, TTime!, TSALES!, TTC!, TTCCOST!, TSTLCOST!, TCONVCOST!, TOTALCOST!, TOTALPROFIT!, DAT$, DWG$, CSCOST!
+        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, woPrice, woTCinch, STLCost!, AvgTime!, cTCcostSQ, CONVCOST!, UNITCOST!, UNITPROFIT!, GROSSPROFIT!, woFormASCcom, TTime!, TSALES!, TTC!, TTCCOST!, TSTLCOST!, TCONVCOST!, TOTALCOST!, TOTALPROFIT!, woDate, woDWGno, woCScost
         Close #1
         
         'Output to GARY
         Open woGaryPath For Append As #1
-        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, PRICE!, Tc!, STLCOST!, AvgTime!
+        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, woPrice, woTCinch, STLCost!, AvgTime!
         Close #1
         
         'Output to GOAL
         Open woGoalPath For Append As #1
-        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, PRICE!, Tc!, STLCOST!, AvgTime!
+        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, woPrice, woTCinch, STLCost!, AvgTime!
         Close #1
         
     Case Else
@@ -547,13 +555,13 @@ Let cTCcostSQ = Format$((cTCcostSQ * Tc!), "CURRENCY")
 
 
 Let CONVCOST! = Format$((cHrCost * AvgTime! * cHrRate), "CURRENCY")
-Let UNITCOST! = Format$((cTCcostSQ + CONVCOST! + STLCOST!), "CURRENCY")
+Let UNITCOST! = Format$((cTCcostSQ + CONVCOST! + STLCost!), "CURRENCY")
 Let UNITPROFIT! = Format$((PRICE! - UNITCOST!), "CURRENCY")
 Let GROSSPROFIT! = Format$(((UNITPROFIT! / PRICE!) * 100), "CURRENCY")
 Let TSALES! = FinishedQty * PRICE!
 Let TTC! = Tc! * FinishedQty
 Let TTCCOST! = cTCcostSQ * FinishedQty
-Let TSTLCOST! = STLCOST! * FinishedQty
+Let TSTLCOST! = STLCost! * FinishedQty
 Let TCONVCOST! = CONVCOST! * FinishedQty
 Let TOTALCOST! = UNITCOST! * FinishedQty
 Let TOTALPROFIT! = UNITPROFIT! * FinishedQty
