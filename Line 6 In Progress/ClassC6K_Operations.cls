@@ -126,6 +126,7 @@ Private userSpeedMult As Single     'Speed Multiplier to be applied to speed for
 
 Private augerPitch As Double        'Auger Pitch & Angle
 Private augerAngle As Double
+Private augerCoil As String
 
 
 Private Const speedSetupPath As String = "F:\apps\exe\line 6\files\speedSetup6.asc"
