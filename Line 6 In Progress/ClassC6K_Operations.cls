@@ -124,8 +124,8 @@ Private baseVelZ As String
 
 Private userSpeedMult As Single     'Speed Multiplier to be applied to speed for varying pass speeds on the fly
 
-Private augerPitch As String        'Auger Pitch & Angle
-Private augerAngle As String
+Private augerPitch As Double        'Auger Pitch & Angle
+Private augerAngle As Double
 
 
 Private Const speedSetupPath As String = "F:\apps\exe\line 6\files\speedSetup6.asc"
@@ -147,6 +147,8 @@ joyActive = False
 joyStr = ""
 
 setE_Stop = False
+
+passType = "Blade"
 
 Call loadPassSpeed
 
@@ -247,18 +249,35 @@ End If
 
 End Sub
 
-Public Function setAugerParam(augerPitchIn As String, augerDiamIn As String) As String
+Public Function setAugerParam(augerPitchIn As String, augerDiamIn As String, augerCoilDirection As String) As String
 
-    'Compute Auger Angle from Pitch and Diameter
-    augerAngle = Atn(augerPitchIn / (augerDiamIn * PI))
+'Compute Auger Angle from Pitch and Diameter
+augerAngle = Atn(augerPitchIn / (augerDiamIn * PI))
 
-    'Store Auger Pitch and Store auger angle after rounding
-    augerPitch = augerPitchIn
-    augerAngle = round2toString(augerAngle)
+'Store Auger Pitch
+augerPitch = CDbl(augerPitchIn)
+
+'Store Auger Coil Direction
+If augerCoilDirection = "Right" Or augerCoilDirection = "Left" Then
+    augerCoil = augerCoilDirection
+Else
+    MsgBox ("Invalid Auger Coil Direction")
+End If
+
+
+'Return auger angle
+setAugerParam = roundToString(augerAngle, 2)
+
+End Function
+
+Public Sub clearAugerParam()
+    augerAngle = 0
+    augerPitch = 0
     
-    'Return auger angle
-    setAugerParam = augerAngle
+End Sub
 
+Public Function getAugerDir() As String
+    getAugerDir = augerCoil
 End Function
 
 '============================================================ c6k Generic =================================================================================================
@@ -284,6 +303,23 @@ End Sub
 '-- resetFSupd() - Function to clear Fast Status up-to-date flag - used in loop in program
 Public Sub resetFSupd()
     fsUpToDate = False
+End Sub
+
+Public Function getPassType()
+    getPassType = passType
+End Function
+
+Public Sub setPassType()
+
+If augerAngle = 0 Then
+    passType = "Blade"
+Else
+    If frmLine6.Option_Auger_Direction(0).value = True Then
+        passType = "Auger Face"
+    Else
+        passType = "Auger Edge"
+    End If
+
 End Sub
 
 '============================================================ Drive Setup & Testing =================================================================================================
@@ -995,31 +1031,49 @@ Public Sub runOsc()
 
 End Sub
 
-Public Sub runPass(newPassType As String, passRunState As Boolean)
+Public Sub runPass(passRunState As String)
 
-    Call setPassVel(newPassType)
+'-- Update Pass Velocity
+Call setPassVel(passType)
 
-Select Case passType
-    Case "Blade"
-        c6k.Write "MC100000:"
+
+'-- Set motor behavior
+Select Case passRunState
+
+    ' Start the motors in continuous move mode
+    Case "Start"
+        Select Case passType
+            Case "Blade"
+                c6k.Write "MC100X00:GO100X00" & Chr(13)
+                
+            Case "Auger Edge"
+                c6k.Write "MC000X11:GO000X11" & Chr(13)
+            
+            Case "Auger Face"
+                c6k.Write "MC011X11:GO011X11" & Chr(13)
+            
+            Case Else
+                MsgBox ("Error in pass type select")
+                Exit Sub
+            
+        End Select
         
-    Case "Auger Edge"
-        c6k.Write "MC000011:"
-    
-    Case "Auger Face"
-        c6k.Write "MC011011:"
-    
-    Case Else
-        MsgBox ("Error in pass type select")
+    ' Update velocity only
+    Case "Update"
         Exit Sub
-    
+        
+    ' Stop continuous move mode
+    Case "Stop"
+        c6k.Write "!S111011:MC000X00" & Chr(13)
+        
+    Case Else
+        MsgBox ("Error in runPass function")
+        
 End Select
-
-passType = newPassType
 
 End Sub
 
-Public Sub setPassVel(passType As String)
+Private Sub setPassVel(passType As String)
 
 Dim currentPassSpeed As String
 Dim currentRotSpeed As String
@@ -1046,7 +1100,7 @@ Select Case passType
         currentSpeedY = roundToStr((baseVelY * userSpeedMult), 3)
         currentSpeedZ = roundToStr((baseVelZ * userSpeedMult), 3)
     
-        c6k.Write "V," & currentSpeedZ & ",,," & currentRotSpeed & "," & currentSpeedY & Chr$(13)
+        c6k.Write "V," & currentSpeedZ & ",0,," & currentRotSpeed & "," & currentSpeedY & Chr$(13)
     
     Case Else
     

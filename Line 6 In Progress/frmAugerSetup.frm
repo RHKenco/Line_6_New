@@ -46,7 +46,7 @@ Begin VB.Form frmAugerSetup
       Top             =   3360
       Width           =   2175
    End
-   Begin VB.OptionButton Option_Auger_Twist 
+   Begin VB.OptionButton Option_Auger_Coil 
       BackColor       =   &H00C00000&
       Caption         =   "Left-Handed"
       BeginProperty Font 
@@ -84,7 +84,7 @@ Begin VB.Form frmAugerSetup
       TabIndex        =   6
       Top             =   2160
       Width           =   2175
-      Begin VB.OptionButton Option_Auger_Twist 
+      Begin VB.OptionButton Option_Auger_Coil 
          BackColor       =   &H00C00000&
          Caption         =   "Right-Handed"
          BeginProperty Font 
@@ -263,3 +263,33 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Private Sub Button_Compute_Click()
+
+Dim tempDirection As String
+
+If Option_Auger_Coil(0).value = True Then
+    tempDirection = "Right"
+ElseIf Option_Auger_Coil(1).value = True Then
+    tempDirection = "Left"
+Else
+    MsgBox ("Error in Auger Coil Direction Declaration")
+End If
+
+
+'Set Auger Parameters
+Dim tempAngle As String
+
+tempAngle = c6kOps.setAugerParam(Text_Enter_Auger_Pitch.Text, Text_Enter_Auger_Dia.Text, tempDirection)
+
+Text_Pop_Auger_Angle.Text = tempAngle
+Label_Auger_Ready.Visible = True
+Label_Auger_Ready.Refresh
+
+frmLine6.Button_Set_Auger.Enabled = False
+frmLine6.Button_Set_Auger.Visible = False
+frmLine6.Button_Set_Auger.Refresh
+
+frmLine6.Button_Clear_Auger.Enabled = True
+frmLine6.Button_Clear_Auger.Refresh
+
+End Sub

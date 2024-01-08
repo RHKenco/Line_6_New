@@ -10,6 +10,23 @@ Begin VB.Form frmLine6
    ScaleHeight     =   6660
    ScaleWidth      =   17385
    StartUpPosition =   3  'Windows Default
+   Begin VB.CommandButton Button_Set_Auger 
+      Caption         =   "Auger Setup"
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   8.25
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   975
+      Left            =   7680
+      TabIndex        =   26
+      Top             =   5160
+      Width           =   1575
+   End
    Begin VB.OptionButton Option_Auger_Direction 
       BackColor       =   &H00C00000&
       Caption         =   "Run Edge"
@@ -19,7 +36,7 @@ Begin VB.Form frmLine6
       Left            =   5520
       TabIndex        =   22
       Top             =   5640
-      Width           =   1935
+      Width           =   1095
    End
    Begin VB.Frame Frame_Auger_Switch 
       BackColor       =   &H00C00000&
@@ -39,6 +56,23 @@ Begin VB.Form frmLine6
       TabIndex        =   20
       Top             =   5040
       Width           =   2175
+      Begin VB.CommandButton Button_Clear_Auger 
+         Caption         =   "Clear"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   735
+         Left            =   1320
+         TabIndex        =   25
+         Top             =   240
+         Width           =   735
+      End
       Begin VB.OptionButton Option_Auger_Direction 
          BackColor       =   &H00C00000&
          Caption         =   "Run Face"
@@ -48,7 +82,7 @@ Begin VB.Form frmLine6
          Left            =   120
          TabIndex        =   21
          Top             =   240
-         Width           =   1935
+         Width           =   1095
       End
    End
    Begin VB.TextBox Text_Enter_Pass_Width 
@@ -489,9 +523,30 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Private Sub Button_Clear_Auger_Click()
+
+' Clear Auger Parameters
+Call c6kOps.clearAugerParam
+
+' Reset Pass Type
+Call c6kOps.setPassType
+
+'Re-show set button
+Button_Set_Auger.Visible = True
+Button_Set_Auger.Refresh
+
+End Sub
+
 Private Sub Button_Go_Click()
 
 FSM_Line6.State = 2
+
+End Sub
+
+Private Sub Button_Set_Auger_Click()
+
+'Show auger setup form
+frmAugerSetup.Show
 
 End Sub
 

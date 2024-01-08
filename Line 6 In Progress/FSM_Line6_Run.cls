@@ -83,12 +83,26 @@ Private Sub runState2() 'Pause State - Joystick movement & Oscillator Only
 Call c6kOps.runOsc
 
 
+'-- Check for Inputs
+'** If SwitchState = Off, Resume Pass & set FSM State to 3 (Run Mode)
+'** If Release Is Pressed, set FSM to State 4
+
+
+
 End Sub
 
 Private Sub runState3() 'Run State - Joystick in pass adjustment mode, Oscillator running
 
 '-- Run Oscillator
 Call c6kOps.runOsc
+
+
+'-- Check for switch
+'** If SwitchState = ON, Pause Pass & set FSM State to 2 (Pause Mode)
+
+
+'-- Run Pass
+Call c6kOps.runPass("Update")
 
 
 End Sub
