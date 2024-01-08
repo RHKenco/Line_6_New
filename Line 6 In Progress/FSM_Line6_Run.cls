@@ -20,20 +20,15 @@ Attribute VB_Exposed = False
 '|      States:
 '|          - 0 - Setup
 '|                  - initializes Oscillator
-'|          - 1 - Set Torch
-'|                  - Enables Free Joystick to position Torch
-'|          - 2 - Strike Arc
-'|                  - Strikes Arc & Begins Oscillation
-'|          - 3 - Form Puddle
-'|                  - Enables Free Joystick mode to position puddle
-'|          - 4 - Run Pass
-'|                  - Runs Pass, Joystick in Run mode
-'|          - 5 - Terminate
-'|                  - Enables Free Joystick mode to end pass
-'|          - 6 - Return
+'|          - 1 - Set Torch & Strike Arc
+'|                  - Enables Free Joystick to position Torch, Homes Oscillator,
+'|                      and Strikes Arc / Starts Osc uppon Transition
+'|          - 2 - Pause
+'|                  - Stops movement & allows for re-positioning joystick. Finish Pass from this state
+'|          - 3 - Run Pass
+'|                  - Starts movement & operates mid-pass joystick
+'|          - 4 - Return
 '|                  - Cuts Arc and returns to beginning of pass
-'|          - 7 - Wait
-'|                  - Waits for keypress to return to Set mode for next pass
 '|
 '|
 '----------------------------------------------------------------------------------------------------------------------
@@ -65,44 +60,39 @@ Select Case State
         Call runState3
     Case 4
         Call runState4
-    Case 5
-        Call runState5
-    Case 6
-        Call runState6
-    Case 7
-        Call runState7
 End Select
 
 End Sub
 
-Private Sub runState0()
+Private Sub runState0() 'Setup State - Runs any necessary FSM Setup code and moves immediately to state 1
+
+'Home Oscillator
+c6kOps.homeOsc
+    
+State = 1
+    
+End Sub
+
+Private Sub runState1() 'Set Torch & Strike Arc State - Set torch for initial pass, then strike arc
 
 End Sub
 
-Private Sub runState1()
+Private Sub runState2() 'Pause State - Joystick movement & Oscillator Only
+
+'-- Run Oscillator
+Call c6kOps.runOsc
+
 
 End Sub
 
-Private Sub runState2()
+Private Sub runState3() 'Run State - Joystick in pass adjustment mode, Oscillator running
+
+'-- Run Oscillator
+Call c6kOps.runOsc
+
 
 End Sub
 
-Private Sub runState3()
-
-End Sub
-
-Private Sub runState4()
-
-End Sub
-
-Private Sub runState5()
-
-End Sub
-
-Private Sub runState6()
-
-End Sub
-
-Private Sub runState7()
+Private Sub runState4() 'Return State - moves head back to start of pass, then backs away perpendicularly by set distance
 
 End Sub

@@ -489,13 +489,19 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Private Sub Button_Go_Click()
+
+FSM_Line6.State = 2
+
+End Sub
+
 Private Sub Button_Start_Click()
 
 'Start Punch
 Call woMgr.startWO
 
 'Enable Timeout Timer
-
+Call woMgr.woTimer("Start")
     
 End Sub
 
@@ -617,7 +623,7 @@ Private Sub Text_Pop_Mat_Change()
 
 End Sub
 
-'-- Background Task Timer - Runs Joystick, Updates DRO ------------------------------------
+'-- Main FSM Timer - Operates the non-UI elements of the program ------------------------------------
 Private Sub Timer_FSM_Timer()
 
 Call fsmMain.Run

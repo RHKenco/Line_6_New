@@ -340,7 +340,7 @@ c6k.Write ("HOMA4.1:HOMAD4.50:@HOMZ0:HOMV4.1:HOMVF4.1:" & Chr$(13))
 'Adtl motion parameters, call home function
 c6k.Write ("HOMBAC111011:HOMEDG111111:HOMDF000100:HOM,,,0,,:" & Chr$(13))
 'Wait until homing motion has stopped, then move back to standby position
-c6k.Write ("WAIT(6AS=XXX1X):T.1:D,,,-2.375,,:GO0001000:" & Chr$(13))
+c6k.Write ("WAIT(6AS=XXX1X):T.1:D,,,-2.375,,:GO0001000:VAR1=0" & Chr$(13))
 
 End Sub
 
@@ -986,6 +986,16 @@ Call setOutput("Airblade", True)
 
 'Close contacts and Move main z-axis up by 0.9"
 c6k.Write "A,10:AD,3:V,13:D,0.9:GO01:1OUT.16-1:WAIT(MOV=b000000):JOG100001" & Chr$(13)
+
+End Sub
+
+Public Sub runOsc()
+
+    c6k.Write ("IF(MOV=bXXX0XX)" & Chr(13))                                         'If osc motion has stopped
+        c6k.Write ("V,,," & Str$(baseOscSpeed) & ",," & Chr(13))                        'Set osc velocity
+        c6k.Write ("IF(VAR1=0):D,,," & Str$(passWidth) & ":VAR1=1:NIF" & Chr(13))       'If last pass was -, then set + distance & reset bool
+        c6k.Write ("IF(VAR1=1):D,,,-" & Str$(passWidth) & ":VAR1=0:NIF" & Chr(13))      'If last pass was +, then set - distance & reset bool
+    c6k.Write ("GOXXX1XX:NIF" & Chr(13))                                                'Initiate motion
 
 End Sub
 
