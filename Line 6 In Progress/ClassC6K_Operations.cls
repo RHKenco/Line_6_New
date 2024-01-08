@@ -774,27 +774,23 @@ If (mode + 1) <> joyLastBtnInput Then
                 
                     c6k.Write ("1INFNC1-1J:1INFNC2-1K:1INFNC3-6J:1INFNC4-6K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 1 ; Set inputs 3 & 4 for +/- Axis 6
                 
-                    c6k.Write ("JOG000X01" & Chr$(13)) 'Set Axes 1 & 6 to Jog Mode
+                    c6k.Write ("JOG100X01" & Chr$(13)) 'Set Axes 1 & 6 to Jog Mode
                     
                     joyStr = "X-Y"
                     
                 Case "Auger Edge"
-                    c6k.Write ("JOG000X00" & Chr$(13))
-                
-                    c6k.Write ("1INFNC1-5J:1INFNC2-5K:1INFNC3-6J:1INFNC4-6K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 5 ; Set inputs 3 & 4 for +/- Axis 6
-                
-                    c6k.Write ("JOG000X11" & Chr$(13)) 'Set Axes 5 & 6 to Jog Mode
+                    c6k.Write ("JOG000X00:MC000X00" & Chr$(13))
                     
                     joyStr = "Y-R"
                     
                 Case "Auger Face"
                     c6k.Write ("JOG000X00" & Chr$(13))
                 
-                    c6k.Write ("1INFNC1-5J:1INFNC2-5K:1INFNC3-6J:1INFNC4-6K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 5 ; Set inputs 3 & 4 for +/- Axis 6
+                    c6k.Write ("1INFNC1-1J:1INFNC2-1K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 5 ; Set inputs 3 & 4 for +/- Axis 6
                 
-                    c6k.Write ("JOG000X01" & Chr$(13)) 'Set Axes 5 & 6 to Jog Mode
+                    c6k.Write ("JOG100X00" & Chr$(13)) 'Set Axes 5 & 6 to Jog Mode
                     
-                    joyStr = "Z'-R"
+                    joyStr = "X-R"
                     
                 Case Else
                     MsgBox "Error in JoyRun Handler - Case: " & buttons & " Pass Type: " & passType
