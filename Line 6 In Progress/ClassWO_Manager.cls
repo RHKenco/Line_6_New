@@ -42,7 +42,7 @@ Private Const machineNo = 6
 
 Private woLastStartTime As String       ' Start time of WO
 Private woLastEndTime As String         ' Not-Finish Time of WO
-Private woTotalTime As String       ' Total time since last Finish
+Private woTotalTime As Single       ' Total time since last Finish
 
 'Internal Variables
 Private woActive As Boolean         ' Work Order Active flag
@@ -444,26 +444,26 @@ Select Case Punch
         Let Sta$ = "6"
         
         'STLCost! appears in some of the grosspit calculations. Looking at the data in grosspit, however, STLCost appears to only be set in the Line 2 and Line 3 programs.
-        Dim STLCost!
-        Let STLCost! = 0
+        Dim STLCOST!
+        Let STLCOST! = 0
         
         'Write Finished Punch & Data to Bar_Data
-        Write #1, woNum, machineNo, "Finish", Format(Now, "yy-mm-dd"), Format$(Time, "hh:mm:ss"), woPartNum, FinishedQty, AvgTime!, STLCost!, GROSSPROFIT! & "%", woFormASCcom
+        Write #1, woNum, machineNo, "Finish", Format(Now, "yy-mm-dd"), Format$(Time, "hh:mm:ss"), woPartNum, FinishedQty, AvgTime!, STLCOST!, GROSSPROFIT! & "%", woFormASCcom
         Close #1
         
         'Output to GROSSPIT
         Open woGrossPITpath For Append As #1
-        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, woPrice, woTCinch, STLCost!, AvgTime!, cTCcostSQ, CONVCOST!, UNITCOST!, UNITPROFIT!, GROSSPROFIT!, woFormASCcom, TTime!, TSALES!, TTC!, TTCCOST!, TSTLCOST!, TCONVCOST!, TOTALCOST!, TOTALPROFIT!, woDate, woDWGno, woCScost
+        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, woPrice, woTCinch, STLCOST!, AvgTime!, cTCcostSQ, CONVCOST!, UNITCOST!, UNITPROFIT!, GROSSPROFIT!, woFormASCcom, TTime!, TSALES!, TTC!, TTCCOST!, TSTLCOST!, TCONVCOST!, TOTALCOST!, TOTALPROFIT!, woDate, woDWGno, woCScost
         Close #1
         
         'Output to GARY
         Open woGaryPath For Append As #1
-        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, woPrice, woTCinch, STLCost!, AvgTime!
+        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, woPrice, woTCinch, STLCOST!, AvgTime!
         Close #1
         
         'Output to GOAL
         Open woGoalPath For Append As #1
-        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, woPrice, woTCinch, STLCost!, AvgTime!
+        Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, woPrice, woTCinch, STLCOST!, AvgTime!
         Close #1
         
     Case Else
@@ -477,22 +477,24 @@ End Sub
 Private Sub updTemp(cmd As String)
 
 Dim woNumTemp$
-Dim woLastStartTimeTemp
-Dim woLastEndTimeTemp
-Dim woTotalTimeTemp
+Dim woLastStartTimeTemp$
+Dim woLastEndTimeTemp$
+Dim woTotalTimeTemp!
+Dim woIsTimedout As Boolean
+woIsTimedout = False
 
 Select Case cmd
     Case "New"
     
         Open woTempData For Output As #2
-        Write #2, woNum, woLastStartTime, 0, 0  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
+        Write #2, woNum, woLastStartTime$, 0, 0  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
         
         Close #2
         
     Case "Load"
         
         Open woTempData For Input As #2
-        Input #2, woNumTemp$, woLastStartTime, woLastEndTime, woTotalTime  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
+        Input #2, woNumTemp$, woLastStartTime$, woLastEndTime$, woTotalTime  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
         
         Close #2
         
@@ -500,68 +502,85 @@ Select Case cmd
         
         ' Load last Start punch timestamp from woTempData
         Open woTempData For Input As #2
-        Input #2, woNumTemp, woLastStartTimeTemp, woLastEndTimeTemp, woTotalTimeTemp  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
+        Input #2, woNumTemp$, woLastStartTimeTemp$, woLastEndTimeTemp$, woTotalTimeTemp!  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
         
         ' If the timestamp does not match the one stored in the class, there is probably an error
-        If woLastStartTime <> woLastStartTimeTemp Then MsgBox ("Start time match error")
+        If woLastStartTime <> woLastStartTimeTemp$ Then MsgBox ("Start time match error")
         
         ' Get current time as Start time
-        woLastStartTime = Now()
+        woLastStartTime$ = Now()
         
         Close #2
         
         ' Store values back in temp file
         Open woTempData For Output As #2
-        Write #2, woNum, woLastStartTime, woLastEndTime, woTotalTime  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
+        Write #2, woNum, woLastStartTime$, woLastEndTime$, woTotalTime  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
     
         Close #2
         
     Case "End"
-    
-        ' Load last Start punch timestamp from woTempData
-        Open woTempData For Input As #2
-        Input #2, woNumTemp, woLastStartTimeTemp, woLastEndTimeTemp, woTotalTimeTemp  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
+        woIsTimedout = False
         
-        ' If the timestamp does not match the one stored in the class, there is probably an error
-        If woLastStartTime <> woLastStartTimeTemp Then MsgBox ("Start time match error")
+        GoTo SaveData:
         
-        ' Get current time as N/F time
-        woLastEndTime = Now()
+    Case "Timeout"
+        woIsTimedout = True
         
-        ' Generate new total time based on last start time, current N/F time, and previous total time
-        woTotalTime = DateDiff("s", woLastEndTime, woLastStartTime) + woTotalTimeTemp
-        
-        Close #2
-        
-        ' Store values back in temp file
-        Open woTempData For Output As #2
-        Write #2, woNum, woLastStartTime, woLastEndTime, woTotalTime  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
-    
-        Close #2
+        GoTo SaveData:
         
     Case Else
         MsgBox ("Error in Temp File Handler")
 End Select
     
+Exit Sub
+
+SaveData:
+    
+        ' Load last Start punch timestamp from woTempData
+        Open woTempData For Input As #2
+        Input #2, woNumTemp$, woLastStartTimeTemp$, woLastEndTimeTemp$, woTotalTimeTemp!  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
+        
+        ' If the timestamp does not match the one stored in the class, there is probably an error
+        If woLastStartTime <> woLastStartTimeTemp$ Then MsgBox ("Start time match error")
+        
+        ' Get current time as N/F time
+        woLastEndTime$ = Now()
+        
+        ' Generate new total time based on last start time, current N/F time, and previous total time
+        woTotalTime$ = DateDiff("s", woLastEndTime$, woLastStartTime$) + woTotalTimeTemp!
+        
+        If woIsTimedout Then woTotalTime = woTotalTime - (woTimeoutTime)
+        
+        Close #2
+        
+        ' Store values back in temp file
+        Open woTempData For Output As #2
+        Write #2, woNum, woLastStartTime$, woLastEndTime$, woTotalTime  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
+    
+        Close #2
     
 End Sub
 
 ' -- runCalcs() - Runs calculations necessary to push WO data out when finish is pressed.
 Private Sub runCalcs()
 
-Let TTime! = woTotalTime / 60
+'Unused Value - See writeData function for more details.
+Dim STLCOST!
+STLCOST! = 0
+
+Let TTime! = woTotalTime / 3600                                 'Total time is in seconds, divide by 3600 to get to hours.
 Let AvgTime! = Format$((TTime! / FinishedQty), "CURRENCY")
 Let cTCcostSQ = Format$((cTCcostSQ * Tc!), "CURRENCY")
 
 
 Let CONVCOST! = Format$((cHrCost * AvgTime! * cHrRate), "CURRENCY")
-Let UNITCOST! = Format$((cTCcostSQ + CONVCOST! + STLCost!), "CURRENCY")
+Let UNITCOST! = Format$((cTCcostSQ + CONVCOST! + STLCOST!), "CURRENCY")
 Let UNITPROFIT! = Format$((PRICE! - UNITCOST!), "CURRENCY")
 Let GROSSPROFIT! = Format$(((UNITPROFIT! / PRICE!) * 100), "CURRENCY")
 Let TSALES! = FinishedQty * PRICE!
 Let TTC! = Tc! * FinishedQty
 Let TTCCOST! = cTCcostSQ * FinishedQty
-Let TSTLCOST! = STLCost! * FinishedQty
+Let TSTLCOST! = STLCOST! * FinishedQty
 Let TCONVCOST! = CONVCOST! * FinishedQty
 Let TOTALCOST! = UNITCOST! * FinishedQty
 Let TOTALPROFIT! = UNITPROFIT! * FinishedQty
