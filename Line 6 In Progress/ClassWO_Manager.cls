@@ -203,12 +203,18 @@ If Dir(woTempMain) = "" Then
    Exit Sub
 Else
     
+    ' Prompt the user to check if they would like to load the temp file
+    If MsgBox("Previously Active WO Detected. Would you like to load?", vbYesNo) = vbNo Then Exit Sub
+    
     Dim DAT As String
     
     ' Load temp file to check WOnum (temp6) and Date
     Open (woTempMain) For Input As #2
     Input #2, woNum, DAT
     Close #2
+    
+    'Define temp file directory path
+    Let woTempData = woTempDir & woNum & "6.tmp"
     
     ' Load backup data temp file & store in mgr variables
     Call updTemp("Load")
@@ -493,6 +499,12 @@ Select Case cmd
         
     Case "Load"
         
+        'If the file does not exist to be loaded
+        If Dir(woTempData) = "" Then
+            MsgBox ("Temp File does not exist. The WO will be activated in the form, but no prior data will be recovered.")
+            Exit Sub
+        End If
+        
         Open woTempData For Input As #2
         Input #2, woNumTemp$, woLastStartTime$, woLastEndTime$, woTotalTime  ' Write to Temp file WO number, WO start time, Elapsed time (0 for first punch), Total Time (0 for first punch)
         
@@ -597,11 +609,20 @@ Select Case timerCmd
             woCountdownTime = woCountdownTime - 1
             
             Dim tempMin As Integer
-            Dim tempSec As Integer
-            tempMin = woCountdownTime \ 60
-            tempSec = woCountdownTime - tempMin * 60
+            Dim tempSec As Ingeger
+            tempMin = CInt((woCountdownTime / woTimeoutCalib) \ 60)
+            tempSec = CInt((woCountdownTime / woTimeoutCalib) - tempMin * 60)
+
+            Dim Sec$
             
-            frmLine6.Var_Label_System_Status.Caption = "Started - " & CStr(tempMin) & ":" & CStr(tempSec) & " Remaining"
+            If tempSec <= 9 Then
+                Sec$ = "0" & CStr(tempMin)
+            Else
+                Sec$ = CStr(tempMin)
+            End If
+            
+            
+            frmLine6.Var_Label_System_Status.Caption = "Started - " & CStr(tempMin) & ":" & Sec$ & " Remaining"
             frmLine6.Var_Label_System_Status.Refresh
             
         Else
@@ -610,6 +631,7 @@ Select Case timerCmd
             frmLine6.Var_Label_System_Status.Refresh
             
             Call timeoutWO
+            
         End If
     
     Case Else

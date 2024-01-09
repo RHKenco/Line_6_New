@@ -758,10 +758,10 @@ temp = "X"  'Set X - Axis Functionality
 If joyHoriz = temp Or joyVert = temp Then   'If any input axes are indicated as teh current axis, then
     'Determine what axis should be set and set jog / MC inputs accordingly
     If joyHoriz = temp Then
-        c6k.Write "1INFNC1-1J:1INFNC2-1K" & Chr$(13)    'Set inputs 1 & 2 for Horizontal joy axis
+        c6k.Write "1INFNC1-1K:1INFNC2-1J" & Chr$(13)    'Set inputs 1 & 2 for Horizontal joy axis
         joyJogState(1) = 1                              'Set jogState appropriately
     ElseIf joyVert = temp Then
-        c6k.Write "1INFNC3-1J:1INFNC4-1K" & Chr$(13)    'Set inputs 3 & 4 for Vertical joy axis
+        c6k.Write "1INFNC3-1K:1INFNC4-1J" & Chr$(13)    'Set inputs 3 & 4 for Vertical joy axis
         joyJogState(1) = 1                              'Set jogState appropriately
     End If
 Else
@@ -772,10 +772,10 @@ temp = "Y"  'Set Y - Axis Functionality
 If joyHoriz = temp Or joyVert = temp Then   'If any input axes are indicated as teh current axis, then
     'Determine what axis should be set and set jog / MC inputs accordingly
     If joyHoriz = temp Then
-        c6k.Write "1INFNC1-6J:1INFNC2-6K" & Chr$(13)    'Set inputs 1 & 2 for Horizontal joy axis
+        c6k.Write "1INFNC1-6K:1INFNC2-6J" & Chr$(13)    'Set inputs 1 & 2 for Horizontal joy axis
         joyJogState(6) = 1                              'Set jogState appropriately
     ElseIf joyVert = temp Then
-        c6k.Write "1INFNC3-6J:1INFNC4-6K" & Chr$(13)    'Set inputs 3 & 4 for Vertical joy axis
+        c6k.Write "1INFNC3-6K:1INFNC4-6J" & Chr$(13)    'Set inputs 3 & 4 for Vertical joy axis
         joyJogState(6) = 1                              'Set jogState appropriately
     End If
 Else
@@ -786,10 +786,10 @@ temp = "Z"  'Set Z - Axis Functionality
 If joyHoriz = temp Or joyVert = temp Then   'If any input axes are indicated as teh current axis, then
     'Determine what axis should be set and set jog / MC inputs accordingly
     If joyHoriz = temp Then
-        c6k.Write "1INFNC1-2J:1INFNC2-2K" & Chr$(13)    'Set inputs 1 & 2 for Horizontal joy axis
+        c6k.Write "1INFNC1-2K:1INFNC2-2J" & Chr$(13)    'Set inputs 1 & 2 for Horizontal joy axis
         joyJogState(2) = 1                              'Set jogState appropriately
     ElseIf joyVert = temp Then
-        c6k.Write "1INFNC3-2J:1INFNC4-2K" & Chr$(13)    'Set inputs 3 & 4 for Vertical joy axis
+        c6k.Write "1INFNC3-2K:1INFNC4-2J" & Chr$(13)    'Set inputs 3 & 4 for Vertical joy axis
         joyJogState(2) = 1                              'Set jogState appropriately
     End If
 Else
@@ -800,10 +800,10 @@ temp = "Za"  'Set Zalt - Axis Functionality
 If joyHoriz = temp Or joyVert = temp Then   'If any input axes are indicated as teh current axis, then
     'Determine what axis should be set and set jog / MC inputs accordingly
     If joyHoriz = temp Then
-        c6k.Write "1INFNC1-3J:1INFNC2-3K" & Chr$(13)    'Set inputs 1 & 2 for Horizontal joy axis
+        c6k.Write "1INFNC1-3K:1INFNC2-3J" & Chr$(13)    'Set inputs 1 & 2 for Horizontal joy axis
         joyJogState(3) = 1                              'Set jogState appropriately
     ElseIf joyVert = temp Then
-        c6k.Write "1INFNC3-3J:1INFNC4-3K" & Chr$(13)    'Set inputs 3 & 4 for Vertical joy axis
+        c6k.Write "1INFNC3-3K:1INFNC4-3J" & Chr$(13)    'Set inputs 3 & 4 for Vertical joy axis
         joyJogState(3) = 1                              'Set jogState appropriately
     End If
 Else
