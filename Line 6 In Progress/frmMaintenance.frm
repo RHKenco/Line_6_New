@@ -160,12 +160,12 @@ Begin VB.Form frmMaintenance
             Strikethrough   =   0   'False
          EndProperty
          ForeColor       =   &H8000000E&
-         Height          =   4095
+         Height          =   1575
          Left            =   1560
          TabIndex        =   69
          Top             =   600
          Visible         =   0   'False
-         Width           =   1215
+         Width           =   1335
       End
       Begin VB.Label Label_Drive_Num 
          BackColor       =   &H00C00000&
