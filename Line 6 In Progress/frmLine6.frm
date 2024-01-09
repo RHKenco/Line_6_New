@@ -3,8 +3,8 @@ Begin VB.Form frmLine6
    BackColor       =   &H00C00000&
    Caption         =   "Line 6"
    ClientHeight    =   6660
-   ClientLeft      =   165
-   ClientTop       =   810
+   ClientLeft      =   225
+   ClientTop       =   855
    ClientWidth     =   17385
    LinkTopic       =   "Form6"
    ScaleHeight     =   6660
@@ -617,7 +617,7 @@ Call c6kOps.Enable
 Call c6kOps.bootDrives
 
 '-- Check for previously active WO
-Call woMgr.chkActiveWO
+'Call woMgr.chkActiveWO
 
 '-- Start Airblade & Exhaust Fan
 Call c6kOps.setOutput("Airblade", True)

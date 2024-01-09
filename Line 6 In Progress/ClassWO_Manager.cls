@@ -175,7 +175,7 @@ Public Sub clearWO()
     woTqty = 0
     woPrice = 0
     woTCinch = 0
-    woComments = ""
+    woFormASCcom = ""
     woDate = ""
     woDWGno = ""
     woActive = False
@@ -220,7 +220,7 @@ Else
         
     
     ' Update Form text and call function to load WO
-    frmLine6.Text_Enter_WO.Text = temp6
+    frmLine6.Text_Enter_WO.Text = woNum
     
     Call loadWO
     
@@ -547,7 +547,7 @@ SaveData:
         woLastEndTime$ = Now()
         
         ' Generate new total time based on last start time, current N/F time, and previous total time
-        woTotalTime$ = DateDiff("s", woLastEndTime$, woLastStartTime$) + woTotalTimeTemp!
+        woTotalTime = DateDiff("s", woLastEndTime$, woLastStartTime$) + woTotalTimeTemp!
         
         If woIsTimedout Then woTotalTime = woTotalTime - (woTimeoutTime)
         

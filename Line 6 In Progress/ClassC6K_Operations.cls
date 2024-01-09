@@ -297,9 +297,9 @@ Public Sub updFastStatus()
 
 If Not fsUpToDate Then
     'Pull c6k Fast-Status Data
-    Dim Temp() As Byte
-    Temp = c6k.FastStatus
-    Call CopyMemory(fsinfo, Temp(0), 280)   'copy byte array into structure
+    Dim temp() As Byte
+    temp = c6k.FastStatus
+    Call CopyMemory(fsinfo, temp(0), 280)   'copy byte array into structure
     
     FSinputState = fsinfo.ProgIn(1)
     FSoutputState = fsinfo.ProgOut(1)
@@ -608,17 +608,17 @@ If Not fsUpToDate Then
     Call updFastStatus
 End If
 
-Dim Temp As Byte
-Temp = 0
+Dim temp As Byte
+temp = 0
 
 'Set joyBtnState based on inputs
-If (FSinputState And joySelect) Then Temp = Temp Or (2 ^ (1 - 1))
-If (FSinputState And joyRelease) Then Temp = Temp Or (2 ^ (2 - 1))
-If (FSinputState And joyToggle) Then Temp = Temp Or (2 ^ (3 - 1))
+If (FSinputState And joySelect) Then temp = temp Or (2 ^ (1 - 1))
+If (FSinputState And joyRelease) Then temp = temp Or (2 ^ (2 - 1))
+If (FSinputState And joyToggle) Then temp = temp Or (2 ^ (3 - 1))
 
-If Temp > 7 Then MsgBox ("Input Error:" & Chr$(13) & "inputState Is " & Temp)
+If temp > 7 Then MsgBox ("Input Error:" & Chr$(13) & "inputState Is " & temp)
 
-joyBtnState = 7 And Not Temp
+joyBtnState = 7 And Not temp
 getJoyBtnInputs = joyBtnState
 
 'Based inputs, joyBtnInputs will be:
@@ -641,12 +641,12 @@ If Not fsUpToDate Then
 End If
 
 'Set joyStkState based on inputs - Since directional inputs are exclusive, no simultaneous input states will occur
-If (FSinputState And joyLeft) Then Temp = 1
-If (FSinputState And joyRight) Then Temp = 2
-If (FSinputState And joyUp) Then Temp = 3
-If (FSinputState And joyDown) Then Temp = 4
+If (FSinputState And joyLeft) Then temp = 1
+If (FSinputState And joyRight) Then temp = 2
+If (FSinputState And joyUp) Then temp = 3
+If (FSinputState And joyDown) Then temp = 4
 
-joyStkState = Temp
+joyStkState = temp
 
 getJoyStkInputs = joyStkState
 
@@ -752,15 +752,15 @@ If joyHoriz = joyVert Then
     Exit Sub
 End If
 
-Dim Temp As String
+Dim temp As String
 
-Temp = "X"  'Set X - Axis Functionality
-If joyHoriz = Temp Or joyVert = Temp Then   'If any input axes are indicated as teh current axis, then
+temp = "X"  'Set X - Axis Functionality
+If joyHoriz = temp Or joyVert = temp Then   'If any input axes are indicated as teh current axis, then
     'Determine what axis should be set and set jog / MC inputs accordingly
-    If joyHoriz = Temp Then
+    If joyHoriz = temp Then
         c6k.Write "1INFNC1-1J:1INFNC2-1K" & Chr$(13)    'Set inputs 1 & 2 for Horizontal joy axis
         joyJogState(1) = 1                              'Set jogState appropriately
-    ElseIf joyVert = Temp Then
+    ElseIf joyVert = temp Then
         c6k.Write "1INFNC3-1J:1INFNC4-1K" & Chr$(13)    'Set inputs 3 & 4 for Vertical joy axis
         joyJogState(1) = 1                              'Set jogState appropriately
     End If
@@ -768,13 +768,13 @@ Else
     joyJogState(1) = 0                                  'Clear jogState if no input
 End If
 
-Temp = "Y"  'Set Y - Axis Functionality
-If joyHoriz = Temp Or joyVert = Temp Then   'If any input axes are indicated as teh current axis, then
+temp = "Y"  'Set Y - Axis Functionality
+If joyHoriz = temp Or joyVert = temp Then   'If any input axes are indicated as teh current axis, then
     'Determine what axis should be set and set jog / MC inputs accordingly
-    If joyHoriz = Temp Then
+    If joyHoriz = temp Then
         c6k.Write "1INFNC1-6J:1INFNC2-6K" & Chr$(13)    'Set inputs 1 & 2 for Horizontal joy axis
         joyJogState(6) = 1                              'Set jogState appropriately
-    ElseIf joyVert = Temp Then
+    ElseIf joyVert = temp Then
         c6k.Write "1INFNC3-6J:1INFNC4-6K" & Chr$(13)    'Set inputs 3 & 4 for Vertical joy axis
         joyJogState(6) = 1                              'Set jogState appropriately
     End If
@@ -782,13 +782,13 @@ Else
     joyJogState(6) = 0                                  'Clear jogState if no input
 End If
 
-Temp = "Z"  'Set Z - Axis Functionality
-If joyHoriz = Temp Or joyVert = Temp Then   'If any input axes are indicated as teh current axis, then
+temp = "Z"  'Set Z - Axis Functionality
+If joyHoriz = temp Or joyVert = temp Then   'If any input axes are indicated as teh current axis, then
     'Determine what axis should be set and set jog / MC inputs accordingly
-    If joyHoriz = Temp Then
+    If joyHoriz = temp Then
         c6k.Write "1INFNC1-2J:1INFNC2-2K" & Chr$(13)    'Set inputs 1 & 2 for Horizontal joy axis
         joyJogState(2) = 1                              'Set jogState appropriately
-    ElseIf joyVert = Temp Then
+    ElseIf joyVert = temp Then
         c6k.Write "1INFNC3-2J:1INFNC4-2K" & Chr$(13)    'Set inputs 3 & 4 for Vertical joy axis
         joyJogState(2) = 1                              'Set jogState appropriately
     End If
@@ -796,13 +796,13 @@ Else
     joyJogState(2) = 0                                  'Clear jogState if no input
 End If
 
-Temp = "Za"  'Set Zalt - Axis Functionality
-If joyHoriz = Temp Or joyVert = Temp Then   'If any input axes are indicated as teh current axis, then
+temp = "Za"  'Set Zalt - Axis Functionality
+If joyHoriz = temp Or joyVert = temp Then   'If any input axes are indicated as teh current axis, then
     'Determine what axis should be set and set jog / MC inputs accordingly
-    If joyHoriz = Temp Then
+    If joyHoriz = temp Then
         c6k.Write "1INFNC1-3J:1INFNC2-3K" & Chr$(13)    'Set inputs 1 & 2 for Horizontal joy axis
         joyJogState(3) = 1                              'Set jogState appropriately
-    ElseIf joyVert = Temp Then
+    ElseIf joyVert = temp Then
         c6k.Write "1INFNC3-3J:1INFNC4-3K" & Chr$(13)    'Set inputs 3 & 4 for Vertical joy axis
         joyJogState(3) = 1                              'Set jogState appropriately
     End If
@@ -810,13 +810,13 @@ Else
     joyJogState(3) = 0                                  'Clear jogState if no input
 End If
 
-Temp = "R"  'Set Rotation - Axis Functionality
-If joyHoriz = Temp Or joyVert = Temp Then   'If any input axes are indicated as teh current axis, then
+temp = "R"  'Set Rotation - Axis Functionality
+If joyHoriz = temp Or joyVert = temp Then   'If any input axes are indicated as teh current axis, then
     'Determine what axis should be set and set jog / MC inputs accordingly
-    If joyHoriz = Temp Then
+    If joyHoriz = temp Then
         c6k.Write "1INFNC1-5J:1INFNC2-5K" & Chr$(13)    'Set inputs 1 & 2 for Horizontal joy axis
         joyJogState(5) = 1                              'Set jogState appropriately
-    ElseIf joyVert = Temp Then
+    ElseIf joyVert = temp Then
         c6k.Write "1INFNC3-5J:1INFNC4-5K" & Chr$(13)    'Set inputs 3 & 4 for Vertical joy axis
         joyJogState(5) = 1                              'Set jogState appropriately
     End If
@@ -824,14 +824,14 @@ Else
     joyJogState(5) = 0                                  'Clear jogState if no input
 End If
 
-Temp = "YR"  'Set Auger Edge - Y&R - Axis Functionality
-If joyHoriz = Temp Or joyVert = Temp Then   'If any input axes are indicated as teh current axis, then
+temp = "YR"  'Set Auger Edge - Y&R - Axis Functionality
+If joyHoriz = temp Or joyVert = temp Then   'If any input axes are indicated as teh current axis, then
     'Determine what axis should be set and set jog / MC inputs accordingly
-    If joyHoriz = Temp Then
+    If joyHoriz = temp Then
         c6k.Write "V8,15,10,5,5,5" & Chr$(13)    'Set
         joyJogState(5) = 2                              'Set jogState appropriately
         joyJogState(6) = 2
-    ElseIf joyVert = Temp Then
+    ElseIf joyVert = temp Then
         c6k.Write "" & Chr$(13)    'Set
         joyJogState(5) = 3                              'Set jogState appropriately
         joyJogState(6) = 3                              'Set jogState appropriately
@@ -973,7 +973,7 @@ End Sub
 '-- joyFree() - Joystick mode for idle mode
 Private Function joyFree(buttons As Integer) As Boolean
 
-If (mode + 1) <> joyLastBtnInput Then
+If (buttons + 1) <> joyLastBtnInput Then
 
     Select Case buttons
         Case 0, 4  ' No Keys Pressed or Toggle Only - X-Y Mode
@@ -1013,14 +1013,14 @@ If (mode + 1) <> joyLastBtnInput Then
             
             'Return False to indicate that user input should end joystick mode
             joyFree = False
-            mode_Last = 0
+            joyLastBtnInput = 0
             Exit Function
             
         Case Else
             
             MsgBox "Error in JoyFree Handler - Case: " & buttons
             joyFree = False
-            mode_Last = 0
+            joyLastBtnInput = 0
             Exit Function
         
     End Select
@@ -1029,7 +1029,7 @@ End If
     
 joyFree = True
 
-joyLastBtnInput = (mode + 1)
+joyLastBtnInput = (buttons + 1)
 
 End Function
 
