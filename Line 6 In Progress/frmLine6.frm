@@ -3,8 +3,8 @@ Begin VB.Form frmLine6
    BackColor       =   &H00C00000&
    Caption         =   "Line 6"
    ClientHeight    =   6660
-   ClientLeft      =   225
-   ClientTop       =   855
+   ClientLeft      =   165
+   ClientTop       =   810
    ClientWidth     =   17385
    LinkTopic       =   "Form6"
    ScaleHeight     =   6660
@@ -539,7 +539,7 @@ End Sub
 
 Private Sub Button_Go_Click()
 
-FSM_Line6.State = 2
+fsmMain.State = 2
 
 End Sub
 

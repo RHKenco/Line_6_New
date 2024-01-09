@@ -109,7 +109,7 @@ Call c6kOps.updFastStatus
     
     
     '-- Run subFSM for run-state
-        Call FSM_Line6_Run
+        Call fsmRun
 
     End If
 

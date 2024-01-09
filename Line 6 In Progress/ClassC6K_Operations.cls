@@ -226,6 +226,20 @@ Close #1
 
 End Sub
 
+Public Sub dispPassSpeed()
+
+Dim i As Integer
+For i = 0 To 3
+
+    frmCalibration.Text_Pass_Speed(i) = passSpeed(i)
+    frmCalibration.Text_Osc_Speed(i) = oscSpeed(i)
+    
+    If i <> 3 Then frmCalibration.Text_Pass_Thrsh(i) = passThreshold(i)
+
+Next i
+
+End Sub
+
 Private Sub setSpeeds()
 
 'Set speed to match osc pass width based on set thresholds
@@ -459,7 +473,7 @@ getOutputState = FSoutputState
 End Function
 
 Public Sub stopAllOut()
-    c6k.Write "JOG000000:1OUTALL9,16,0:1OUTALL25,32,0:T2" & Chr$(13)
+    c6k.Write "!S:JOG000000:1OUTALL9,16,0:1OUTALL25,32,0:T2" & Chr$(13)
 End Sub
 
 
@@ -1221,30 +1235,32 @@ If Not fsUpToDate Then
     Call updFastStatus
 End If
 
-YMOTOR = (fsinfo.MotorPos(6))
-    Let Text16.Text = Val(YMOTOR)
-    Let Text16.Text = Format((Text16.Text / Ycal), "0.000")
+Dim temp As Double
                 
-XMOTOR = (fsinfo.MotorPos(2))
-    Let Text17.Text = Val(XMOTOR)
-    Let Text17.Text = Format((Text17.Text / Xcal), "0.000")
+XMOTOR = (fsinfo.MotorPos(1))
+    temp = Val(XMOTOR)
+    frmMaintenance.Text_Pop_DRO(1 - 1).Text = Format((temp / Xcal), "0.000")
     
-UDMOTOR = (fsinfo.MotorPos(3))
-    Let Text14.Text = Val(UDMOTOR)
-    Let Text14.Text = Format((Text14.Text / Zcal), "0.000")
+YMOTOR = (fsinfo.MotorPos(6))
+    temp = Val(YMOTOR)
+    frmMaintenance.Text_Pop_DRO(6 - 1).Text = Format((temp / Ycal), "0.000")
     
-OSSMOTOR = (fsinfo.MotorPos(6))
-    Let Text15.Text = Val(OSSMOTOR)
-    Let Text15.Text = Format((Text15.Text / Ocal), "0.000")
+ZMOTOR = (fsinfo.MotorPos(2))
+    temp = Val(ZMOTOR)
+    frmMaintenance.Text_Pop_DRO(2 - 1).Text = Format((temp / Zcal), "0.000")
+
+ZaMOTOR = (fsinfo.MotorPos(3))
+    temp = Val(ZaMOTOR)
+    frmMaintenance.Text_Pop_DRO(3 - 1).Text = Format((temp / Zcal), "0.000")
+    
+OSSMOTOR = (fsinfo.MotorPos(4))
+    temp = Val(OSSMOTOR)
+    frmMaintenance.Text_Pop_DRO(4 - 1).Text = Format((temp / Ocal), "0.000")
             
 ROTATION = (fsinfo.MotorPos(5))
-    Let Text20.Text = Val(ROTATION)
-    Let Text20.Text = Format(((Text20.Text / Rcal)), "0.000")
+    temp = Val(ROTATION)
+    frmMaintenance.Text_Pop_DRO(5 - 1).Text = Format(((temp / Rcal)), "0.000")
 
-
-XSpeedSHOW = (fsinfo.MotorVel(2))
-    Let Text18.Text = Val(XSpeedSHOW)
-    Let Text18.Text = Format((Text18.Text / XcalV), "0.000")
     
 End Function
 

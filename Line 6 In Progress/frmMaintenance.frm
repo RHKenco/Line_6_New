@@ -146,6 +146,27 @@ Begin VB.Form frmMaintenance
          Top             =   600
          Width           =   855
       End
+      Begin VB.Label Var_Label_Joystick_Status 
+         Alignment       =   2  'Center
+         BackColor       =   &H00C00000&
+         Caption         =   "Joystick Enabled:"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   13.5
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   4095
+         Left            =   1560
+         TabIndex        =   69
+         Top             =   600
+         Visible         =   0   'False
+         Width           =   1215
+      End
       Begin VB.Label Label_Drive_Num 
          BackColor       =   &H00C00000&
          Caption         =   "8 - Unused"
@@ -1234,9 +1255,12 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Private Sub Form_Load()
     
     Timer_c6kRead.Enabled = True
+    
+    Call c6kOps.stopAllOut
 
 End Sub
 
@@ -1300,18 +1324,47 @@ Private Sub Timer_c6kRead_Timer()
 'Call Fast Status
 Call c6kOps.updFastStatus
 
-If c6kOps.getJoyActive And Not c6kOps.chkE_Stop() Then
-
-    'Run JoyRun function if active
-    c6kOps.runJoy ("Free")
-    
-End If
+    '-- Run Joystick if active
+        If c6kOps.getJoyActive And Not c6kOps.chkE_Stop() Then
+        
+            'Run JoyRun function, and if it returns true,
+            If c6kOps.runJoy("Free") Then
+        
+                'Set Joystick Status Message
+                Var_Label_Joystick_Status.Caption = "Joystick" & Chr(13) & "Enabled:" & Chr(13) & Chr(13) & c6kOps.getJoyStr() & Chr(13) & "Mode"
+                Var_Label_Joystick_Status.Visible = True
+        
+            Else
+                'If the joystick becomes inactive hide label
+                Var_Label_Joystick_Status.Visible = False
+        
+            End If
+        
+        '--Input State Debug - Uncomment these two lines to enter input debug mode
+        'Var_Label_Joystick_Status.Caption = c6kOps.getInputState
+        'Var_Label_Joystick_Status.Visible = True
+            
+        End If
 
 'Set input text to red if input is active
 Call setInputText(c6kOps.getInputState())
 Call setOutputs(c6kOps.getOutputState())
 
+Call c6kOps.updDro
+
 'Reset Fast Status Update Flag
 Call c6kOps.resetFSupd
+
+End Sub
+
+Private Sub Topbar_Joystick_Click()
+
+' Toggle joystick active boolean
+If Not c6kOps.getJoyActive Then
+    c6kOps.runJoy ("Enable")
+Else
+    c6kOps.runJoy ("Disable")
+    Var_Label_Joystick_Status.Visible = False
+End If
 
 End Sub
