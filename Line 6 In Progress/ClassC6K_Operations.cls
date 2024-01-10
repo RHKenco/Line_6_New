@@ -62,7 +62,6 @@ Option Explicit
 
 
 '-- Constants for readability of Inputs
-
 Private Const inEstop As Long = Input20
 Private Const inH2O As Long = Input19
 
@@ -74,16 +73,29 @@ Private Const joySelect As Long = Input22
 Private Const joyRelease As Long = Input23
 Private Const joyToggle As Long = Input24
 
-'Constants for Water Flow Counter
-Private Const H2Ocount As Integer = 5   'Time between loss of signal and stopping machine, in seconds
-Private Const H2Oconst As Integer = 20  'FSM Period in Hz
 
-'-- Class Private Variables
-
-Private FSinputState As Long      'Variable to store FastStatus input Data
-Private FSoutputState As Long     'Variable to store FastStatus output Data
+'-- c6k Constants and Variables
+Private FSinputState As Long        'Variable to store FastStatus input Data
+Private FSoutputState As Long       'Variable to store FastStatus output Data
 Private fsUpToDate As Boolean       'Boolean flag to limit FastStatus Calls - Reset in FSM
 
+Private posCal(6) As Integer                'Array to store position calibration data. These following constant values will be stored upon initialization,
+Private Const posCalX = 26550 'counts/in    '       and will convert positional data from counts to appropriate units for each axis
+Private Const posCalY = 62500 'counts/in
+Private Const posCalZ = 39683 'counts/in
+Private Const posCalZa = 510204 'counts/in
+Private Const posCalO = 62500 'counts/in?
+Private Const posCalR = 62500 'counts/degree?
+
+Private revCal(6) As Integer                'Array to store revolution calibration data. These following constant values will be stored upon initialization,
+Private Const revCalX = 25000 'rev          '       and will convert motor revolutions to appropriate units for each axis. Current numbers are simple conversion to revolutions
+Private Const revCalY = 25000 'rev
+Private Const revCalZ = 25000 'rev
+Private Const revCalZa = 25000 'rev
+Private Const revCalO = 25000 'rev
+Private Const revalR = 25000 'rev
+
+'-- Joystick Constants and variables
 Private joyActive As Boolean        'Boolean to determine if the joystick is active
 Private joyStr As String            'String to describe current joystick state for Form Display
 Private joyBtnState As Integer      'Integer containing state of joystick buttons
@@ -100,13 +112,25 @@ Private joyJogState(6) As Integer   'Array of 7 single Numbers (of which index 0
 Private joyMCx As Boolean           'Bool to store state of continuous motion X joy
 Private joyMCx As Boolean           'Bool to store state of continuous motion Y joy
 
+'-- Critical input booleans and related variables
 Private setE_Stop As Boolean    'Local E-stop variable
+
 Private chkH2O As Boolean       'Local Water Sensor Boolean
 Private countH2O As Integer     'Water Flow Counter
+Private Const H2Ocount As Integer = 5   'Time between loss of signal and stopping machine, in seconds
+Private Const H2Oconst As Integer = 20  'FSM Period in Hz
 
+
+'-- Pass Type & Definition Variables
 Private passWidth As Single     'Pass Width variable
+
 Private passType As String
 
+Private augerPitch As Double        'Auger Pitch & Angle
+Private augerAngle As Double
+Private augerCoil As String
+
+'-- Pass Speed Calculation Variables & Constants
 Private passSpeed(3) As Single      'Array to store pass speeds at different pass witdths
 Private Const passSpeed0 As Single = 0.125      ' - Defaults
 Private Const passSpeed1 As Single = 0.119
@@ -135,10 +159,6 @@ Private userSpeedMult As Single         'Speed Multiplier to be applied to speed
 Private Const speedMultInc = 0.05       'Constant for incrementing the speedmult increase
 Private userSpeedBoost As Single        'Speed Boost Multiplier for joystick adjustment of multi-axis movements
 Private Const userSpeedBoostMult = 1.5  'Constant for speed boost for multi-axis joystick operations
-
-Private augerPitch As Double        'Auger Pitch & Angle
-Private augerAngle As Double
-Private augerCoil As String
 
 
 Private Const speedSetupPath As String = "F:\apps\exe\line 6\files\speedSetup6.asc"
@@ -353,6 +373,41 @@ End Sub
 '-- bootDrives() - boots up drives in c6k ------------------------------------------------------------------------------
 Public Sub bootDrives()
 
+' -- Load drive speed values
+
+Dim tempPosCal As String
+Dim tempRevCal As String
+
+
+'Store defaults in calibration array
+posCal(1) = posCalX
+posCal(6) = posCalY
+posCal(2) = posCalZ
+posCal(3) = posCalZa
+posCal(4) = posCalO
+posCal(5) = posCalR
+
+revCal(1) = revCalX
+revCal(6) = revCalY
+revCal(2) = revCalZ
+revCal(3) = revCalZa
+revCal(4) = revCalO
+revCal(5) = revCalR
+
+'Generate strings for c6k communication
+
+For i = 1 To 6
+    
+    If i = 1 Then
+        tempPosCal = CStr(posCal(i))
+        tempRevCal = CStr(velCal(i))
+    Else
+        tempPosCal = tempPosCal & "," & CStr(posCal(i))
+        tempRevCal = tempRevCal & "," & CStr(velCal(i))
+
+Next i
+
+
 ' -- Set Up & Enable Drives
 
 'Set stop behavior - When stop command recieved, will decelerate to stop and clear command buffer
@@ -363,7 +418,7 @@ c6k.Write ("DRIVE0,0,0,0,0,0,0,0:CMDDIR000000:DRFEN00000000" & Chr$(13))
 
 'Set Up Axis Defititions - Sets drives to Stepper mode, Sets Drive Resolution to 250000, Sets Distance Scales, Sets Acceleration Scale for All Axes,
 '  Sets Velocity Scale for All Axes, Enables Scale Factors, Disables End-of-Travel Limit Input Checking, Sets Hard Limit Deceleration to 100
-c6k.Write "AXSDEF00000000:@DRES250000:SCLD26550,39683,510204,,62500,62500,62500:@SCLA25000:@SCLV25000:SCALE1:LH0,0,0,0,0,0,0,0:LHAD100,100,100,100,100,100,100,100:" + Chr$(13)
+c6k.Write "AXSDEF00000000:@DRES250000:SCLD" & tempPosCal & ":@SCLA" & tempRevCal & ":@SCLV" & tempRevCal & ":SCALE1:LH0,0,0,0,0,0,0,0:LHAD100,100,100,100,100,100,100,100:" + Chr$(13)
 
 'Set Up Encoders - Set Encodor Polarity, Set Encoder Resolution, Set to Capture Encoder Position rather than Commanded Position
 c6k.Write ("ENCPOL11011111:ERES4000,4000,4000,4000,4000,4000,4000,4000:ENCCNT11111111:" & Chr$(13))
@@ -1266,49 +1321,19 @@ End Function
 
 Public Function updDro()
 
-'-- Set calibration Constants
-Const Xcal = 26550
-Const XcalV = 660
-
-Const Ycal = 26550
-
-Const Zcal = 500000
-
-Const Ocal = 25000
-
-Const Rcal = 4432
-
-
+'If fast status is not up to date, call fast status
 If Not fsUpToDate Then
     Call updFastStatus
 End If
 
+
+'For each drive axis, pull position from fast status data and display on maintenance DRO
 Dim temp As Double
                 
-XMOTOR = (fsinfo.MotorPos(1))
-    temp = Val(XMOTOR)
-    frmMaintenance.Text_Pop_DRO(1 - 1).Text = Format((temp / Xcal), "0.000")
-    
-YMOTOR = (fsinfo.MotorPos(6))
-    temp = Val(YMOTOR)
-    frmMaintenance.Text_Pop_DRO(6 - 1).Text = Format((temp / Ycal), "0.000")
-    
-ZMOTOR = (fsinfo.MotorPos(2))
-    temp = Val(ZMOTOR)
-    frmMaintenance.Text_Pop_DRO(2 - 1).Text = Format((temp / Zcal), "0.000")
-
-ZaMOTOR = (fsinfo.MotorPos(3))
-    temp = Val(ZaMOTOR)
-    frmMaintenance.Text_Pop_DRO(3 - 1).Text = Format((temp / Zcal), "0.000")
-    
-OSSMOTOR = (fsinfo.MotorPos(4))
-    temp = Val(OSSMOTOR)
-    frmMaintenance.Text_Pop_DRO(4 - 1).Text = Format((temp / Ocal), "0.000")
-            
-ROTATION = (fsinfo.MotorPos(5))
-    temp = Val(ROTATION)
-    frmMaintenance.Text_Pop_DRO(5 - 1).Text = Format(((temp / Rcal)), "0.000")
-
+For i = 1 To 6
+    temp = Val(fsinfo.MotorPos(i))
+    frmMaintenance.Text_Pop_DRO(i - 1).Text = Format((temp / posCal(i)), "0.000")
+Next i
     
 End Function
 

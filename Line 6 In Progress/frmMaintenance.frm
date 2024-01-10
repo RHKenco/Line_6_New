@@ -5,10 +5,10 @@ Begin VB.Form frmMaintenance
    ClientHeight    =   5775
    ClientLeft      =   165
    ClientTop       =   810
-   ClientWidth     =   8265
+   ClientWidth     =   10740
    LinkTopic       =   "Form6"
    ScaleHeight     =   5775
-   ScaleWidth      =   8265
+   ScaleWidth      =   10740
    StartUpPosition =   3  'Windows Default
    Begin VB.Timer Timer_c6kRead 
       Interval        =   100
@@ -31,7 +31,163 @@ Begin VB.Form frmMaintenance
       Left            =   5040
       TabIndex        =   54
       Top             =   600
-      Width           =   3015
+      Width           =   4455
+      Begin VB.CommandButton Button_Move_Axis 
+         Caption         =   "GoY"
+         Height          =   255
+         Index           =   5
+         Left            =   2880
+         TabIndex        =   87
+         Top             =   1200
+         Width           =   735
+      End
+      Begin VB.CommandButton Button_Move_Axis 
+         Caption         =   "Go R"
+         Height          =   255
+         Index           =   4
+         Left            =   2880
+         TabIndex        =   86
+         Top             =   3600
+         Width           =   735
+      End
+      Begin VB.CommandButton Button_Move_Axis 
+         Caption         =   "Go O"
+         Height          =   255
+         Index           =   3
+         Left            =   2880
+         TabIndex        =   85
+         Top             =   3000
+         Width           =   735
+      End
+      Begin VB.CommandButton Button_Move_Axis 
+         Caption         =   "Go Za"
+         Height          =   255
+         Index           =   2
+         Left            =   2880
+         TabIndex        =   84
+         Top             =   2400
+         Width           =   735
+      End
+      Begin VB.CommandButton Button_Move_Axis 
+         Caption         =   "Go Z"
+         Height          =   255
+         Index           =   1
+         Left            =   2880
+         TabIndex        =   83
+         Top             =   1800
+         Width           =   735
+      End
+      Begin VB.CommandButton Button_Move_Axis 
+         Caption         =   "Go X"
+         Height          =   255
+         Index           =   0
+         Left            =   2880
+         TabIndex        =   82
+         Top             =   600
+         Width           =   735
+      End
+      Begin VB.TextBox Text_In_Des 
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   285
+         Index           =   5
+         Left            =   2160
+         TabIndex        =   81
+         Top             =   1200
+         Width           =   615
+      End
+      Begin VB.TextBox Text_In_Des 
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   285
+         Index           =   4
+         Left            =   2160
+         TabIndex        =   80
+         Top             =   3600
+         Width           =   615
+      End
+      Begin VB.TextBox Text_In_Des 
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   285
+         Index           =   3
+         Left            =   2160
+         TabIndex        =   79
+         Top             =   3000
+         Width           =   615
+      End
+      Begin VB.TextBox Text_In_Des 
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   285
+         Index           =   2
+         Left            =   2160
+         TabIndex        =   78
+         Top             =   2400
+         Width           =   615
+      End
+      Begin VB.TextBox Text_In_Des 
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   285
+         Index           =   1
+         Left            =   2160
+         TabIndex        =   77
+         Top             =   1800
+         Width           =   615
+      End
+      Begin VB.TextBox Text_In_Des 
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   285
+         Index           =   0
+         Left            =   2160
+         TabIndex        =   76
+         Top             =   600
+         Width           =   615
+      End
       Begin VB.TextBox Text_Pop_DRO 
          Alignment       =   1  'Right Justify
          BeginProperty Font 
@@ -146,6 +302,126 @@ Begin VB.Form frmMaintenance
          Top             =   600
          Width           =   855
       End
+      Begin VB.Label Label_Drive_Units 
+         BackColor       =   &H00C00000&
+         Caption         =   "in"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   5
+         Left            =   1560
+         TabIndex        =   75
+         Top             =   1200
+         Width           =   375
+      End
+      Begin VB.Label Label_Drive_Units 
+         BackColor       =   &H00C00000&
+         Caption         =   "deg"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   4
+         Left            =   1560
+         TabIndex        =   74
+         Top             =   3600
+         Width           =   495
+      End
+      Begin VB.Label Label_Drive_Units 
+         BackColor       =   &H00C00000&
+         Caption         =   "in"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   3
+         Left            =   1560
+         TabIndex        =   73
+         Top             =   3000
+         Width           =   375
+      End
+      Begin VB.Label Label_Drive_Units 
+         BackColor       =   &H00C00000&
+         Caption         =   "in"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   2
+         Left            =   1560
+         TabIndex        =   72
+         Top             =   2400
+         Width           =   375
+      End
+      Begin VB.Label Label_Drive_Units 
+         BackColor       =   &H00C00000&
+         Caption         =   "in"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   1
+         Left            =   1560
+         TabIndex        =   71
+         Top             =   1800
+         Width           =   375
+      End
+      Begin VB.Label Label_Drive_Units 
+         BackColor       =   &H00C00000&
+         Caption         =   "in"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   0
+         Left            =   1560
+         TabIndex        =   70
+         Top             =   600
+         Width           =   375
+      End
       Begin VB.Label Var_Label_Joystick_Status 
          Alignment       =   2  'Center
          BackColor       =   &H00C00000&
@@ -160,12 +436,12 @@ Begin VB.Form frmMaintenance
             Strikethrough   =   0   'False
          EndProperty
          ForeColor       =   &H8000000E&
-         Height          =   1575
-         Left            =   1560
+         Height          =   735
+         Left            =   1440
          TabIndex        =   69
-         Top             =   600
+         Top             =   4080
          Visible         =   0   'False
-         Width           =   1335
+         Width           =   2895
       End
       Begin VB.Label Label_Drive_Num 
          BackColor       =   &H00C00000&
@@ -1208,9 +1484,9 @@ Begin VB.Form frmMaintenance
          Width           =   1575
       End
    End
-   Begin VB.Label Label1 
+   Begin VB.Label Label_Drives 
       BackColor       =   &H00C00000&
-      Caption         =   "        Drives                                       "
+      Caption         =   "        Drives                                              "
       BeginProperty Font 
          Name            =   "Arial"
          Size            =   14.25
@@ -1225,11 +1501,11 @@ Begin VB.Form frmMaintenance
       Left            =   5040
       TabIndex        =   53
       Top             =   240
-      Width           =   3015
+      Width           =   4455
    End
    Begin VB.Label Label_IO_Section 
       BackColor       =   &H00C00000&
-      Caption         =   "        I/O                                       "
+      Caption         =   "        I/O                                                  "
       BeginProperty Font 
          Name            =   "Arial"
          Size            =   14.25
@@ -1255,6 +1531,39 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+Private Sub Button_Move_Axis_Click(Index As Integer)
+
+'Generate string of values for 6k with desired distance & GO command in correct position
+Dim tempD As String
+Dim tempGO As String
+
+For i = 0 To 5
+
+    If i = 1 Then
+        If i = Index Then
+            tempD = Format(CDbl(Text_In_Des(i).Text), "0.000")
+            tempGO = "1"
+        Else
+            tempD = "0"
+            tempGO = "0"
+        End If
+    Else
+        If i = Index Then
+            tempD = tempD & "," & Format(CDbl(Text_In_Des(i).Text), "0.000")
+            tempGO = tempGO & "1"
+        Else
+            tempD = tempD & ",0"
+            tempGO = "0"
+        End If
+    End If
+
+Next i
+
+'Instruct 6k
+c6k.Write ("MC0:V1,1,1,1,1,1:D" & tempD & ":GO" & tempGO & Chr(13))
+
+End Sub
 
 Private Sub Form_Load()
     
@@ -1292,6 +1601,10 @@ Loop Until i > 14
 
 End Sub
 
+Private Sub Label_Drive_Units_Click(Index As Integer)
+
+End Sub
+
 Private Sub setOutputs(currentOutputState As Long)
 
 Dim outputIndex As Integer
@@ -1309,15 +1622,7 @@ For Each i In Check_Output
         Label_Block_Pin(i).ForeColor = (&HCF&)
         
     ElseIf Not (currentOutputState And (2 ^ outputIndex)) And Check_Output(i) Then
-        'Deactivate Output
-        Call c6kOps.setOutputNum((outputIndex + 1), False)
-        'Set text color to white
-        Label_Block_Pin(i).ForeColor = (&H8000000E)
-    End If
 
-Next i
-
-End Sub
 
 Private Sub Timer_c6kRead_Timer()
 
