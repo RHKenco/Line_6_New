@@ -126,6 +126,7 @@ Private passWidth As Single     'Pass Width variable
 
 Private passType As String
 
+Private augerSet As Boolean         'Auger Active Bool
 Private augerPitch As Double        'Auger Pitch & Angle
 Private augerAngle As Double
 Private augerCoil As String
@@ -184,6 +185,36 @@ setE_Stop = False
 passType = "Blade"
 
 Call loadPassSpeed
+
+End Sub
+
+Public Sub setPassWidth()
+
+On Error GoTo ErrHand
+
+Dim tempPassW As String
+
+tempPassW = frmLine6.Text_Enter_Pass_Width.Text
+
+If tempPassW = "" Then
+    frmLine6.Text_Enter_Pass_Width.Text = "1.000"
+    passWidth = 1#
+Else
+    passWidth = CSng(tempPassW)
+    
+    'Apply limits to pass width
+    If passWidth < 0.875 Then
+        passWidth = 0.875
+        frmLine6.Text_Enter_Pass_Width.Text = "0.875"
+    ElseIf passWidth > 2.5 Then
+        passWidth = 2.5
+        frmLine6.Text_Enter_Pass_Width.Text = "2.500"
+    End If
+End If
+
+ErrHand:
+    MsgBox "Error in pass width setting - String likely could not be entered as numerical value"
+Resume
 
 End Sub
 
@@ -254,10 +285,10 @@ Public Sub dispPassSpeed()
 Dim i As Integer
 For i = 0 To 3
 
-    frmCalibration.Text_Pass_Speed(i) = passSpeed(i)
-    frmCalibration.Text_Osc_Speed(i) = oscSpeed(i)
+    frmCalibrate.Text_Pass_Speed(i) = passSpeed(i)
+    frmCalibrate.Text_Osc_Speed(i) = oscSpeed(i)
     
-    If i <> 3 Then frmCalibration.Text_Pass_Thrsh(i) = passThreshold(i)
+    If i <> 3 Then frmCalibrate.Text_Pass_Thrsh(i) = passThreshold(i)
 
 Next i
 
@@ -311,9 +342,10 @@ Else
     MsgBox ("Invalid Auger Coil Direction")
 End If
 
+augerSet = True
 
 'Return auger angle
-setAugerParam = roundToString(augerAngle, 2)
+setAugerParam = roundToString((augerAngle * 180 / PI), 2)
 
 End Function
 
@@ -321,10 +353,16 @@ Public Sub clearAugerParam()
     augerAngle = 0
     augerPitch = 0
     
+    augerSet = False
+    
 End Sub
 
 Public Function getAugerDir() As String
-    getAugerDir = augerCoil
+    If augerSet Then getAugerDir = augerCoil Else MsgBox "Auger not setup!"
+End Function
+
+Public Function getAugerSet() As Boolean
+    getAugerSet = augerSet
 End Function
 
 '============================================================ c6k Generic =================================================================================================
@@ -358,7 +396,7 @@ End Function
 
 Public Sub setPassType()
 
-If augerAngle = 0 Then
+If augerSet = False Then
     passType = "Blade"
 Else
     If frmLine6.Option_Auger_Direction(0).value = True Then
@@ -366,6 +404,7 @@ Else
     Else
         passType = "Auger Edge"
     End If
+End If
 
 End Sub
 

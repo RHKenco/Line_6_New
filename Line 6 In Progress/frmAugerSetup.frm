@@ -102,6 +102,7 @@ Begin VB.Form frmAugerSetup
          Left            =   120
          TabIndex        =   7
          Top             =   240
+         Value           =   -1  'True
          Width           =   1935
       End
    End
@@ -285,11 +286,7 @@ Text_Pop_Auger_Angle.Text = tempAngle
 Label_Auger_Ready.Visible = True
 Label_Auger_Ready.Refresh
 
-frmLine6.Button_Set_Auger.Enabled = False
-frmLine6.Button_Set_Auger.Visible = False
-frmLine6.Button_Set_Auger.Refresh
-
-frmLine6.Button_Clear_Auger.Enabled = True
-frmLine6.Button_Clear_Auger.Refresh
+Call btnState("Active Auger")
+Call statusMsg("Active Auger", "")
 
 End Sub

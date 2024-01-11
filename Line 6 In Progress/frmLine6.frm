@@ -21,11 +21,11 @@ Begin VB.Form frmLine6
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   975
-      Left            =   7680
+      Height          =   1095
+      Left            =   5400
       TabIndex        =   26
-      Top             =   5160
-      Width           =   1575
+      Top             =   5040
+      Width           =   2175
    End
    Begin VB.OptionButton Option_Auger_Direction 
       BackColor       =   &H00C00000&
@@ -82,10 +82,20 @@ Begin VB.Form frmLine6
          Left            =   120
          TabIndex        =   21
          Top             =   240
+         Value           =   -1  'True
          Width           =   1095
       End
    End
    Begin VB.TextBox Text_Enter_Pass_Width 
+      BeginProperty DataFormat 
+         Type            =   0
+         Format          =   "0.000"
+         HaveTrueFalseNull=   0
+         FirstDayOfWeek  =   0
+         FirstWeekOfYear =   0
+         LCID            =   1033
+         SubFormatType   =   0
+      EndProperty
       Height          =   375
       Left            =   5400
       TabIndex        =   18
@@ -174,6 +184,7 @@ Begin VB.Form frmLine6
       EndProperty
       Height          =   375
       Left            =   1920
+      Locked          =   -1  'True
       TabIndex        =   10
       Top             =   3720
       Width           =   1575
@@ -190,6 +201,7 @@ Begin VB.Form frmLine6
       EndProperty
       Height          =   375
       Left            =   600
+      Locked          =   -1  'True
       TabIndex        =   8
       Top             =   2160
       Width           =   2895
@@ -235,6 +247,7 @@ Begin VB.Form frmLine6
       EndProperty
       Height          =   375
       Left            =   600
+      Locked          =   -1  'True
       TabIndex        =   5
       Top             =   3720
       Width           =   975
@@ -251,6 +264,7 @@ Begin VB.Form frmLine6
       EndProperty
       Height          =   375
       Left            =   600
+      Locked          =   -1  'True
       TabIndex        =   3
       Top             =   2880
       Width           =   2895
@@ -535,11 +549,26 @@ Call c6kOps.setPassType
 Button_Set_Auger.Visible = True
 Button_Set_Auger.Refresh
 
+Call statusMsg("Active Blade", "")
+
+End Sub
+
+Private Sub Button_Fin_Click()
+'finish Punch
+Call woMgr.finishWO
+
 End Sub
 
 Private Sub Button_Go_Click()
 
 fsmMain.State = 2
+
+End Sub
+
+Private Sub Button_NF_Click()
+
+'NF Punch
+Call woMgr.notfinishWO
 
 End Sub
 
@@ -554,9 +583,6 @@ Private Sub Button_Start_Click()
 
 'Start Punch
 Call woMgr.startWO
-
-'Enable Timeout Timer
-Call woMgr.woTimer("Start")
     
 End Sub
 
@@ -566,6 +592,30 @@ If Not woMgr.isWOactive() Then
     Call woMgr.loadWO
 Else
    Call woMgr.clearWO
+End If
+
+End Sub
+
+Private Sub Text_Enter_Pass_Width_Change()
+
+Static pwOldInput As Single
+Dim pwNewInput As String
+
+pwNewInput = Text_Enter_Pass_Width.Text
+If IsNumeric(pwNewInput) Then
+    pwOldInput = CSng(pwNewInput)
+ElseIf pwNewInput = "" Then
+    Exit Sub
+Else
+    Text_Enter_Pass_Width.Text = CStr(pwOldInput)
+End If
+
+End Sub
+
+Private Sub Text_Enter_WO_KeyPress(KeyAscii As Integer)
+
+If KeyAscii = (13) Then
+Call Button_WO_Enter_Clear_Click
 End If
 
 End Sub
@@ -600,15 +650,14 @@ Var_Label_WO_Active.Tag = "No Active Work Order"
 Var_Label_WO_Active.Caption = Var_Label_WO_Active.Tag
 Var_Label_WO_Active.Visible = True
 
-Var_Label_System_Status = "Ready to Run Blade"
-Var_Label_System_Status.Visible = False
+Call statusMsg("Inactive", "")
 
 Var_Label_Joystick_Status.Visible = False
 
 Label_Estop.Visible = False
 
 'Initialize Form Buttons
-woMgr.btnState ("Inactive")
+btnState ("Inactive")
 
 '--
 Call c6kOps.Enable
@@ -723,7 +772,7 @@ If temp = 1 Then
     c6k.Write ("!RESET" & Chr$(13))
     
     'Unload the main form, as the reset command will disconnect ethernet
-    frmLine6.Unload
+    Unload Me
 End If
     
 End Sub

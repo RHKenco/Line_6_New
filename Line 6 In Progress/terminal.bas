@@ -134,7 +134,7 @@ Public Xoffset1 As Single
 Public Yoffset1 As Single
 Public Xoffset2 As Single
 Public Yoffset2 As Single
-Public passWidth As Single
+'Public passWidth As Single
 Public CalTig_X As Single
 Public CalTig_Y As Single
 Public XSpeed As String

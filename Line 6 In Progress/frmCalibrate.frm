@@ -316,6 +316,8 @@ Private Sub Button_Default_Click()
 
 Call c6kOps.defaultPassSpeed
 
+Call c6kOps.dispPassSpeed
+
 End Sub
 
 Private Sub Button_Load_Click()

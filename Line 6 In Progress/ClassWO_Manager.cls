@@ -73,6 +73,7 @@ Private Const cHrRate As Single = 0.5           '                       - ?
 
 Private TTime!
 Private AvgTime!
+Private woTCcostSQ
 
 Private CONVCOST!
 Private UNITCOST!
@@ -128,11 +129,10 @@ If frmLine6.Text_Enter_WO.Text <> frmLine6.Text_Enter_WO.Tag And frmLine6.Text_E
         frmLine6.Var_Label_WO_Active.Caption = "Work Order " + woNum + " Active"
         frmLine6.Var_Label_WO_Active.Visible = True
         
-        frmLine6.Var_Label_System_Status.Caption = "Ready to Run Blade"
-        frmLine6.Var_Label_System_Status.Visible = True
+        Call statusMsg("Active Blade", "")
         
         'Update Buttons
-        btnState ("Active")
+        Call btnState("Active Blade")
         
         frmLine6.Refresh
         
@@ -167,7 +167,7 @@ Public Sub clearWO()
     frmLine6.Var_Label_WO_Active.Caption = frmLine6.Var_Label_WO_Active.Tag
     frmLine6.Var_Label_WO_Active.Visible = True
     
-    frmLine6.Var_Label_System_Status.Visible = False
+    Call statusMsg("Inactive", "")
     
     'Clear Stored FORM.ASC Variables
     woNum = ""
@@ -179,6 +179,9 @@ Public Sub clearWO()
     woDate = ""
     woDWGno = ""
     woActive = False
+    
+    'Clear Auger Data
+    Call c6kOps.clearAugerParam
     
     'Update Buttons
     btnState ("Inactive")
@@ -234,90 +237,7 @@ End If
 
 End Sub
 
-'-- btnState() - Function to handle visibility and enabling of Enter, Go, Start, N/F, and Finish Buttons -------------------------------------
-'   - Inputs: btn_State - string containing desired button state
-Public Sub btnState(btn_state As String)
-    
-    If btn_state = "Inactive" Then
-        
-        frmLine6.Button_WO_Enter_Clear.Enabled = True
-        frmLine6.Button_WO_Enter_Clear.Caption = "Enter"
-        frmLine6.Text_Enter_WO.Locked = False
-        
-        frmLine6.Button_Start.Enabled = False
-        frmLine6.Button_Start.Visible = True
-        frmLine6.Button_NF.Enabled = False
-        frmLine6.Button_NF.Visible = False
-        frmLine6.Button_Fin.Enabled = False
-        frmLine6.Button_Fin.Visible = False
-        
-        frmLine6.Button_Go.Enabled = False
-        frmLine6.Button_Go.Visible = True
-        
-    ElseIf btn_state = "Active" Then
-            
-        frmLine6.Button_WO_Enter_Clear.Enabled = True
-        frmLine6.Button_WO_Enter_Clear.Caption = "Clear"
-        frmLine6.Text_Enter_WO.Locked = True
-                    
-        frmLine6.Button_Start.Enabled = True
-        frmLine6.Button_Start.Visible = True
-        frmLine6.Button_NF.Enabled = False
-        frmLine6.Button_NF.Visible = False
-        frmLine6.Button_Fin.Enabled = False
-        frmLine6.Button_Fin.Visible = False
-        
-        frmLine6.Button_Go.Enabled = False
-        
-    ElseIf btn_state = "Started" Then
-    
-        frmLine6.Button_WO_Enter_Clear.Enabled = False
-            
-        frmLine6.Button_Start.Enabled = False
-        frmLine6.Button_Start.Visible = False
-        frmLine6.Button_NF.Enabled = True
-        frmLine6.Button_NF.Visible = True
-        frmLine6.Button_Fin.Enabled = True
-        frmLine6.Button_Fin.Visible = True
-        
-        frmLine6.Button_Go.Enabled = True
-        
-    ElseIf btn_state = "Running" Then
-    
-        frmLine6.Button_WO_Enter_Clear.Enabled = False
-            
-        frmLine6.Button_Start.Enabled = False
-        frmLine6.Button_Start.Visible = False
-        frmLine6.Button_NF.Enabled = False
-        frmLine6.Button_NF.Visible = True
-        frmLine6.Button_Fin.Enabled = False
-        frmLine6.Button_Fin.Visible = True
-        
-        frmLine6.Button_Go.Enabled = False
-        
-    ElseIf btn_state = "Returned" Then
-    
-        frmLine6.Button_WO_Enter_Clear.Enabled = False
-            
-        frmLine6.Button_Start.Enabled = False
-        frmLine6.Button_Start.Visible = False
-        frmLine6.Button_NF.Enabled = True
-        frmLine6.Button_NF.Visible = True
-        frmLine6.Button_Fin.Enabled = True
-        frmLine6.Button_Fin.Visible = True
-        
-        frmLine6.Button_Go.Enabled = False
-        
-    Else
-        MsgBox ("Error in Button State Function")
-        
-        Exit Sub
-        
-    End If
-    
-    frmLine6.Refresh
 
-End Sub
 
 Public Sub startWO()
     Call updTemp("Start")
@@ -335,8 +255,11 @@ Public Sub notfinishWO()
     Call writeData("N/F")
     Call btnState("Active")
     
-    frmLine6.Var_Label_System_Status.Caption = "N/F Pressed - Press Start to Resume"
-    frmLine6.Var_Label_System_Status.Refresh
+    'Stop Timeout Timer
+    Call woTimer("Reset")
+    woStarted = False
+    
+    Call statusMsg("Not-Finish", "")
 
 End Sub
 
@@ -344,19 +267,18 @@ Public Sub finishWO()
     Call updTemp("End")
     Call writeData("Finish")
     Call btnState("Active")
+
+    'Stop Timeout Timer
+    Call woTimer("Reset")
+    woStarted = False
     
-    frmLine6.Var_Label_System_Status.Caption = "N/F Pressed - Press Start to Resume"
-    frmLine6.Var_Label_System_Status.Refresh
-
-
 End Sub
 
 Private Sub timeoutWO()
     Call writeData("TimeOut")
     Call btnState("Active")
     
-    frmLine6.Var_Label_System_Status.Caption = "Finished - Press Start to Run Adtl Parts"
-    frmLine6.Var_Label_System_Status.Refresh
+    Call systemMsg("Timeout")
 
 End Sub
 
@@ -431,7 +353,7 @@ Select Case Punch
         
         Close #1
 
-    Case "Finished"
+    Case "Finish"
         
         'Prompt User for Quantity Finished
         Dim FinishedQty As Integer
@@ -442,7 +364,7 @@ Select Case Punch
             Exit Sub
         End If
         
-        Call runCalcs
+        Call runCalcs(FinishedQty)
         
         'Sta$ appears to indicate the line on which a part was impregnated
         'Alternative values could occur if the temp file comment is set to specific values, but the comment is never set in this program
@@ -471,6 +393,9 @@ Select Case Punch
         Open woGoalPath For Append As #1
         Write #1, woNum, PartNumber, woTqty, FinishedQty, Sta$, Date$, woPrice, woTCinch, STLCOST!, AvgTime!
         Close #1
+        
+        'Write status message to Form
+        Call statusMsg("Finish", CStr(FinishedQty))
         
     Case Else
         MsgBox ("Error in Punch Handler")
@@ -574,28 +499,28 @@ SaveData:
 End Sub
 
 ' -- runCalcs() - Runs calculations necessary to push WO data out when finish is pressed.
-Private Sub runCalcs()
+Private Sub runCalcs(finQt As Integer)
 
 'Unused Value - See writeData function for more details.
 Dim STLCOST!
 STLCOST! = 0
 
 Let TTime! = woTotalTime / 3600                                 'Total time is in seconds, divide by 3600 to get to hours.
-Let AvgTime! = Format$((TTime! / FinishedQty), "CURRENCY")
-Let cTCcostSQ = Format$((cTCcostSQ * Tc!), "CURRENCY")
+Let AvgTime! = Format$((TTime! / finQt), "CURRENCY")
+Let woTCcostSQ = Format$((cTCcostSQ * woTCinch), "CURRENCY")
 
 
 Let CONVCOST! = Format$((cHrCost * AvgTime! * cHrRate), "CURRENCY")
 Let UNITCOST! = Format$((cTCcostSQ + CONVCOST! + STLCOST!), "CURRENCY")
-Let UNITPROFIT! = Format$((PRICE! - UNITCOST!), "CURRENCY")
-Let GROSSPROFIT! = Format$(((UNITPROFIT! / PRICE!) * 100), "CURRENCY")
-Let TSALES! = FinishedQty * PRICE!
-Let TTC! = Tc! * FinishedQty
-Let TTCCOST! = cTCcostSQ * FinishedQty
-Let TSTLCOST! = STLCOST! * FinishedQty
-Let TCONVCOST! = CONVCOST! * FinishedQty
-Let TOTALCOST! = UNITCOST! * FinishedQty
-Let TOTALPROFIT! = UNITPROFIT! * FinishedQty
+Let UNITPROFIT! = Format$((woPrice - UNITCOST!), "CURRENCY")
+Let GROSSPROFIT! = Format$(((UNITPROFIT! / woPrice) * 100), "CURRENCY")
+Let TSALES! = finQt * woPrice
+Let TTC! = Tc! * finQt
+Let TTCCOST! = cTCcostSQ * finQt
+Let TSTLCOST! = STLCOST! * finQt
+Let TCONVCOST! = CONVCOST! * finQt
+Let TOTALCOST! = UNITCOST! * finQt
+Let TOTALPROFIT! = UNITPROFIT! * finQt
 
 End Sub
 
@@ -609,26 +534,16 @@ Select Case timerCmd
             woCountdownTime = woCountdownTime - 1
             
             Dim tempMin As Integer
-            Dim tempSec As Ingeger
+            Dim tempSec As Integer
+            Dim tempStr As String
             tempMin = CInt((woCountdownTime / woTimeoutCalib) \ 60)
             tempSec = CInt((woCountdownTime / woTimeoutCalib) - tempMin * 60)
-
-            Dim Sec$
             
-            If tempSec <= 9 Then
-                Sec$ = "0" & CStr(tempMin)
-            Else
-                Sec$ = CStr(tempMin)
-            End If
+            tempStr = CStr(tempMin) & ":" & Format(tempSec, "00")
             
-            
-            frmLine6.Var_Label_System_Status.Caption = "Started - " & CStr(tempMin) & ":" & Sec$ & " Remaining"
-            frmLine6.Var_Label_System_Status.Refresh
+            Call statusMsg("Started", tempStr)
             
         Else
-            
-            frmLine6.Var_Label_System_Status.Caption = "Timed Out - Press Start When Ready"
-            frmLine6.Var_Label_System_Status.Refresh
             
             Call timeoutWO
             
