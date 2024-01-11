@@ -2173,7 +2173,7 @@ Label7.Refresh
 RunPass = False
 
 For i = 1 To 6
-    If Check1(i - 1).Value = 1 Then
+    If Check1(i - 1).value = 1 Then
         RunPass = True
     End If
 Next i
@@ -2213,7 +2213,7 @@ c6k.Write ("HOMBAC111011:HOMEDG111111:HOMDF000100:HOM,,,0,,:" & Chr$(13))
 c6k.Write ("WAIT(6AS=XXX1X):T.1:D,,,-2.375,,:GO0001000:" & Chr$(13))
     
 For i = 1 To 6
-    If Check1(i - 1).Value = 1 Then
+    If Check1(i - 1).value = 1 Then
         Yoffset1 = Format((Val(Text8(i).Text) + Val(Text9(i).Text * 0.5)), "####0.000") 'Y START POS
         Xoffset1 = Format(Val(Text7(i).Text - 2), "####0.000") 'X STOP -2"
         Yoffset2 = Format(Val(CalTig_Y) + (Val(Text8(i).Text) + Val(Text9(i).Text * 0.5)), "####0.000")
@@ -2462,11 +2462,11 @@ If Val(Text9(i).Text) > 1.99 Then XSpeed = XSpeed3: OssSpeed = OssSpeed3
 If Val(Text9(i).Text) > 2.49 Then XSpeed = XSpeed4: OssSpeed = OssSpeed4
 c6k.Write "VAR10=" + Str(XSpeed) + ":VAR11=" + Str(OssSpeed) + ":" & Chr$(13)
 c6k.Write "MC000000:MA110000:COMEXC1:" & Chr$(13)
-If Check1(i - 1).Value = 1 Then
+If Check1(i - 1).value = 1 Then
     If Val(Text9(i).Text) < 1 Then
-        PassWidth = 0
+        passWidth = 0
     Else
-        PassWidth = ((Val(Text9(i).Text) - 0.75))
+        passWidth = ((Val(Text9(i).Text) - 0.75))
     End If
     c6k.Write "VAR1=1" & Chr$(13)
     
@@ -2507,16 +2507,16 @@ If Check1(i - 1).Value = 1 Then
     'END OF CHECK1 PROGRAM
     
     'Jog on / Oss on / Move to Tab
-    c6k.Write "MC110000:VAR4=0:VAR5=0:VAR1=0:A,,,5,,:V,,,(VAR11),,:D,,,-" + Str$(PassWidth / 2) + ":GO000100:WAIT(MOV=bXXX0XX):REPEAT:D,,," + Str$(PassWidth) + ":GO000100:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XX):D,,,-" + Str$(PassWidth) + ":GO000100:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0" & Chr$(13)
+    c6k.Write "MC110000:VAR4=0:VAR5=0:VAR1=0:A,,,5,,:V,,,(VAR11),,:D,,,-" + Str$(passWidth / 2) + ":GO000100:WAIT(MOV=bXXX0XX):REPEAT:D,,," + Str$(passWidth) + ":GO000100:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XX):D,,,-" + Str$(passWidth) + ":GO000100:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0" & Chr$(13)
          
     'START TC AND X AXIS Move
     c6k.Write "JOG0:" & Chr$(13)
     c6k.Write "JOG0:MC100000:VAR4=0:VAR5=0:VAR3=1:1OUT.14-1:A20:V(VAR10):D-1:GO1:WAIT(1OUT.14=b1):PSET0,0,0,X,0,0:VAR1=1:INEN.2-1" & Chr$(13)
-    c6k.Write "VAR1=1:V,,,(VAR11),,:REPEAT:D,,," + Str$(PassWidth) + ":GO000100:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XX):D,,,-" + Str$(PassWidth) + ":GO000100:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0:" & Chr$(13)
+    c6k.Write "VAR1=1:V,,,(VAR11),,:REPEAT:D,,," + Str$(passWidth) + ":GO000100:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XX):D,,,-" + Str$(passWidth) + ":GO000100:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0:" & Chr$(13)
      
     'STOP X AXIS & FILL END / Jog
     c6k.Write "MC100000:V0:GO1:1OUT.25-1" & Chr$(13)
-    c6k.Write "VAR4=0:VAR5=0:VAR1=0:V,,,(VAR11),,:REPEAT:D,,," + Str$(PassWidth) + ":GO000100:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XX):D,,,-" + Str$(PassWidth) + ":GO000100:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0:INENXXXX0XX:" & Chr$(13)
+    c6k.Write "VAR4=0:VAR5=0:VAR1=0:V,,,(VAR11),,:REPEAT:D,,," + Str$(passWidth) + ":GO000100:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XX):D,,,-" + Str$(passWidth) + ":GO000100:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0:INENXXXX0XX:" & Chr$(13)
        
     ' FAST STATUS UPDATE ESTOP/WATER/MOTOR POS
     TESTWATERPUMP = 0
@@ -2714,7 +2714,7 @@ Label7.Refresh
 RunPass = False
 
 For i = 1 To 6
-    If Check1(i - 1).Value = 1 Then
+    If Check1(i - 1).value = 1 Then
         RunPass = True
     End If
 Next i
@@ -2754,7 +2754,7 @@ c6k.Write ("HOMBAC1110111:HOMEDG1111111:HOMDF0001000:HOM,,,0,,,:" & Chr$(13))
 c6k.Write ("WAIT(6AS=XXX1XXX):T.1:D,,,-2.375,,,:GO0001000:" & Chr$(13))
     
 For i = 1 To 6
-    If Check1(i - 1).Value = 1 Then
+    If Check1(i - 1).value = 1 Then
         Yoffset1 = Format((Val(Text8(i).Text) + Val(Text9(i).Text * 0.5)), "####0.000") 'Y START POS
         Xoffset1 = Format(Val(Text7(i).Text - 2), "####0.000") 'X STOP -2"
         Yoffset2 = Format(Val(CalTig_Y) + (Val(Text8(i).Text) + Val(Text9(i).Text * 0.5)), "####0.000")
@@ -3003,11 +3003,11 @@ If Val(Text9(i).Text) > 1.99 Then XSpeed = XSpeed3: OssSpeed = OssSpeed3
 If Val(Text9(i).Text) > 2.49 Then XSpeed = XSpeed4: OssSpeed = OssSpeed4
 c6k.Write "VAR10=" + Str(RotSpeed) + ":VAR11=" + Str(OssSpeed) + ":" & Chr$(13)
 c6k.Write "MC0000000:MA1100000:COMEXC1:" & Chr$(13)
-If Check1(i - 1).Value = 1 Then
+If Check1(i - 1).value = 1 Then
     If Val(Text9(i).Text) < 1 Then
-        PassWidth = 0
+        passWidth = 0
     Else
-        PassWidth = ((Val(Text9(i).Text) - 0.75))
+        passWidth = ((Val(Text9(i).Text) - 0.75))
     End If
     c6k.Write "VAR1=1" & Chr$(13)
     
@@ -3048,16 +3048,16 @@ If Check1(i - 1).Value = 1 Then
     'END OF CHECK1 PROGRAM
     
     'Jog on / Oss on / Move to Tab
-    c6k.Write "MC0100001:VAR4=0:VAR5=0:VAR1=0:A,,,5,,:V,,,(VAR11),,:D,,,-" + Str$(PassWidth / 2) + ":GO0001000:WAIT(MOV=bXXX0XXX):REPEAT:D,,," + Str$(PassWidth) + ":GO0001000:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):D,,,-" + Str$(PassWidth) + ":GO0001000:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0" & Chr$(13)
+    c6k.Write "MC0100001:VAR4=0:VAR5=0:VAR1=0:A,,,5,,:V,,,(VAR11),,:D,,,-" + Str$(passWidth / 2) + ":GO0001000:WAIT(MOV=bXXX0XXX):REPEAT:D,,," + Str$(passWidth) + ":GO0001000:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):D,,,-" + Str$(passWidth) + ":GO0001000:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0" & Chr$(13)
          
     'START TC AND X AXIS Move
     c6k.Write "JOG0:" & Chr$(13)
     c6k.Write "JOG0:MC0000001:VAR4=0:VAR5=0:VAR3=1:1OUT.14-1:A,,,,,,10:V,,,,,,(VAR10):D,,,,,,-1:GO,,,,,,1:WAIT(1OUT.14=b1):PSET0,0,0,X,0,0,0:VAR1=1:INEN.2-1" & Chr$(13)
-    c6k.Write "VAR1=1:V,,,(VAR11),,:REPEAT:D,,," + Str$(PassWidth) + ":GO0001000:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XXX):D,,,-" + Str$(PassWidth) + ":GO0001000:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XXX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0:" & Chr$(13)
+    c6k.Write "VAR1=1:V,,,(VAR11),,:REPEAT:D,,," + Str$(passWidth) + ":GO0001000:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XXX):D,,,-" + Str$(passWidth) + ":GO0001000:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XXX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0:" & Chr$(13)
      
     'STOP X AXIS & FILL END / Jog
     c6k.Write "MC0000001:V,,,,,,0:GO,,,,,,1:1OUT.25-1" & Chr$(13)
-    c6k.Write "VAR4=0:VAR5=0:VAR1=0:V,,,(VAR11),,:REPEAT:D,,," + Str$(PassWidth) + ":GO000100X:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):D,,,-" + Str$(PassWidth) + ":GO000100X:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0:INENXXXX0XX:" & Chr$(13)
+    c6k.Write "VAR4=0:VAR5=0:VAR1=0:V,,,(VAR11),,:REPEAT:D,,," + Str$(passWidth) + ":GO000100X:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):D,,,-" + Str$(passWidth) + ":GO000100X:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0:INENXXXX0XX:" & Chr$(13)
        
     ' FAST STATUS UPDATE ESTOP/WATER/MOTOR POS
     TESTWATERPUMP = 0
@@ -3182,7 +3182,7 @@ Label7.Refresh
 RunPass = False
 
 For i = 1 To 6
-    If Check1(i - 1).Value = 1 Then
+    If Check1(i - 1).value = 1 Then
         RunPass = True
     End If
 Next i
@@ -3222,7 +3222,7 @@ c6k.Write ("HOMBAC1110111:HOMEDG1111111:HOMDF0001000:HOM,,,0,,,:" & Chr$(13))
 c6k.Write ("WAIT(6AS=XXX1XXX):T.1:D,,,-2.375,,,:GO0001000:" & Chr$(13))
     
 For i = 1 To 6
-    If Check1(i - 1).Value = 1 Then
+    If Check1(i - 1).value = 1 Then
         Yoffset1 = Format((Val(Text8(i).Text) + Val(Text9(i).Text * 0.5)), "####0.000") 'Y START POS
         Xoffset1 = Format(Val(Text7(i).Text - 2), "####0.000") 'X STOP -2"
         Yoffset2 = Format(Val(CalTig_Y) + (Val(Text8(i).Text) + Val(Text9(i).Text * 0.5)), "####0.000")
@@ -3471,11 +3471,11 @@ If Val(Text9(i).Text) > 1.99 Then XSpeed = XSpeed3: OssSpeed = OssSpeed3
 If Val(Text9(i).Text) > 2.49 Then XSpeed = XSpeed4: OssSpeed = OssSpeed4
 c6k.Write "VAR10=" + Str(RotSpeed) + ":VAR11=" + Str(OssSpeed) + ":" & Chr$(13)
 c6k.Write "MC0000000:MA1100000:COMEXC1:" & Chr$(13)
-If Check1(i - 1).Value = 1 Then
+If Check1(i - 1).value = 1 Then
     If Val(Text9(i).Text) < 1 Then
-        PassWidth = 0
+        passWidth = 0
     Else
-        PassWidth = ((Val(Text9(i).Text) - 0.75))
+        passWidth = ((Val(Text9(i).Text) - 0.75))
     End If
     c6k.Write "VAR1=1" & Chr$(13)
     
@@ -3516,16 +3516,16 @@ If Check1(i - 1).Value = 1 Then
     'END OF CHECK1 PROGRAM
     
     'Jog on / Oss on / Move to Tab
-    c6k.Write "MC0100001:VAR4=0:VAR5=0:VAR1=0:A,,,5,,:V,,,(VAR11),,:D,,,-" + Str$(PassWidth / 2) + ":GO0001000:WAIT(MOV=bXXX0XXX):REPEAT:D,,," + Str$(PassWidth) + ":GO0001000:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):D,,,-" + Str$(PassWidth) + ":GO0001000:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0" & Chr$(13)
+    c6k.Write "MC0100001:VAR4=0:VAR5=0:VAR1=0:A,,,5,,:V,,,(VAR11),,:D,,,-" + Str$(passWidth / 2) + ":GO0001000:WAIT(MOV=bXXX0XXX):REPEAT:D,,," + Str$(passWidth) + ":GO0001000:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):D,,,-" + Str$(passWidth) + ":GO0001000:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0" & Chr$(13)
          
     'START TC AND X AXIS Move
     c6k.Write "JOG0:" & Chr$(13)
     c6k.Write "JOG0:MC0000001:VAR4=0:VAR5=0:VAR3=1:1OUT.14-1:A,,,,,,10:V,,,,,,(VAR10):D,,,,,,-1:GO,,,,,,1:WAIT(1OUT.14=b1):PSET0,0,0,X,0,0,0:VAR1=1:INEN.2-1" & Chr$(13)
-    c6k.Write "VAR1=1:V,,,(VAR11),,:REPEAT:D,,," + Str$(PassWidth) + ":GO0001000:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XXX):D,,,-" + Str$(PassWidth) + ":GO0001000:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XXX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0:" & Chr$(13)
+    c6k.Write "VAR1=1:V,,,(VAR11),,:REPEAT:D,,," + Str$(passWidth) + ":GO0001000:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XXX):D,,,-" + Str$(passWidth) + ":GO0001000:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XXX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0:" & Chr$(13)
      
     'STOP X AXIS & FILL END / Jog
     c6k.Write "MC1000001:V,,,,,,0:GO,,,,,,1:1OUT.25-1" & Chr$(13)
-    c6k.Write "VAR4=0:VAR5=0:VAR1=0:V,,,(VAR11),,:REPEAT:D,,," + Str$(PassWidth) + ":GO0001000:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):D,,,-" + Str$(PassWidth) + ":GO0001000:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0:INENXXXX0XX:" & Chr$(13)
+    c6k.Write "VAR4=0:VAR5=0:VAR1=0:V,,,(VAR11),,:REPEAT:D,,," + Str$(passWidth) + ":GO0001000:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):D,,,-" + Str$(passWidth) + ":GO0001000:REPEAT:GOSUB CHECK:UNTIL(MOV=bXXX0XXX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0:INENXXXX0XX:" & Chr$(13)
        
     ' FAST STATUS UPDATE ESTOP/WATER/MOTOR POS
     TESTWATERPUMP = 0
@@ -3647,7 +3647,7 @@ Text7(i).Text = ""
 Text8(i).Text = ""
 Text9(i).Text = ""
 
-Check1(i - 1).Value = 0
+Check1(i - 1).value = 0
 Check1(i - 1).Caption = "OFF"
 Next i
 BARCODE_READER
@@ -3734,42 +3734,42 @@ While WORK_ORDER$ <> WOK$
                If currmin = 1 Then
                     If fpassw > 0 Then
                         Text5(G).Text = "Front Pass": Text6(G).Text = fstart: Text7(G).Text = fstop: Text8(G).Text = fyaxis: Text9(G).Text = (fpassw - fyaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     fy1 = 500
                ElseIf currmin = 2 Then
                     If bpassw > 0 Then
                         Text5(G).Text = "Back Pass": Text6(G).Text = bstart: Text7(G).Text = bstop: Text8(G).Text = byaxis: Text9(G).Text = (bpassw - byaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     by1 = 500
                ElseIf currmin = 3 Then
                     If ex1passW > 0 Then
                         Text5(G).Text = "Front Extra Pass": Text6(G).Text = ex1start: Text7(G).Text = ex1stop: Text8(G).Text = ex1yaxis: Text9(G).Text = (ex1passW - ex1yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     ex1 = 500
                ElseIf currmin = 4 Then
                     If ex2passW > 0 Then
                         Text5(G).Text = "Back Extra Pass": Text6(G).Text = ex2start: Text7(G).Text = ex2stop: Text8(G).Text = ex2yaxis: Text9(G).Text = (ex2passW - ex2yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     ex2 = 500
               ElseIf currmin = 5 Then
                     If pass5passW > 0 Then
                         Text5(G).Text = "Pass 5": Text6(G).Text = pass5start: Text7(G).Text = pass5stop: Text8(G).Text = pass5yaxis: Text9(G).Text = (pass5passW - pass5yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     pass5y = 500
               ElseIf currmin = 6 Then
                     If pass6passW > 0 Then
                         Text5(G).Text = "Pass 6": Text6(G).Text = pass6start: Text7(G).Text = pass6stop: Text8(G).Text = pass6yaxis: Text9(G).Text = (pass6passW - pass6yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     pass6y = 500
@@ -3779,19 +3779,19 @@ While WORK_ORDER$ <> WOK$
 'Form1.Text4.BackColor = QBColor(15)
               If Val(fstart) <> Val(leftpass) Then
                      Text5(7).Text = "Left Pass": Text6(7).Text = fstart: Text7(7).Text = leftpass: Text8(7).Text = fpassW1: Text9(7).Text = (bwidthW1 - fpassW1)
-                        Check1(6).Value = 1: Check1(6).Caption = "ON"
+                        Check1(6).value = 1: Check1(6).Caption = "ON"
               End If
               If Val(lengthB1) <> Val(Lengthr1) Then
                      Text5(8).Text = "Right Pass": Text6(8).Text = lengthB1: Text7(8).Text = Lengthr1: Text8(8).Text = fpassB1: Text9(8).Text = (bwidthB2 - fpassB1)
-                        Check1(7).Value = 1: Check1(7).Caption = "ON"
+                        Check1(7).value = 1: Check1(7).Caption = "ON"
               End If
               If Val(FRONTBEVEL) > 0 Then
                      Text5(9).Text = "Front Bevel": Text9(9).Text = Format(FRONTBEVEL, "#.###")
-                        Check1(8).Value = 1: Check1(8).Caption = "ON"
+                        Check1(8).value = 1: Check1(8).Caption = "ON"
               End If
               If Val(BACKBEVEL) > 0 Then
                      Text5(10).Text = "Back Bevel": Text9(10).Text = Format(BACKBEVEL, "#.###")
-                        Check1(9).Value = 1: Check1(9).Caption = "ON"
+                        Check1(9).value = 1: Check1(9).Caption = "ON"
               End If
            If RunCondition5 = "YES" Then
              Timer2.Enabled = True
@@ -3893,7 +3893,7 @@ Text7(i).Text = ""
 Text8(i).Text = ""
 Text9(i).Text = ""
 
-Check1(i - 1).Value = 0
+Check1(i - 1).value = 0
 Check1(i - 1).Caption = "OFF"
 Next i
  If Dir("F:\BARCODE\temp6.tmp") = "" Then
@@ -4032,7 +4032,7 @@ While WORK_ORDER$ <> WOK$
                     If fpassw > 0 Then
                         Text5(G).Text = "Front Pass": Text6(G).Text = fstart: Text7(G).Text = fstop: Text8(G).Text = fyaxis: Text9(G).Text = (fpassw - fyaxis)
                         If Text9(G).Text > 2.625 Then Text9(G).Text = 2.625
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     fy1 = 500
@@ -4040,35 +4040,35 @@ While WORK_ORDER$ <> WOK$
                     If bpassw > 0 Then
                         Text5(G).Text = "Back Pass": Text6(G).Text = bstart: Text7(G).Text = bstop: Text8(G).Text = byaxis: Text9(G).Text = (bpassw - byaxis)
                         If Text9(G).Text > 2.625 Then Text9(G).Text = 2.625
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     by1 = 500
                ElseIf currmin = 3 Then
                     If ex1passW > 0 Then
                         Text5(G).Text = "Front Extra Pass": Text6(G).Text = ex1start: Text7(G).Text = ex1stop: Text8(G).Text = ex1yaxis: Text9(G).Text = (ex1passW - ex1yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     ex1 = 500
                ElseIf currmin = 4 Then
                     If ex2passW > 0 Then
                         Text5(G).Text = "Back Extra Pass": Text6(G).Text = ex2start: Text7(G).Text = ex2stop: Text8(G).Text = ex2yaxis: Text9(G).Text = (ex2passW - ex2yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     ex2 = 500
               ElseIf currmin = 5 Then
                     If pass5passW > 0 Then
                         Text5(G).Text = "Pass 5": Text6(G).Text = pass5start: Text7(G).Text = pass5stop: Text8(G).Text = pass5yaxis: Text9(G).Text = (pass5passW - pass5yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     pass5y = 500
               ElseIf currmin = 6 Then
                     If pass6passW > 0 Then
                         Text5(G).Text = "Pass 6": Text6(G).Text = pass6start: Text7(G).Text = pass6stop: Text8(G).Text = pass6yaxis: Text9(G).Text = (pass6passW - pass6yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     pass6y = 500
@@ -4079,19 +4079,19 @@ While WORK_ORDER$ <> WOK$
 
               If Val(fstart) <> Val(leftpass) Then
                      Text5(7).Text = "Left Pass": Text6(7).Text = fstart: Text7(7).Text = leftpass: Text8(7).Text = fpassW1: Text9(7).Text = (bwidthW1 - fpassW1)
-                        Check1(6).Value = 1: Check1(6).Caption = "ON"
+                        Check1(6).value = 1: Check1(6).Caption = "ON"
               End If
               If Val(lengthB1) <> Val(Lengthr1) Then
                      Text5(8).Text = "Right Pass": Text6(8).Text = lengthB1: Text7(8).Text = Lengthr1: Text8(8).Text = fpassB1: Text9(8).Text = (bwidthB2 - fpassB1)
-                        Check1(7).Value = 1: Check1(7).Caption = "ON"
+                        Check1(7).value = 1: Check1(7).Caption = "ON"
               End If
               If Val(FRONTBEVEL) > 0 Then
                      Text5(9).Text = "Front Bevel": Text9(9).Text = Format(FRONTBEVEL, "#.###")
-                        Check1(8).Value = 1: Check1(8).Caption = "ON"
+                        Check1(8).value = 1: Check1(8).Caption = "ON"
               End If
               If Val(BACKBEVEL) > 0 Then
                      Text5(10).Text = "Back Bevel": Text9(10).Text = Format(BACKBEVEL, "#.###")
-                        Check1(9).Value = 1: Check1(9).Caption = "ON"
+                        Check1(9).value = 1: Check1(9).Caption = "ON"
               End If
 10:
            If RunCondition5 = "YES" Then
@@ -4233,7 +4233,7 @@ Text7(i).Text = ""
 Text8(i).Text = ""
 Text9(i).Text = ""
 
-Check1(i - 1).Value = 0
+Check1(i - 1).value = 0
 Check1(i - 1).Caption = "OFF"
 Next i
  If Dir("F:\BARCODE\temp6.tmp") = "" Then
@@ -4363,42 +4363,42 @@ While WORK_ORDER$ <> WOK$
                If currmin = 1 Then
                     If fpassw > 0 Then
                         Text5(G).Text = "Front Pass": Text6(G).Text = fstart: Text7(G).Text = fstop: Text8(G).Text = fyaxis: Text9(G).Text = (fpassw - fyaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     fy1 = 500
                ElseIf currmin = 2 Then
                     If bpassw > 0 Then
                         Text5(G).Text = "Back Pass": Text6(G).Text = bstart: Text7(G).Text = bstop: Text8(G).Text = byaxis: Text9(G).Text = (bpassw - byaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     by1 = 500
                ElseIf currmin = 3 Then
                     If ex1passW > 0 Then
                         Text5(G).Text = "Front Extra Pass": Text6(G).Text = ex1start: Text7(G).Text = ex1stop: Text8(G).Text = ex1yaxis: Text9(G).Text = (ex1passW - ex1yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     ex1 = 500
                ElseIf currmin = 4 Then
                     If ex2passW > 0 Then
                         Text5(G).Text = "Back Extra Pass": Text6(G).Text = ex2start: Text7(G).Text = ex2stop: Text8(G).Text = ex2yaxis: Text9(G).Text = (ex2passW - ex2yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     ex2 = 500
               ElseIf currmin = 5 Then
                     If pass5passW > 0 Then
                         Text5(G).Text = "Pass 5": Text6(G).Text = pass5start: Text7(G).Text = pass5stop: Text8(G).Text = pass5yaxis: Text9(G).Text = (pass5passW - pass5yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     pass5y = 500
               ElseIf currmin = 6 Then
                     If pass6passW > 0 Then
                         Text5(G).Text = "Pass 6": Text6(G).Text = pass6start: Text7(G).Text = pass6stop: Text8(G).Text = pass6yaxis: Text9(G).Text = (pass6passW - pass6yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     pass6y = 500
@@ -4408,19 +4408,19 @@ While WORK_ORDER$ <> WOK$
 'Form1.Text4.BackColor = QBColor(15)
               If Val(fstart) <> Val(leftpass) Then
                      Text5(7).Text = "Left Pass": Text6(7).Text = fstart: Text7(7).Text = leftpass: Text8(7).Text = fpassW1: Text9(7).Text = (bwidthW1 - fpassW1)
-                        Check1(6).Value = 1: Check1(6).Caption = "ON"
+                        Check1(6).value = 1: Check1(6).Caption = "ON"
               End If
               If Val(lengthB1) <> Val(Lengthr1) Then
                      Text5(8).Text = "Right Pass": Text6(8).Text = lengthB1: Text7(8).Text = Lengthr1: Text8(8).Text = fpassB1: Text9(8).Text = (bwidthB2 - fpassB1)
-                        Check1(7).Value = 1: Check1(7).Caption = "ON"
+                        Check1(7).value = 1: Check1(7).Caption = "ON"
               End If
               If Val(FRONTBEVEL) > 0 Then
                      Text5(9).Text = "Front Bevel": Text9(9).Text = Format(FRONTBEVEL, "#.###")
-                        Check1(8).Value = 1: Check1(8).Caption = "ON"
+                        Check1(8).value = 1: Check1(8).Caption = "ON"
               End If
               If Val(BACKBEVEL) > 0 Then
                      Text5(10).Text = "Back Bevel": Text9(10).Text = Format(BACKBEVEL, "#.###")
-                        Check1(9).Value = 1: Check1(9).Caption = "ON"
+                        Check1(9).value = 1: Check1(9).Caption = "ON"
               End If
        GoTo 10
         End If
@@ -5088,7 +5088,7 @@ Text7(i).Text = ""
 Text8(i).Text = ""
 Text9(i).Text = ""
 
-Check1(i - 1).Value = 0
+Check1(i - 1).value = 0
 Check1(i - 1).Caption = "OFF"
 Next i
 WORK_ORDER$ = InputBox("ENTER WORK ORDER #" + Chr(13) + "OR WAND BARCODE", "WORK ORDER#")
@@ -5174,42 +5174,42 @@ While WORK_ORDER$ <> WOK$
                If currmin = 1 Then
                     If fpassw > 0 Then
                         Text5(G).Text = "Front Pass": Text6(G).Text = fstart: Text7(G).Text = fstop: Text8(G).Text = fyaxis: Text9(G).Text = (fpassw - fyaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     fy1 = 500
                ElseIf currmin = 2 Then
                     If bpassw > 0 Then
                         Text5(G).Text = "Back Pass": Text6(G).Text = bstart: Text7(G).Text = bstop: Text8(G).Text = byaxis: Text9(G).Text = (bpassw - byaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     by1 = 500
                ElseIf currmin = 3 Then
                     If ex1passW > 0 Then
                         Text5(G).Text = "Front Extra Pass": Text6(G).Text = ex1start: Text7(G).Text = ex1stop: Text8(G).Text = ex1yaxis: Text9(G).Text = (ex1passW - ex1yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     ex1 = 500
                ElseIf currmin = 4 Then
                     If ex2passW > 0 Then
                         Text5(G).Text = "Back Extra Pass": Text6(G).Text = ex2start: Text7(G).Text = ex2stop: Text8(G).Text = ex2yaxis: Text9(G).Text = (ex2passW - ex2yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     ex2 = 500
               ElseIf currmin = 5 Then
                     If pass5passW > 0 Then
                         Text5(G).Text = "Pass 5": Text6(G).Text = pass5start: Text7(G).Text = pass5stop: Text8(G).Text = pass5yaxis: Text9(G).Text = (pass5passW - pass5yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     pass5y = 500
               ElseIf currmin = 6 Then
                     If pass6passW > 0 Then
                         Text5(G).Text = "Pass 6": Text6(G).Text = pass6start: Text7(G).Text = pass6stop: Text8(G).Text = pass6yaxis: Text9(G).Text = (pass6passW - pass6yaxis)
-                        Check1(G - 1).Value = 1: Check1(G - 1).Caption = "ON"
+                        Check1(G - 1).value = 1: Check1(G - 1).Caption = "ON"
                         G = G + 1
                     End If
                     pass6y = 500
@@ -5219,19 +5219,19 @@ While WORK_ORDER$ <> WOK$
 'Form1.Text4.BackColor = QBColor(15)
               If Val(fstart) <> Val(leftpass) Then
                      Text5(7).Text = "Left Pass": Text6(7).Text = fstart: Text7(7).Text = leftpass: Text8(7).Text = fpassW1: Text9(7).Text = (bwidthW1 - fpassW1)
-                        Check1(6).Value = 1: Check1(6).Caption = "ON"
+                        Check1(6).value = 1: Check1(6).Caption = "ON"
               End If
               If Val(lengthB1) <> Val(Lengthr1) Then
                      Text5(8).Text = "Right Pass": Text6(8).Text = lengthB1: Text7(8).Text = Lengthr1: Text8(8).Text = fpassB1: Text9(8).Text = (bwidthB2 - fpassB1)
-                        Check1(7).Value = 1: Check1(7).Caption = "ON"
+                        Check1(7).value = 1: Check1(7).Caption = "ON"
               End If
               If Val(FRONTBEVEL) > 0 Then
                      Text5(9).Text = "Front Bevel": Text9(9).Text = Format(FRONTBEVEL, "#.###")
-                        Check1(8).Value = 1: Check1(8).Caption = "ON"
+                        Check1(8).value = 1: Check1(8).Caption = "ON"
               End If
               If Val(BACKBEVEL) > 0 Then
                      Text5(10).Text = "Back Bevel": Text9(10).Text = Format(BACKBEVEL, "#.###")
-                        Check1(9).Value = 1: Check1(9).Caption = "ON"
+                        Check1(9).value = 1: Check1(9).Caption = "ON"
               End If
            If RunCondition5 = "YES" Then
              Timer2.Enabled = True
@@ -5284,7 +5284,7 @@ End Sub
 
 Private Sub Text13_KeyPress(KeyAscii As Integer)
 If KeyAscii = (13) Then
-Command6.Value = True
+Command6.value = True
 End If
 
 End Sub
@@ -5292,11 +5292,11 @@ End Sub
 Private Sub Text5_Click(Index As Integer)
 For i = 1 To 10
 If i <> Index Then
-    Check1(i - 1).Value = 0: Check1(i - 1).Caption = "OFF"
+    Check1(i - 1).value = 0: Check1(i - 1).Caption = "OFF"
     Text5(i).BackColor = QBColor(15)
 Else
     If Text5(i).Text > "" Then
-        Check1(i - 1).Value = 1: Check1(i - 1).Caption = "ON"
+        Check1(i - 1).value = 1: Check1(i - 1).Caption = "ON"
         Text5(i).BackColor = QBColor(14)
     End If
 End If
@@ -5353,7 +5353,7 @@ If KeyAscii = (13) Then
     '    Check1(Index).Caption = "OFF": Text5(Index + 1).BackColor = QBColor(15)
     'Else
         If Text5(Index).Text > "" And Val(Text9(Index).Text) > 0 Then
-            Check1(Index - 1).Caption = "ON": Check1(Index - 1).Value = 1: Text5(Index).BackColor = QBColor(14)
+            Check1(Index - 1).Caption = "ON": Check1(Index - 1).value = 1: Text5(Index).BackColor = QBColor(14)
         'Else
         '    Check1(Index).Value = 0
         End If
@@ -5568,7 +5568,7 @@ If MSComm1.PortOpen = False Then
     Do
         
         
-        MSComm1.Output = "a" & Chr$(13)
+        MSComm1.output = "a" & Chr$(13)
         ' Wait for data to come back to the serial port.
         Dummy = DoEvents()
             For J = 1 To 1000

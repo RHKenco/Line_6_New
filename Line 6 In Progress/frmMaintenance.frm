@@ -3,15 +3,15 @@ Begin VB.Form frmMaintenance
    BackColor       =   &H00C00000&
    Caption         =   "Maintainance"
    ClientHeight    =   5775
-   ClientLeft      =   165
-   ClientTop       =   810
+   ClientLeft      =   225
+   ClientTop       =   855
    ClientWidth     =   10740
    LinkTopic       =   "Form6"
    ScaleHeight     =   5775
    ScaleWidth      =   10740
    StartUpPosition =   3  'Windows Default
    Begin VB.Timer Timer_c6kRead 
-      Interval        =   100
+      Interval        =   50
       Left            =   120
       Top             =   120
    End
@@ -1545,7 +1545,7 @@ Dim tempGO As String
 
 For i = 0 To 5
 
-    If i = 1 Then
+    If i = 0 Then
         If i = Index Then
             tempD = Format(CDbl(Text_In_Des(i).Text), "0.000")
             tempGO = "1"
@@ -1559,7 +1559,7 @@ For i = 0 To 5
             tempGO = tempGO & "1"
         Else
             tempD = tempD & ",0"
-            tempGO = "0"
+            tempGO = tempGO & "0"
         End If
     End If
 
@@ -1593,13 +1593,17 @@ End Sub
 Private Sub setInputText(currentInputState As Long)
 
 Dim Index As Integer
+Dim inputOn As Boolean
 
 For i = 0 To 15
+
     'Set up index for selecting proper label & Input binary
     If i > 7 Then Index = i + 8 Else Index = i
     
+    inputOn = (currentInputState And (2 ^ Index))
+    
     'Set text to red if input is active
-    If (currentInputState And (2 ^ Index)) Then Label_Block_Pin(Index).ForeColor = (&HCF&) Else Label_Block_Pin(Index).ForeColor = (&H8000000E)
+    If inputOn Then Label_Block_Pin(Index).ForeColor = (&HCF&) Else Label_Block_Pin(Index).ForeColor = (&H8000000E)
 
 Next i
 
@@ -1608,42 +1612,46 @@ End Sub
 Private Sub setOutputs(currentOutputState As Long)
 
 'Create local temp variables
+Dim i
 Dim outputIndex As Integer
 Dim outputOn As Boolean
+Dim boxChecked As Boolean
 
 'For all checkboxes
-For Each i In Check_Output
+For i = 0 To 14
 
     '-- Set up index for selecting proper label & Input binary
     If i < 8 Then outputIndex = i + 8 Else outputIndex = i + 16
     
     'Compare output long to single bit shifted to output location, then convert to bool
-    outputOn = (currentOutputState And (2 ^ outputIndex))
+    If (currentOutputState And CLng(2 ^ outputIndex)) Then outputOn = True Else outputOn = False
+    
+    If Check_Output(i).value = 0 Then boxChecked = False Else boxChecked = True
     
     '-- If output state does not match checkbox, set output state accordingly
     ' If the current output is not enabled and checkbox is checked
-    If Not outputOn And Check_Output(i).value = 1 Then
+    If Not outputOn And boxChecked Then
         'Acivate Output
         Call c6kOps.setOutputNum((outputIndex + 1), True)
         'Set text color to red
-        Label_Block_Pin(i).ForeColor = (&HCF&)
+        Label_Block_Pin(outputIndex).ForeColor = (&HCF&)
         
     ' If the current output is enabled and the box not checked
-    ElseIf outputOn And Check_Output(i).value = 0 Then
+    ElseIf outputOn And Not boxChecked Then
         'Disable Output
         Call c6kOps.setOutputNum((outputIndex + 1), False)
         'Set text color to white
-        Label_Block_Pin(i).ForeColor = (&H8000000E)
+        Label_Block_Pin(outputIndex).ForeColor = (&H8000000E)
         
     ' If the output is enabled and the checkbox is clicked
-    ElseIf outputOn And Check_Output(i).value = 1 Then
+    ElseIf outputOn And boxChecked Then
         'Verify color is set correctly
-        If Label_Block_Pin(i).ForeColor = (&H8000000E) Then Label_Block_Pin(i).ForeColor = (&HCF&)
+        If Label_Block_Pin(outputIndex).ForeColor = (&H8000000E) Then Label_Block_Pin(outputIndex).ForeColor = (&HCF&)
         
     ' If the output is not enabled and the checkbox is not clicked
-    ElseIf Not outputOn And Check_Output(i).value = 0 Then
+    ElseIf Not outputOn And Not boxChecked Then
         'Verify color is set correctly
-        If Label_Block_Pin(i).ForeColor = (&HCF&) Then Label_Block_Pin(i).ForeColor = (&H8000000E)
+        If Label_Block_Pin(outputIndex).ForeColor = (&HCF&) Then Label_Block_Pin(outputIndex).ForeColor = (&H8000000E)
     
     Else
         MsgBox "Error in Maintenance Output Control"
@@ -1652,6 +1660,7 @@ For Each i In Check_Output
 Next i
 
 End Sub
+
 
 Private Sub Timer_c6kRead_Timer()
 
@@ -1715,5 +1724,11 @@ End Sub
 Private Sub Topbar_Stop_Output_Click()
 
     Call c6kOps.stopAllOut
+    
+    Dim i As Integer
+    
+    For i = 0 To 15
+        Check_Output(i).value = 0
+    Next i
 
 End Sub

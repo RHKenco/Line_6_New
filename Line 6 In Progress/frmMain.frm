@@ -189,7 +189,7 @@ Next i
             connected = False           'set connected flag to false
             MsgBox "Connection attempt failed...", 0, "Status"
         End If
-Shell ("f:\apps\exe\flow sensor\fs6.exe")
+'Shell ("f:\apps\exe\flow sensor\fs6.exe")
     '***************2nd 6k *****************
 '   Dim ipaddr1$
 '            ipaddr1 = "192.168.2.3"

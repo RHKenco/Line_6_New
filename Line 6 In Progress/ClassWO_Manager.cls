@@ -27,13 +27,13 @@ Private Const woTimeoutCalib = 20   'Calibration constant - cycle of timer in Hz
 
 
 ' Filepaths utilized in multiple locations
-Private Const woFormASCpath As String = "F:\MFG\FORM.ASC"
-Private Const woBarDataPath As String = "F:\MFG\Bar_Data.dta"
-Private Const woGrossPITpath As String = "F:\MFG\GROSSPIT.GPA"
-Private Const woGaryPath As String = "F:\mfg\GARY.GPA"
-Private Const woGoalPath As String = "F:\mfg\GOAL.GPA"
-Private Const woTempMain As String = "F:\BARCODE\temp6.temp"
-Private Const woTempDir As String = "F:\BARCODE\"
+Private Const woFormASCpath As String = "C:\line 6\mfg\testFORM.ASC" '"F:\MFG\FORM.ASC"
+Private Const woBarDataPath As String = "C:\line 6\mfg\testBar_Data.dta" '"F:\MFG\Bar_Data.dta"
+Private Const woGrossPITpath As String = "C:\line 6\mfg\testGROSSPIT.GPA" '"F:\MFG\GROSSPIT.GPA"
+Private Const woGaryPath As String = "C:\line 6\mfg\testGARY.GPA" '"F:\mfg\GARY.GPA"
+Private Const woGoalPath As String = "C:\line 6\mfg\testGOAL.GPA" '"F:\mfg\GOAL.GPA"
+Private Const woTempMain As String = "C:\line 6\files\temp6.temp" '"F:\BARCODE\temp6.temp"
+Private Const woTempDir As String = "C:\line 6\files\" '"F:\BARCODE\"
 
 Private woTempData As String        ' Varible to store path to WO temp data
 

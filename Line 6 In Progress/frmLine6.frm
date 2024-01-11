@@ -3,8 +3,8 @@ Begin VB.Form frmLine6
    BackColor       =   &H00C00000&
    Caption         =   "Line 6"
    ClientHeight    =   6660
-   ClientLeft      =   165
-   ClientTop       =   810
+   ClientLeft      =   225
+   ClientTop       =   855
    ClientWidth     =   17385
    LinkTopic       =   "Form6"
    ScaleHeight     =   6660
@@ -649,6 +649,9 @@ Private Sub FL6_End_Program()
     
     'Reset c6k Controller to avoid retained settings & commands in next boot. Will disconnect ethernet
     c6k.Write ("RESET")
+    
+    Var_Label_WO_Active.Caption = "Unloading all forms, Please Wait"
+    Var_Label_WO_Active.Refresh
     
     'Unload all Forms except frmLine6 and frmMain
     For Each tmpForm In Forms

@@ -79,7 +79,7 @@ Private FSinputState As Long        'Variable to store FastStatus input Data
 Private FSoutputState As Long       'Variable to store FastStatus output Data
 Private fsUpToDate As Boolean       'Boolean flag to limit FastStatus Calls - Reset in FSM
 
-Private posCal(6) As Integer                'Array to store position calibration data. These following constant values will be stored upon initialization,
+Private posCal(6) As Long                'Array to store position calibration data. These following constant values will be stored upon initialization,
 Private Const posCalX = 26550 'counts/in    '       and will convert positional data from counts to appropriate units for each axis
 Private Const posCalY = 62500 'counts/in
 Private Const posCalZ = 39683 'counts/in
@@ -87,13 +87,13 @@ Private Const posCalZa = 510204 'counts/in
 Private Const posCalO = 62500 'counts/in?
 Private Const posCalR = 62500 'counts/degree?
 
-Private revCal(6) As Integer                'Array to store revolution calibration data. These following constant values will be stored upon initialization,
+Private revCal(6) As Long                'Array to store revolution calibration data. These following constant values will be stored upon initialization,
 Private Const revCalX = 25000 'rev          '       and will convert motor revolutions to appropriate units for each axis. Current numbers are simple conversion to revolutions
 Private Const revCalY = 25000 'rev
 Private Const revCalZ = 25000 'rev
 Private Const revCalZa = 25000 'rev
 Private Const revCalO = 25000 'rev
-Private Const revalR = 25000 'rev
+Private Const revCalR = 25000 'rev
 
 '-- Joystick Constants and variables
 Private joyActive As Boolean        'Boolean to determine if the joystick is active
@@ -101,7 +101,7 @@ Private joyStr As String            'String to describe current joystick state f
 Private joyBtnState As Integer      'Integer containing state of joystick buttons
 Private joyLastBtnInput As Integer  'Integer containing previous state of joystick buttons
 Private joyStkInputs As Integer      'Integer containing state of joystick directional input
-Private joyLastStkInput As Integer  'Integer containing previous directional state
+Private joyLastStkInputs As Integer  'Integer containing previous directional state
 
 Private joyJogState(6) As Integer   'Array of 7 single Numbers (of which index 0 is ignored) to contain jog / MC parameters
                                     '   - 0 indicates no motion
@@ -161,7 +161,7 @@ Private userSpeedBoost As Single        'Speed Boost Multiplier for joystick adj
 Private Const userSpeedBoostMult = 1.5  'Constant for speed boost for multi-axis joystick operations
 
 
-Private Const speedSetupPath As String = "F:\apps\exe\line 6\files\speedSetup6.asc"
+Private Const speedSetupPath As String = "C:\line 6\files\speedSetup6.asc"  '"F:\apps\exe\line 6\files\speedSetup6.asc"
 
 
 '============================================================ Class Setup ==================================================================================================
@@ -395,15 +395,17 @@ revCal(4) = revCalO
 revCal(5) = revCalR
 
 'Generate strings for c6k communication
+Dim i As Integer
 
 For i = 1 To 6
     
     If i = 1 Then
         tempPosCal = CStr(posCal(i))
-        tempRevCal = CStr(velCal(i))
+        tempRevCal = CStr(revCal(i))
     Else
         tempPosCal = tempPosCal & "," & CStr(posCal(i))
-        tempRevCal = tempRevCal & "," & CStr(velCal(i))
+        tempRevCal = tempRevCal & "," & CStr(revCal(i))
+    End If
 
 Next i
 
@@ -1329,7 +1331,7 @@ End If
 
 'For each drive axis, pull position from fast status data and display on maintenance DRO
 Dim temp As Double
-                
+Dim i As Integer
 For i = 1 To 6
     temp = Val(fsinfo.MotorPos(i))
     frmMaintenance.Text_Pop_DRO(i - 1).Text = Format((temp / posCal(i)), "0.000")
