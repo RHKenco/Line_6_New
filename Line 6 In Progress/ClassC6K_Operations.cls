@@ -110,7 +110,7 @@ Private joyJogState(6) As Integer   'Array of 7 single Numbers (of which index 0
                                     '   - 3 indicates continuous motion directed by joy vert.
                                     
 Private joyMCx As Boolean           'Bool to store state of continuous motion X joy
-Private joyMCx As Boolean           'Bool to store state of continuous motion Y joy
+Private joyMCy As Boolean           'Bool to store state of continuous motion Y joy
 
 '-- Critical input booleans and related variables
 Private setE_Stop As Boolean    'Local E-stop variable
@@ -1362,7 +1362,7 @@ Public Sub runOsc()
 
 End Sub
 
-Public Sub runPass(passRunState As String)
+Public Sub RunPass(passRunState As String)
 
 '-- Update Pass Velocity
 Call setPassVel(passType)
