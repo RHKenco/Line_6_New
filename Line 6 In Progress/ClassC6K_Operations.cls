@@ -531,7 +531,7 @@ getOutputState = FSoutputState
 End Function
 
 Public Sub stopAllOut()
-    c6k.Write "!S:JOG000000:1OUTALL9,16,0:1OUTALL25,32,0:T2" & Chr$(13)
+    c6k.Write "!S:!JOG000000:!1OUTALL9,16,0:!1OUTALL25,32,0:T2" & Chr$(13)
 End Sub
 
 

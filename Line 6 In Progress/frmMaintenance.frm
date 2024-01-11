@@ -1525,6 +1525,9 @@ Begin VB.Form frmMaintenance
    Begin VB.Menu Topbar_Joystick 
       Caption         =   "Joystick"
    End
+   Begin VB.Menu Topbar_Stop_Output 
+      Caption         =   "Stop Output"
+   End
 End
 Attribute VB_Name = "frmMaintenance"
 Attribute VB_GlobalNameSpace = False
@@ -1533,6 +1536,8 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
 Private Sub Button_Move_Axis_Click(Index As Integer)
+
+Const MoveVelocities = "1,1,1,1,1,1"
 
 'Generate string of values for 6k with desired distance & GO command in correct position
 Dim tempD As String
@@ -1561,9 +1566,11 @@ For i = 0 To 5
 Next i
 
 'Instruct 6k
-c6k.Write ("MC0:V1,1,1,1,1,1:D" & tempD & ":GO" & tempGO & Chr(13))
+c6k.Write ("MC0:V" & MoveVelocities & ":D" & tempD & ":GO" & tempGO & Chr(13))
 
 End Sub
+
+
 
 Private Sub Form_Load()
     
@@ -1585,77 +1592,108 @@ End Sub
 
 Private Sub setInputText(currentInputState As Long)
 
-Dim i As Integer
 Dim Index As Integer
 
-Do
-'Set up index for selecting proper label & Input binary
-If i > 7 Then Index = i + 8 Else Index = i
+For i = 0 To 15
+    'Set up index for selecting proper label & Input binary
+    If i > 7 Then Index = i + 8 Else Index = i
+    
+    'Set text to red if input is active
+    If (currentInputState And (2 ^ Index)) Then Label_Block_Pin(Index).ForeColor = (&HCF&) Else Label_Block_Pin(Index).ForeColor = (&H8000000E)
 
-'Set text to red if input is active
-If (currentInputState And (2 ^ Index)) Then Label_Block_Pin(Index).ForeColor = (&HCF&) Else Label_Block_Pin(Index).ForeColor = (&H8000000E)
-
-i = i + 1
-
-Loop Until i > 14
-
-End Sub
-
-Private Sub Label_Drive_Units_Click(Index As Integer)
+Next i
 
 End Sub
 
 Private Sub setOutputs(currentOutputState As Long)
 
+'Create local temp variables
 Dim outputIndex As Integer
+Dim outputOn As Boolean
 
+'For all checkboxes
 For Each i In Check_Output
 
-    'Set up index for selecting proper label & Input binary
+    '-- Set up index for selecting proper label & Input binary
     If i < 8 Then outputIndex = i + 8 Else outputIndex = i + 16
     
-    'If output state does not match checkbox, set output state accordingly
-    If (currentOutputState And (2 ^ outputIndex)) And Not Check_Output(i) Then
+    'Compare output long to single bit shifted to output location, then convert to bool
+    outputOn = (currentOutputState And (2 ^ outputIndex))
+    
+    '-- If output state does not match checkbox, set output state accordingly
+    ' If the current output is not enabled and checkbox is checked
+    If Not outputOn And Check_Output(i).value = 1 Then
         'Acivate Output
         Call c6kOps.setOutputNum((outputIndex + 1), True)
         'Set text color to red
         Label_Block_Pin(i).ForeColor = (&HCF&)
         
-    ElseIf Not (currentOutputState And (2 ^ outputIndex)) And Check_Output(i) Then
+    ' If the current output is enabled and the box not checked
+    ElseIf outputOn And Check_Output(i).value = 0 Then
+        'Disable Output
+        Call c6kOps.setOutputNum((outputIndex + 1), False)
+        'Set text color to white
+        Label_Block_Pin(i).ForeColor = (&H8000000E)
+        
+    ' If the output is enabled and the checkbox is clicked
+    ElseIf outputOn And Check_Output(i).value = 1 Then
+        'Verify color is set correctly
+        If Label_Block_Pin(i).ForeColor = (&H8000000E) Then Label_Block_Pin(i).ForeColor = (&HCF&)
+        
+    ' If the output is not enabled and the checkbox is not clicked
+    ElseIf Not outputOn And Check_Output(i).value = 0 Then
+        'Verify color is set correctly
+        If Label_Block_Pin(i).ForeColor = (&HCF&) Then Label_Block_Pin(i).ForeColor = (&H8000000E)
+    
+    Else
+        MsgBox "Error in Maintenance Output Control"
+    End If
+    
+Next i
 
+End Sub
 
 Private Sub Timer_c6kRead_Timer()
 
 'Call Fast Status
 Call c6kOps.updFastStatus
 
-    '-- Run Joystick if active
-        If c6kOps.getJoyActive And Not c6kOps.chkE_Stop() Then
-        
-            'Run JoyRun function, and if it returns true,
-            If c6kOps.runJoy("Free") Then
-        
-                'Set Joystick Status Message
-                Var_Label_Joystick_Status.Caption = "Joystick" & Chr(13) & "Enabled:" & Chr(13) & Chr(13) & c6kOps.getJoyStr() & Chr(13) & "Mode"
-                Var_Label_Joystick_Status.Visible = True
-        
-            Else
-                'If the joystick becomes inactive hide label
-                Var_Label_Joystick_Status.Visible = False
-        
-            End If
-        
-        '--Input State Debug - Uncomment these two lines to enter input debug mode
-        'Var_Label_Joystick_Status.Caption = c6kOps.getInputState
-        'Var_Label_Joystick_Status.Visible = True
-            
+'-- Check for E-Stop
+If Not c6kOps.chkE_Stop Then
+
+'-- Run Joystick if active
+    If c6kOps.getJoyActive And Not c6kOps.chkE_Stop() Then
+    
+        'Run JoyRun function, and if it returns true,
+        If c6kOps.runJoy("Free") Then
+    
+            'Set Joystick Status Message
+            Var_Label_Joystick_Status.Caption = "Joystick" & Chr(13) & "Enabled:" & Chr(13) & Chr(13) & c6kOps.getJoyStr() & Chr(13) & "Mode"
+            Var_Label_Joystick_Status.Visible = True
+    
+        Else
+            'If the joystick becomes inactive hide label
+            Var_Label_Joystick_Status.Visible = False
+    
         End If
+    
+    '--Input State Debug - Uncomment these two lines to enter input debug mode
+    'Var_Label_Joystick_Status.Caption = c6kOps.getInputState
+    'Var_Label_Joystick_Status.Visible = True
+        
+    End If
 
-'Set input text to red if input is active
-Call setInputText(c6kOps.getInputState())
-Call setOutputs(c6kOps.getOutputState())
+    'Set input text to red if input is active
+    Call setInputText(c6kOps.getInputState())
+    Call setOutputs(c6kOps.getOutputState())
+    
+    Call c6kOps.updDro
 
-Call c6kOps.updDro
+'Else
+
+'Add functionality for E-Stop label in frmMaintenance Here
+
+End If
 
 'Reset Fast Status Update Flag
 Call c6kOps.resetFSupd
@@ -1671,5 +1709,11 @@ Else
     c6kOps.runJoy ("Disable")
     Var_Label_Joystick_Status.Visible = False
 End If
+
+End Sub
+
+Private Sub Topbar_Stop_Output_Click()
+
+    Call c6kOps.stopAllOut
 
 End Sub
