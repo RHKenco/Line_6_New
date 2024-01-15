@@ -1,13 +1,17 @@
 Attribute VB_Name = "Status_Messages"
 
-Public Sub statusMsg(newStatus As String, displayStr As String)
+Public Sub statusMsg(newStatus As String, Optional displayStr As String)
 
+'Exit sub if Msg hasn't changed
+Static currentMsg
+If currentMsg = newStatus Then Exit Sub
 
 ' Check if auger or blade
 If btn_state = "Active" Then
     If c6kOps.getAugerSet() Then btnState ("Active Auger") Else btnState ("Active Blade")
 End If
 
+Dim tempLabel As String
     
 Select Case newStatus
 
@@ -18,29 +22,42 @@ Select Case newStatus
         Exit Sub
         
     Case "Active Blade"
-        frmLine6.Var_Label_System_Status.Caption = "Ready to Start Blade"
+        tempLabel = "Ready to Start Blade"
         
     Case "Active Auger"
-        frmLine6.Var_Label_System_Status.Caption = "Ready to Start Auger"
+        tempLabel = "Ready to Start Auger"
         
     Case "Started"
-        frmLine6.Var_Label_System_Status.Caption = "Started - " & displayStr & " Remaining"
+        tempLabel = "Started - " & displayStr & " Remaining"
+        
+    Case "Strike"
+        tempLabel = "Move to strike location, then press Release"
+    Case "Toggle"
+        tempLabel = "Please flip switch to proceed"
     Case "Running"
+        tempLabel = "Running Pass. Flip Switch to Pause"
+    Case "Paused"
+        tempLabel = "Pass Paused. Flip Switch to Resume or Press Release to Finish"
+    Case "Returned"
+        tempLabel = "Pass Completed; Returning to Pass Start." & Chr(13) & "Press Release for Next Pass"
     
     Case "Not-Finish"
-        frmLine6.Var_Label_System_Status.Caption = "N/F Pressed - Press Start to Resume"
+        tempLabel = "N/F Pressed - Press Start to Resume"
     
     Case "Finish"
-        frmLine6.Var_Label_System_Status.Caption = "Finished " & displayStr & " Parts. Press start for next set of parts," & Chr(13) & "or press clear to enter new WO"
+        tempLabel = "Finished " & displayStr & " Parts." & Chr(13) & "Press start for next set of parts," & Chr(13) & "or press clear to enter new WO"
     
     Case "Timeout"
-        frmLine6.Var_Label_System_Status.Caption = "System Timed Out - Press Start to Resume"
+        tempLabel = "System Timed Out - Press Start to Resume"
 
     Case Else
         MsgBox "Error in Status Message Display"
 End Select
 
+frmLine6.Var_Label_System_Status.Caption = tempLabel
 frmLine6.Var_Label_System_Status.Visible = True
 frmLine6.Var_Label_System_Status.Refresh
+
+currentMsg = newStatus
 
 End Sub

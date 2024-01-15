@@ -21,7 +21,9 @@ Attribute VB_Exposed = False
 '|                  - initializes FSM
 '|          - 1 - Idle
 '|                  - Waits for input from Form
-'|          - 2 - Run
+'|          - 2 - Transition
+'|                  - Initializes Run mode FSM
+'|          - 3 - Run
 '|                  - Operates Run mode FSM
 '|
 '|
@@ -42,7 +44,6 @@ Public State As Integer
 
 
 
-
 Public Sub Run()
 
 Select Case State
@@ -52,6 +53,8 @@ Select Case State
         Call runState1
     Case 2
         Call runState2
+    Case 3
+        Call runState3
 End Select
 
 End Sub
@@ -98,12 +101,31 @@ Call c6kOps.updFastStatus
         End If
         
     End If
-'Reset Fast Status Update Flag
-Call c6kOps.resetFSupd
 
 End Sub
 
-Private Sub runState2() 'Run Pass State - Runs sub-FSM to operate the machine while running a pass
+Private Sub runState2() 'Initialize Pass State - Runs setup for pass operation
+
+'-- Call Fast Status
+Call c6kOps.updFastStatus
+'-- Check for E-Stop and H2O Flow
+    If Not c6kOps.chkE_Stop Then
+    
+    
+    '-- Run subFSM initialization state
+    
+        fsmRun.State = 0
+        Call fsmRun.Run
+        
+    'Proceed to main run state
+    State = 3
+
+    End If
+
+End Sub
+
+
+Private Sub runState3() 'Run Pass State - Runs sub-FSM to operate the machine while running a pass
 
 '-- Call Fast Status
 Call c6kOps.updFastStatus
@@ -112,11 +134,8 @@ Call c6kOps.updFastStatus
     
     
     '-- Run subFSM for run-state
-        Call fsmRun
+        Call fsmRun.Run
 
     End If
-
-'Reset Fast Status Update Flag
-Call c6kOps.resetFSupd
 
 End Sub

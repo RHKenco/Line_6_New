@@ -5,10 +5,10 @@ Begin VB.Form frmLine6
    ClientHeight    =   6660
    ClientLeft      =   225
    ClientTop       =   855
-   ClientWidth     =   17385
+   ClientWidth     =   19410
    LinkTopic       =   "Form6"
    ScaleHeight     =   6660
-   ScaleWidth      =   17385
+   ScaleWidth      =   19410
    StartUpPosition =   3  'Windows Default
    Begin VB.CommandButton Button_Set_Auger 
       Caption         =   "Auger Setup"
@@ -361,7 +361,7 @@ Begin VB.Form frmLine6
          Strikethrough   =   0   'False
       EndProperty
       ForeColor       =   &H8000000E&
-      Height          =   495
+      Height          =   2055
       Left            =   6120
       TabIndex        =   13
       Top             =   960
@@ -561,6 +561,9 @@ End Sub
 
 Private Sub Button_Go_Click()
 
+'Set pass width
+Call c6kOps.setPassWidth
+
 fsmMain.State = 2
 
 End Sub
@@ -620,10 +623,6 @@ End If
 
 End Sub
 
-Private Sub Command1_Click()
-    Call c6kOps.testDrives
-End Sub
-
 Private Sub Form_Activate()
 
 'When the form returns to focus, activate the FSM
@@ -635,7 +634,6 @@ Private Sub Form_Deactivate()
 
 'When the form loses focus, deactivate the FSM and reset the FastStatus up-to-date flag
 Timer_FSM.Enabled = False
-Call c6kOps.resetFSupd
 
 End Sub
 

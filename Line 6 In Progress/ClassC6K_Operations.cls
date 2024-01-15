@@ -77,7 +77,6 @@ Private Const joyToggle As Long = Input24
 '-- c6k Constants and Variables
 Private FSinputState As Long        'Variable to store FastStatus input Data
 Private FSoutputState As Long       'Variable to store FastStatus output Data
-Private fsUpToDate As Boolean       'Boolean flag to limit FastStatus Calls - Reset in FSM
 
 Private posCal(6) As Long                'Array to store position calibration data. These following constant values will be stored upon initialization,
 Private Const posCalX = 26550 'counts/in    '       and will convert positional data from counts to appropriate units for each axis
@@ -159,7 +158,7 @@ Private baseVelZ As String
 
 Private userSpeedMult As Single         'Speed Multiplier to be applied to speed for varying pass speeds on the fly
 Private Const speedMultInc = 0.05       'Constant for incrementing the speedmult increase
-Private userSpeedBoost(6) As Bool       'Speed Boost Multiplier for each axis - joystick adjustment of multi-axis movements
+Private userSpeedBoost(6) As Boolean    'Speed Boost Multiplier for each axis - joystick adjustment of multi-axis movements
 Private Const userSpeedBoostMult = 1.5  'Constant for speed boost for multi-axis joystick operations
 
 
@@ -175,7 +174,6 @@ c6k.FSEnabled = True
 'Set up variables
 FSinputState = 0
 FSoutputState = 0
-fsUpToDate = False
 
 joyBtnState = 0
 joyActive = False
@@ -213,8 +211,13 @@ Else
     End If
 End If
 
+Call setSpeeds
+
+Exit Sub
+
 ErrHand:
     MsgBox "Error in pass width setting - String likely could not be entered as numerical value"
+    End
 Resume
 
 End Sub
@@ -316,7 +319,7 @@ Else
 End If
 
 'If auger pitch has been declared, then
-If augerPitch <> "" Then
+If augerSet Then
 
     'Set speed values for Auger operations
     baseRotVel = basePassSpeed / augerPitch
@@ -371,25 +374,16 @@ End Function
 '-- updFastStatus() - Function to call Fast Status; only runs if up-to-date flag is false
 Public Sub updFastStatus()
 
-If Not fsUpToDate Then
-    'Pull c6k Fast-Status Data
-    Dim temp() As Byte
-    temp = c6k.FastStatus
-    Call CopyMemory(fsinfo, temp(0), 280)   'copy byte array into structure
+'Pull c6k Fast-Status Data
+Dim temp() As Byte
+temp = c6k.FastStatus
+Call CopyMemory(fsinfo, temp(0), 280)   'copy byte array into structure
     
-    FSinputState = fsinfo.ProgIn(1)
-    FSoutputState = fsinfo.ProgOut(1)
-    
-    fsUpToDate = True
-    
-End If
+FSinputState = fsinfo.ProgIn(1)
+FSoutputState = fsinfo.ProgOut(1)
 
 End Sub
 
-'-- resetFSupd() - Function to clear Fast Status up-to-date flag - used in loop in program
-Public Sub resetFSupd()
-    fsUpToDate = False
-End Sub
 
 Public Function getPassType()
     getPassType = passType
@@ -509,9 +503,8 @@ End Sub
 Public Function getInputState() As Long
 
 'Refresh input data
-If Not fsUpToDate Then
-    Call updFastStatus
-End If
+
+Call updFastStatus
 
 getInputState = FSinputState
     
@@ -523,9 +516,8 @@ End Function
 Public Function getInputStateStr() As String
 
 'Refresh input data
-If Not fsUpToDate Then
-    Call updFastStatus
-End If
+
+Call updFastStatus
 
 ' Generate Header
 Dim stateOutput As String
@@ -564,9 +556,7 @@ End Function
 Public Function getOutputState() As Long
 
 'Refresh input data
-If Not fsUpToDate Then
-    Call updFastStatus
-End If
+Call updFastStatus
 
 getOutputState = FSoutputState
 
@@ -630,9 +620,7 @@ End Sub
 Public Function chkE_Stop() As Boolean
 
 'Refresh Input Data
-If Not fsUpToDate Then
-    Call updFastStatus
-End If
+Call updFastStatus
 
 Dim isEstopPressed As Boolean
 
@@ -668,9 +656,9 @@ End Function
 
 Public Function chkH2Oflow() As Boolean
 
-    If Not fsUpToDate Then
-        Call updFastStatus
-    End If
+'Refresh Input
+Call updFastStatus
+
     
 
 Dim isWaterFlowing As Boolean
@@ -718,9 +706,8 @@ End Function
 Public Function getJoyBtnInputs() As Integer
     
 'Refresh Input Data
-If Not fsUpToDate Then
-    Call updFastStatus
-End If
+Call updFastStatus
+
 
 Dim temp As Byte
 temp = 0
@@ -747,15 +734,50 @@ getJoyBtnInputs = joyBtnState
 
 End Function
 
+Public Function getJoySelect() As Boolean
+
+Dim temp As Integer
+temp = getJoyBtnInputs()
+If temp = 1 Or temp = 3 Or temp = 5 Or temp = 7 Then
+    getJoySelect = True
+Else
+    getJoySelect = False
+End If
+
+End Function
+
+Public Function getJoyToggle() As Boolean
+
+Dim temp As Integer
+temp = getJoyBtnInputs()
+If temp = 4 Or temp = 5 Or temp = 6 Or temp = 7 Then
+    getJoyToggle = True
+Else
+    getJoyToggle = False
+End If
+
+End Function
+
+Public Function getJoyRelease() As Boolean
+
+Dim temp As Integer
+temp = getJoyBtnInputs()
+If temp = 2 Or temp = 3 Or temp = 6 Or temp = 7 Then
+    getJoyRelease = True
+Else
+    getJoyRelease = False
+End If
+
+End Function
+
 Public Function getJoyStkInputs() As Integer
 
 'Store Last State
 joyLastStkInputs = joyStkInputs
 
 'Refresh Input Data
-If Not fsUpToDate Then
-    Call updFastStatus
-End If
+Call updFastStatus
+
 
 Dim temp As Integer
 
@@ -774,19 +796,24 @@ End Function
 '-- runJoy() - main function call for joystick mode - calls appropriate functions for called mode & returns boolean status
 '       - Inputs:
 '           - "Enable" - Sets motors for joystick mode and enables run-mode value
-'           - "Free" - Sets joystick to Free mode (Standard X-Y-Z options)
-'           - "Auger" - As Free mode, but allows APT Rotation
-'           - "Run" - Run mode (PathSpeed-PathTransverse-Z options)
+'           - "Free" - Sets joystick to Free mode
+'           - "Pause" - Set joystick to Pause mode
+'           - "Run" - Run mode
 '           - "Disable" - Disables joystick inputs
 Public Function runJoy(mode As String) As Boolean
          
-'If joystick Enable is called, start joystick
-If mode = "Enable" Then
+'If joystick Enable is called or runJoy is called without an Enable, initialize joystick
+If mode = "Enable" Or joyActive = False Then
     Call startJoy
+    runJoy = True
+    Exit Function
 End If
          
 'If the the joystick is active and the e-stop is not set
 If joyActive = True And chkE_Stop = False Then
+
+    'Refresh Input Data
+    Call updFastStatus
 
     '-- Variable Setup
     'Set up temporary input storage variable & get current inputs
@@ -797,23 +824,13 @@ If joyActive = True And chkE_Stop = False Then
     Dim endJoy As Boolean
     endJoy = False
     
-    '-- Joystick Jump-Table
-    Select Case mode
-        Case "Free"
-            endJoy = Not joyModeFree(inputs)
-            If endJoy Then GoTo CloseJoystick
-            
-        Case "Pause"
-            endJoy = Not joyPause(inputs)
-            If endJoy Then GoTo CloseJoystick
-        
-        Case "Run"
-            endJoy = Not joyRunPass(inputs)
-            If endJoy Then GoTo CloseJoystick
-            
-        Case "Disable"
-            GoTo CloseJoystick
-    End Select
+    'If mode is not disable, run mode set
+    If mode = "Disable" Then
+        GoTo CloseJoystick
+    Else
+        endJoy = Not joyModeSet(inputs, mode)
+        If endJoy Then GoTo CloseJoystick
+    End If
 
 End If
 
@@ -824,6 +841,7 @@ Call runJoyInputs
 runJoy = True
 
 Exit Function
+
 
 CloseJoystick:
 
@@ -1083,7 +1101,7 @@ If joyHoriz = temp Or joyVert = temp Then   'If any input axes are indicated as 
     End If
 End If
 
-temp = "YRb"  'Run Speed Boost
+temp = "Z'b"  'Run Speed Boost
 If joyHoriz = temp Or joyVert = temp Then   'If any input axes are indicated as the current axis, then
     'Determine what axis should be set and set jog / MC inputs accordingly
     If joyHoriz = temp Then
@@ -1134,41 +1152,44 @@ End Sub
 
 Private Sub runJoyInputs()
 
+Dim i As Integer
+
 ' If neither joystick input requires continuous motion, set jog mode
 If joyModeX = 0 And joyModeY = 0 Then
 
 '-- Rebuild Temp Values for Next State
-        Dim i As Integer
+    
+    Dim tempJog As String
 
-        'For all values in joyJogState (except index 0, which is unused)
-        For i = 1 To 6
-            If i <> 4 Then  'For all i except 4 (Osc)
-            
-                Select Case joyJogState(i)
-                    Case 0, 2, 3, 4         ' If jogState is not 1
-                        'First loop through, set initial variable value, else append character
-                        If i = 1 Then
-                            tempJog = "X"
-                        Else
-                            tempJog = tempJog & "X"
-                        End If
-                        
-                    Case 1          'If jogState is 1 then axis is active
-                        If i = 1 Then
-                            tempJog = "1"
-                        Else
-                            tempJog = tempJog & "1"
-                        End If
-                        
-                    Case Else
-                        MsgBox ("Error joyJogState Conversion:" & Chr(13) & "Index: " & i & ", State: " & tempJoyState)
-                End Select
-            Else    ' If i = 4 (Oscillator Axis)
-                tempJog = tempJog & "X"
-            End If
-        Next i
+    'For all values in joyJogState (except index 0, which is unused)
+    For i = 1 To 6
+        If i <> 4 Then  'For all i except 4 (Osc)
+        
+            Select Case joyJogState(i)
+                Case 0, 2, 3, 4         ' If jogState is not 1
+                    'First loop through, set initial variable value, else append character
+                    If i = 1 Then
+                        tempJog = "X"
+                    Else
+                        tempJog = tempJog & "X"
+                    End If
+                    
+                Case 1          'If jogState is 1 then axis is active
+                    If i = 1 Then
+                        tempJog = "1"
+                    Else
+                        tempJog = tempJog & "1"
+                    End If
+                    
+                Case Else
+                    MsgBox ("Error joyJogState Conversion:" & Chr(13) & "Index: " & i & ", State: " & joyJogState(i))
+            End Select
+        Else    ' If i = 4 (Oscillator Axis)
+            tempJog = tempJog & "X"
+        End If
+    Next i
 
-    c6k.Write ("JOG" & tempJog & Chr(13))
+c6k.Write ("JOG" & tempJog & Chr(13))
     
 End If
 
@@ -1205,8 +1226,6 @@ If joyModeX = 1 Or joyModeY = 1 Then
         
         
         '-- Rebuild Temp Values for Next State
-        Dim i As Integer
-
         'For all values in joyJogState (except index 0, which is unused)
         For i = 1 To 6
             If i <> 4 Then  'For all i except 4 (Osc)
@@ -1253,7 +1272,7 @@ If joyModeX = 1 Or joyModeY = 1 Then
                         End If
                         
                     Case Else
-                        MsgBox ("Error joyJogState Conversion:" & Chr(13) & "Index: " & i & ", State: " & tempJoyState)
+                        MsgBox ("Error joyJogState Conversion:" & Chr(13) & "Index: " & i & ", State: " & joyJogState(i))
                 End Select
             Else    ' If i = 4 (Oscillator Axis)
                 TempH = TempH & "X"
@@ -1297,8 +1316,6 @@ If joyModeX = 2 Or joyModeY = 2 Then
     If joyStkInputs <> joyLastStkInputs Then
     
         '-- Set/Clear boost bool for each state
-        Dim i As Integer
-
         'For all values in joyJogState (except index 0, which is unused)
         For i = 1 To 6
             If i <> 4 Then  'For all i except 4 (Osc)
@@ -1319,7 +1336,7 @@ If joyModeX = 2 Or joyModeY = 2 Then
                         If joyStkInputs = 3 Or 4 Then userSpeedBoost(i) = True Else userSpeedBoost(i) = False
                         
                     Case Else
-                        MsgBox ("Error joyJogState Boost Conversion:" & Chr(13) & "Index: " & i & ", State: " & tempJoyState)
+                        MsgBox ("Error joyJogState Boost Conversion:" & Chr(13) & "Index: " & i & ", State: " & joyJogState(i))
                 End Select
                 
             End If
@@ -1351,260 +1368,147 @@ End If
 
 End Sub
 
-'-- joyModeSet() - Sets joystick mode
+'-- joyModeSet() - Sets joystick mode -------------------------------------------------------------------------------------------
 Private Function joyModeSet(buttons As Integer, runMode As String) As Boolean
 
 If (buttons + 1) <> joyLastBtnInput Then
-
-'Disable jog mode to make changes
-c6k.Write ("JOG000X00" & Chr$(13))
-
-'Set joystick mode based on run mode - Free, Pause, or Run
-Select Case runMode
-    Case "Free"         'Standard X-Y-Z Mode. Used for Blades & Positioning
     
-        Select Case buttons
-            Case 0, 4  ' No Keys Pressed or Toggle Only - X-Y Mode
-                Select Case passType
-                    Case "Blade"
-                        Call setJoyInputs("X", "Y")
-                    Case "Auger Edge"
-                        Call setJoyInputs("YR", "Y")
-                    Case "Auger Face"
-                        Call setJoyInputs("X", "Z'R")
-                End Select
-                
-            Case 1 ' Select Key Pressed
-                Select Case passType
-                    Case "Blade"
-                        Call setJoyInputs("X", "Z")
-                    Case "Auger Edge"
-                        Call setJoyInputs("YR", "Y")
-                    Case "Auger Face"
-                        Call setJoyInputs("X", "Z'R")
-                End Select
-              
-            Case 5 ' Toggle Flipped and Select Pressed
-                Select Case passType
-                    Case "Blade"
-                        Call setJoyInputs("X", "Za")
-                    Case "Auger Edge"
-                        Call setJoyInputs("YR", "Y")
-                    Case "Auger Face"
-                        Call setJoyInputs("X", "Z'R")
-                End Select
-            
-            Case 2, 3, 6, 7 ' Release pressed in any combination
-                
-                GoTo ReleaseJoystick
-                
-            Case Else
-                
-                MsgBox "Error in joyModeFree Handler - Case: " & buttons
-                GoTo ReleaseJoystick
-            
-        End Select
+    'Disable jog mode to make changes
+    c6k.Write ("JOG000X00" & Chr$(13))
+    
+    'Set joystick mode based on run mode - Free, Pause, or Run
+    Select Case runMode
+        Case "Free"         'Standard X-Y-Z Mode. Used for Blades & Positioning
         
-    Case "Pause"
+            Select Case buttons
+                Case 0, 4  ' No Keys Pressed or Toggle Only - X-Y Mode
+                    Select Case passType
+                        Case "Blade"
+                            Call setJoyInputs("X", "Y")
+                        Case "Auger Edge"
+                            Call setJoyInputs("YR", "Y")
+                        Case "Auger Face"
+                            Call setJoyInputs("X", "Z'R")
+                    End Select
+                    
+                Case 1 ' Select Key Pressed
+                    Select Case passType
+                        Case "Blade"
+                            Call setJoyInputs("X", "Z")
+                        Case "Auger Edge"
+                            Call setJoyInputs("YR", "Z")
+                        Case "Auger Face"
+                            Call setJoyInputs("X", "Z'")
+                    End Select
+                  
+                Case 5 ' Toggle Flipped and Select Pressed
+                    Select Case passType
+                        Case "Blade"
+                            Call setJoyInputs("X", "Za")
+                        Case "Auger Edge"
+                            Call setJoyInputs("YR", "Za")
+                        Case "Auger Face"
+                            Call setJoyInputs("Y", "Z'")
+                    End Select
+                
+                Case 2, 3, 6, 7 ' Release pressed in any combination
+                    
+                    GoTo ReleaseJoystick
+                    
+                Case Else
+                    
+                    GoTo joyErrorHand
+                
+            End Select
+            
+        Case "Pause"
+            Select Case buttons
+                Case 4      'Toggle Only
+                    Select Case passType
+                        Case "Blade"
+                            Call setJoyInputs("X", "Y")
+                        Case "Auger Edge"
+                            Call setJoyInputs("YR", "Y")
+                        Case "Auger Face"
+                            Call setJoyInputs("Z'R", "X")
+                    End Select
+                Case 5      'Select Pressed
+                    Select Case passType
+                        Case "Blade"
+                            Call setJoyInputs("X", "Za")
+                        Case "Auger Edge"
+                            Call setJoyInputs("YR", "Za")
+                        Case "Auger Face"
+                            Call setJoyInputs("Y", "Za")
+                    End Select
+                Case 6, 7  ' Release Pressed - Advance Program
+                    GoTo ReleaseJoystick
+                Case 0, 1, 2, 3     'Toggle not flipped - return to run mode
+                    GoTo ReleaseJoystick
+                Case Else
+                    GoTo joyErrorHand
+            End Select
+        
+        Case "Run"
+            Select Case buttons
+                Case 0    'No buttons Pressed - Horizontal axis will adjust run speed
+                    Select Case passType
+                        Case "Blade"
+                            Call setJoyInputs("rS", "Y")
+                        Case "Auger Edge"
+                            Call setJoyInputs("rS", "Y")
+                        Case "Auger Face"
+                            Call setJoyInputs("rS", "X")
+                    End Select
+                Case 1      'Select Pressed - Horizontal axis will nudge run axis
+                    Select Case passType
+                        Case "Blade"
+                            Call setJoyInputs("Xb", "Z")
+                        Case "Auger Edge"
+                            Call setJoyInputs("YRb", "Z")
+                        Case "Auger Face"
+                            Call setJoyInputs("Z'Rb", "Z'b")
+                    End Select
     
-    
-    
-    
-    Case Else
-        MsgBox ("Error in joystick mode set")
+                Case 4, 5, 6, 7 'Toggle flipped
+                    GoTo ReleaseJoystick
+                Case 2, 3    'Release Pressed, no toggle - Ignore
+                    
+                Case Else
+                    GoTo joyErrorHand
+            End Select
+        
+        
+        
+        Case Else
+            GoTo joyErrorHand
+    End Select
+        
 End If
     
     
-    
-    
-joyModeFree = True
+joyModeSet = True
 joyLastBtnInput = (buttons + 1)
 
 Exit Function
 
+joyErrorHand:
+
+MsgBox "Error in joyModeFree Handler:" & Chr(13) & "Mode " & passType & ", Case: " & buttons
+
 ReleaseJoystick:
     'Return False to indicate that user input should end joystick mode
-    joyModeFree = False
+    joyModeSet = False
     joyLastBtnInput = 0
 
 
 End Function
 
-
-'-- joyPause() - joystick mode for when pause is set during a pass - Requires accomodation for oscillator, requires option for different run cases
-Private Function joyPause(buttons As Integer) As Boolean
-
-If (mode + 1) <> joyLastBtnInput Then
-
-    Select Case buttons
-        Case 0, 4  ' No Keys Pressed or Toggle Only - X-Y Mode
-        
-            Select Case passType
-                Case "Blade"
-                    c6k.Write ("JOG000X00" & Chr$(13))
-                
-                    c6k.Write ("1INFNC1-1J:1INFNC2-1K:1INFNC3-6J:1INFNC4-6K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 1 ; Set inputs 3 & 4 for +/- Axis 6
-                
-                    c6k.Write ("JOG100X01" & Chr$(13)) 'Set Axes 1 & 6 to Jog Mode
-                    
-                    joyStr = "X-Y"
-                    
-                Case "Auger Edge"
-                    c6k.Write ("!S000X00:JOG000X00:MC000X00" & Chr$(13))      'Stop Motion on all axes but Oscillator
-                    
-                    c6k.Write ("1INFNC1-1J:1INFNC2-1K" & Chr$(13))            'Set jog inputs on X-axis
-                    
-                    c6k.Write ("JOG100X00:MC000X11:GO000X11" & Chr$(13))
-                    
-                    joyStr = "X-YR"
-                    
-                Case "Auger Face"
-                    c6k.Write ("!S000X00:JOG000X00:MC000X00" & Chr$(13))
-                
-                    c6k.Write ("1INFNC1-1J:1INFNC2-1K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 5 ; Set inputs 3 & 4 for +/- Axis 6
-                
-                    c6k.Write ("JOG100X00" & Chr$(13)) 'Set Axes 5 & 6 to Jog Mode
-                    
-                    joyStr = "X-R"
-                    
-                Case Else
-                    MsgBox "Error in JoyRun Handler - Case: " & buttons & " Pass Type: " & passType
-                
-            End Select
-            
-        Case 1 ' Select Key Pressed
-        
-            c6k.Write ("JOG000X00" & Chr$(13))
-            
-            c6k.Write ("1INFNC1-1J:1INFNC2-1K:1INFNC3-2J:1INFNC4-2K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 1 ; Set inputs 3 & 4 for +/- Axis 2
-            
-            c6k.Write ("JOG110X00" & Chr$(13)) 'Set Axes 2 & 5 to Jog Mode
-            
-            joyStr = "X-Z"
-          
-        Case 5 ' Toggle Flipped and Select Pressed
-        
-            c6k.Write ("JOG000X00" & Chr$(13))
-            
-            c6k.Write ("1INFNC1-1J:1INFNC2-1K:1INFNC3-3J:1INFNC4-3K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 1 ; Set inputs 3 & 4 for +/- Axis 3
-            
-            c6k.Write ("JOG101XS00" & Chr$(13)) 'Set Axes 3 & 5 to Jog Mode
-            
-            joyStr = "X-Za"
-        
-        Case 2, 3, 6, 7 ' Release pressed in any combination
-            
-            'Return False to indicate that user input should end joystick mode
-            joyModeFree = False
-            mode_Last = 0
-            Exit Function
-            
-        Case Else
-            
-            MsgBox "Error in joyModeFree Handler - Case: " & buttons
-            joyModeFree = False
-            mode_Last = 0
-            Exit Function
-        
-    End Select
-    
-End If
-    
-joyModeFree = True
-
-joyLastBtnInput = (mode + 1)
-
-End Function
-
-Private Function joyRunPass(buttons As Integer) As Boolean
-
-If (mode + 1) <> joyLastBtnInput Then
-
-    Select Case buttons
-        Case 0, 4  ' No Keys Pressed or Toggle Only - X-Y Mode
-            Select Case passType
-                Case "Blade"
-                    c6k.Write ("JOG000X00" & Chr$(13))
-                
-                    c6k.Write ("1INFNC1-1J:1INFNC2-1K:1INFNC3-6J:1INFNC4-6K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 1 ; Set inputs 3 & 4 for +/- Axis 6
-                
-                    c6k.Write ("JOG000X01" & Chr$(13)) 'Set Axes 1 & 6 to Jog Mode
-                    
-                    joyStr = "X-Y"
-                    
-                Case "Auger Edge"
-                    c6k.Write ("JOG000X00" & Chr$(13))
-                
-                    c6k.Write ("1INFNC1-5J:1INFNC2-5K:1INFNC3-6J:1INFNC4-6K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 5 ; Set inputs 3 & 4 for +/- Axis 6
-                
-                    c6k.Write ("JOG000X11" & Chr$(13)) 'Set Axes 5 & 6 to Jog Mode
-                    
-                    joyStr = "Y-R"
-                    
-                Case "Auger Face"
-                    c6k.Write ("JOG000X00" & Chr$(13))
-                
-                    c6k.Write ("1INFNC1-5J:1INFNC2-5K:1INFNC3-6J:1INFNC4-6K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 5 ; Set inputs 3 & 4 for +/- Axis 6
-                
-                    c6k.Write ("JOG000X01" & Chr$(13)) 'Set Axes 5 & 6 to Jog Mode
-                    
-                    joyStr = "Y-R"
-                    
-                Case Else
-                    MsgBox "Error in JoyRun Handler - Case: " & buttons & " Pass Type: " & passType
-                
-            End Select
-            
-        Case 1 ' Select Key Pressed
-        
-            c6k.Write ("JOG000X00" & Chr$(13))
-            
-            c6k.Write ("1INFNC1-1J:1INFNC2-1K:1INFNC3-2J:1INFNC4-2K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 1 ; Set inputs 3 & 4 for +/- Axis 2
-            
-            c6k.Write ("JOG110X00" & Chr$(13)) 'Set Axes 2 & 5 to Jog Mode
-            
-            joyStr = "X-Z"
-          
-        Case 5 ' Toggle Flipped and Select Pressed
-        
-            c6k.Write ("JOG000X00" & Chr$(13))
-            
-            c6k.Write ("1INFNC1-1J:1INFNC2-1K:1INFNC3-3J:1INFNC4-3K" & Chr$(13)) 'Set inputs 1 & 2 for +/- Axis 1 ; Set inputs 3 & 4 for +/- Axis 3
-            
-            c6k.Write ("JOG101XS00" & Chr$(13)) 'Set Axes 3 & 5 to Jog Mode
-            
-            joyStr = "X-Za"
-        
-        Case 2, 3, 6, 7 ' Release pressed in any combination
-            
-            'Return False to indicate that user input should end joystick mode
-            joyModeFree = False
-            mode_Last = 0
-            Exit Function
-            
-        Case Else
-            
-            MsgBox "Error in JoyRun Handler - Case: " & buttons
-            joyModeFree = False
-            mode_Last = 0
-            Exit Function
-        
-    End Select
-    
-End If
-    
-joyModeFree = True
-
-joyLastBtnInput = (mode + 1)
-
-End Function
-
 Public Function updDro()
 
-'If fast status is not up to date, call fast status
-If Not fsUpToDate Then
-    Call updFastStatus
-End If
+'update inputs
+Call updFastStatus
+
 
 
 'For each drive axis, pull position from fast status data and display on maintenance DRO
@@ -1661,7 +1565,7 @@ Select Case passRunState
                 c6k.Write "MC000X11:GO000X11" & Chr(13)
             
             Case "Auger Face"
-                c6k.Write "MC011X11:GO011X11" & Chr(13)
+                c6k.Write "MC010X11:GO010X11" & Chr(13)
             
             Case Else
                 MsgBox ("Error in pass type select")
@@ -1700,7 +1604,7 @@ vO = ""
 Dim currentPassSpeed As Double
 Dim currentRotSpeed As Double
 currentPassSpeed = (basePassSpeed * userSpeedMult)
-currentRotSpeed = (baseRotVel * userSpeedMult)
+If baseRotVel <> "" Then currentRotSpeed = (baseRotVel * userSpeedMult)
 
 Select Case passType
     Case "Blade"
@@ -1709,7 +1613,7 @@ Select Case passType
         If userSpeedBoost(1) Then currentPassSpeed = currentPassSpeed * userSpeedBoostMult
         
         'Set necessary Speeds
-        vX = roundToString(currentPassSpeed, 3)
+        vX = Format(currentPassSpeed, "X0.000")
         
         vY = ""
         vZ = ""
@@ -1724,8 +1628,8 @@ Select Case passType
         If userSpeedBoost(5) Then currentRotSpeed = currentRotSpeed * userSpeedBoostMult
         
         'Set necessary Speeds
-        vX = roundToString(currentPassSpeed, 3)
-        vR = roundToString(currentRotSpeed, 3)
+        vX = Format(currentPassSpeed, "X0.000")
+        vR = Format(currentRotSpeed, "X0.000")
         
         vY = ""
         vZ = ""
@@ -1746,9 +1650,9 @@ Select Case passType
         If userSpeedBoost(5) Then currentRotSpeed = currentRotSpeed * userSpeedBoostMult
         
         
-        vY = roundToString(currentSpeedY, 3)
-        vZ = roundToString(currentSpeedZ, 3)
-        vR = roundToString(currentSpeedR, 3)
+        vY = Format(currentSpeedY, "X0.000")
+        vZ = Format(currentSpeedZ, "X0.000")
+        vR = Format(currentRotSpeed, "X0.000")
         
         vX = ""
         vZa = ""

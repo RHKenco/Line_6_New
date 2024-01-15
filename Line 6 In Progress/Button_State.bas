@@ -17,6 +17,7 @@ Public Sub btnState(btn_state As String)
     
     Call btnSt_Button_WO_Enter_Clear(btn_state)
     Call btnSt_Button_NF_Fin(btn_state)
+    Call btnSt_Button_Start(btn_state)
     Call btnSt_Button_Go(btn_state)
     Call btnSt_Button_Set_Clear_Auger(btn_state)
     

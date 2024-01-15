@@ -31,7 +31,7 @@ Begin VB.Form frmMaintenance
       Left            =   5040
       TabIndex        =   54
       Top             =   600
-      Width           =   4455
+      Width           =   5535
       Begin VB.CommandButton Button_Move_Axis 
          Caption         =   "GoY"
          Height          =   255
@@ -436,12 +436,12 @@ Begin VB.Form frmMaintenance
             Strikethrough   =   0   'False
          EndProperty
          ForeColor       =   &H8000000E&
-         Height          =   735
+         Height          =   855
          Left            =   1440
          TabIndex        =   69
-         Top             =   4080
+         Top             =   3960
          Visible         =   0   'False
-         Width           =   2895
+         Width           =   3975
       End
       Begin VB.Label Label_Drive_Num 
          BackColor       =   &H00C00000&
@@ -1486,7 +1486,7 @@ Begin VB.Form frmMaintenance
    End
    Begin VB.Label Label_Drives 
       BackColor       =   &H00C00000&
-      Caption         =   "        Drives                                              "
+      Caption         =   "        Drives                                                      "
       BeginProperty Font 
          Name            =   "Arial"
          Size            =   14.25
@@ -1501,7 +1501,7 @@ Begin VB.Form frmMaintenance
       Left            =   5040
       TabIndex        =   53
       Top             =   240
-      Width           =   4455
+      Width           =   5535
    End
    Begin VB.Label Label_IO_Section 
       BackColor       =   &H00C00000&
@@ -1704,9 +1704,6 @@ If Not c6kOps.chkE_Stop Then
 
 End If
 
-'Reset Fast Status Update Flag
-Call c6kOps.resetFSupd
-
 End Sub
 
 Private Sub Topbar_Joystick_Click()
@@ -1732,3 +1729,4 @@ Private Sub Topbar_Stop_Output_Click()
     Next i
 
 End Sub
+
