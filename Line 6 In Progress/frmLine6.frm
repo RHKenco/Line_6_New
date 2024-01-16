@@ -206,7 +206,9 @@ Begin VB.Form frmLine6
       Top             =   2160
       Width           =   2895
    End
-   Begin VB.Timer Timer_Blade_Runtime 
+   Begin VB.Timer Timer_Oscillator 
+      Enabled         =   0   'False
+      Interval        =   5
       Left            =   480
       Top             =   0
    End
@@ -732,6 +734,12 @@ End Sub
 Private Sub Timer_FSM_Timer()
 
 Call fsmMain.Run
+
+End Sub
+
+Private Sub Timer_Oscillator_Timer()
+
+Call c6kOps.runOsc
 
 End Sub
 

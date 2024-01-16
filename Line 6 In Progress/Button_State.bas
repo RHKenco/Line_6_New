@@ -10,9 +10,10 @@ Public Sub btnState(btn_state As String)
     '   - "Started" - Work order has been started, waiting for "Go" command
     '   - "Running" - Work order is running
     
+    
     ' Check if auger or blade
     If btn_state = "Active" Then
-        If c6kOps.getAugerSet() Then btnState ("Active Auger") Else btnState ("Active Blade")
+        If c6kOps.getAugerSet() Then btn_state = ("Active Auger") Else btn_state = ("Active Blade")
     End If
     
     Call btnSt_Button_WO_Enter_Clear(btn_state)
@@ -43,7 +44,7 @@ Select Case btn_state       'States: "Inactive", "Active Blade", "Active Auger",
         frmLine6.Button_WO_Enter_Clear.Enabled = False
         
     Case Else
-        MsgBox "Unspecified Button State for Enter/Clear Button"
+        MsgBox "Unspecified Button State for Enter/Clear Button: " & btn_state
 End Select
         
 End Sub
@@ -62,7 +63,7 @@ Select Case btn_state       'States: "Inactive", "Active Blade", "Active Auger",
         frmLine6.Button_Start.Enabled = False
         frmLine6.Button_Start.Visible = False
     Case Else
-        MsgBox "Unspecified Button State for Start Button"
+        MsgBox "Unspecified Button State for Start Button: " & btn_state
         
 End Select
 
@@ -92,7 +93,7 @@ Select Case btn_state       'States: "Inactive", "Active Blade", "Active Auger",
         frmLine6.Button_Fin.Enabled = False
         frmLine6.Button_Fin.Visible = True
     Case Else
-        MsgBox "Unspecified Button State for Not Finish & Finish Buttons"
+        MsgBox "Unspecified Button State for Not Finish & Finish Buttons: " & btn_state
         
 End Select
 
@@ -113,7 +114,7 @@ Select Case btn_state       'States: "Inactive", "Active Blade", "Active Auger",
         frmLine6.Button_Go.Enabled = False
         frmLine6.Button_Go.Visible = True
     Case Else
-        MsgBox "Unspecified Button State for GO Button"
+        MsgBox "Unspecified Button State for GO Button: " & btn_state
         
 End Select
 
@@ -145,7 +146,7 @@ Select Case btn_state       'States: "Inactive", "Active Blade", "Active Auger",
         
         frmLine6.Button_Clear_Auger.Enabled = False
     Case Else
-        MsgBox "Unspecified Button State for Auger Clear Set Buttons"
+        MsgBox "Unspecified Button State for Auger Clear Set Buttons: " & btn_state
         
 End Select
 

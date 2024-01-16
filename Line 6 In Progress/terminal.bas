@@ -157,6 +157,35 @@ Public fsmMain As New FSM_Line6
 Public fsmRun As New FSM_Line6_Run
 Public woMgr As New ClassWO_Manager
 
+Type joystickState      'Structure to store joystick state
+
+    active As Boolean       'Active boolean - true when joystick is doing stuff
+    
+    stateStr As String      'State String - To display currently active axes
+    
+    axisLR As Integer       'Integers storing the current drive axis for each joystick axis
+    axisFB As Integer
+    axisUD As Integer
+    
+    inBin(9) As Long        'Input Binary - To allow binary comparisons to input values in loops
+    
+    inDeb(9) As Integer     'Input Debounce Counters
+    
+    stateNow(9) As Boolean  'Array of bools containing current input state
+    stateLast(9) As Boolean 'Array of bools containing the previous input state
+    stateUpd As Boolean     'Bool to indicate if the input state has changed
+    
+    outOpt(6) As Integer    'Array of integers to store joystick output options
+    
+    joyJogStr As String     'String to contain jog state the joystick is currently using
+    joyMcStr As String      'String to contain MC state the joystick is currently using
+    
+End Type
+
+Type motionState        'Structure to store motion state being sent to 6k
+    
+
+End Type
 
 Function roundToString(math As Double, places As Integer) As String
 
@@ -253,16 +282,16 @@ Function BitText32Ex(v As Long) As String
 ' roughly .31 milliseconds to run - about double that of BitText32
     
     Dim temp$
-    Dim n%, i%, mask&
+    Dim n%, I%, mask&
     
-    i = 0
+    I = 0
     For n = 0 To 30
-        i = i + 1
+        I = I + 1
         mask = 2 ^ n
         temp = temp & CStr((v And mask) \ mask)
-        If i = 4 Then
+        If I = 4 Then
             temp = temp & "_"
-            i = 0
+            I = 0
         End If
     Next 'n
     

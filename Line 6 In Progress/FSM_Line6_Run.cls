@@ -68,7 +68,7 @@ End Sub
 Private Sub runState0() 'Setup State - Runs any necessary FSM Setup code and moves immediately to state 1
 
 'Home Oscillator
-Call c6kOps.homeOsc
+'Call c6kOps.homeOsc
 
 'Start Water Pump
 Call c6kOps.setOutput("Water Pump", True)
@@ -120,8 +120,6 @@ End Sub
 
 Private Sub runState2() 'Pause State - Joystick movement & Oscillator Only
 
-'-- Run Oscillator
-Call c6kOps.runOsc
 
 '-- Run Joystick
 If Not c6kOps.runJoy("Pause") Then      'If the joystick is released, figure out why
@@ -132,6 +130,10 @@ If Not c6kOps.runJoy("Pause") Then      'If the joystick is released, figure out
         'Revert to Run state
         State = 3
         Call c6kOps.RunPass("Start")
+        
+        'Set status message
+        Call statusMsg("Running", "")
+        
         Exit Sub
     End If
     
@@ -145,14 +147,8 @@ End Sub
 
 Private Sub runState3() 'Run State - Joystick in pass adjustment mode, Oscillator running
 
-'-- Run Oscillator
-Call c6kOps.runOsc
-
 '-- Run Pass
 Call c6kOps.RunPass("Update")
-
-'-- Run Joystick
-Call c6kOps.runJoy("Run")
 
 '-- Run Joystick
 If Not c6kOps.runJoy("Run") Then        'If the joystick is released, figure out why
@@ -163,6 +159,10 @@ If Not c6kOps.runJoy("Run") Then        'If the joystick is released, figure out
         'Revert to Pause State
         State = 2
         Call c6kOps.RunPass("Stop")
+        
+        'Set status message
+        Call statusMsg("Paused", "")
+            
         Exit Sub
         
     End If
@@ -183,7 +183,7 @@ Call statusMsg("Returned")
 '-- Check for Release / Toggle
 If c6kOps.getJoyToggle And c6kOps.getJoyRelease Then
     'Revert to Pause State
-    State = 0
+    State = 1
     Exit Sub
     
 End If

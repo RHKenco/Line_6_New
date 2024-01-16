@@ -180,7 +180,7 @@ Next i
     
         Set c6k = CreateObject("COM6SRVR.NET")
         If c6k.Connect(ipaddr) > 0 Then
-            c6k.Write "TREV" & vbCr    'send TREV command
+            c6k.Write "T1:TREV" & vbCr    'send TREV command
  
             Terminal_Timer.Enabled = True       'enable response polling
             connected = True            'set connected flag to true

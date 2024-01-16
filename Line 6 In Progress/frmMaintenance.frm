@@ -1677,7 +1677,7 @@ If Not c6kOps.chkE_Stop Then
         If c6kOps.runJoy("Free") Then
     
             'Set Joystick Status Message
-            Var_Label_Joystick_Status.Caption = "Joystick" & Chr(13) & "Enabled:" & Chr(13) & Chr(13) & c6kOps.getJoyStr() & Chr(13) & "Mode"
+            Var_Label_Joystick_Status.Caption = "Joystick Enabled:" & Chr(13) & c6kOps.getJoyStr() & " Mode"
             Var_Label_Joystick_Status.Visible = True
     
         Else

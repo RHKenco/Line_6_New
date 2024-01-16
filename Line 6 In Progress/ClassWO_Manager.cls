@@ -536,8 +536,8 @@ Select Case timerCmd
             Dim tempMin As Integer
             Dim tempSec As Integer
             Dim tempStr As String
-            tempMin = CInt((woCountdownTime / woTimeoutCalib) \ 60)
-            tempSec = CInt((woCountdownTime / woTimeoutCalib) - tempMin * 60)
+            tempMin = (woCountdownTime \ woTimeoutCalib) \ 60
+            tempSec = (woCountdownTime \ woTimeoutCalib) - tempMin * 60
             
             tempStr = CStr(tempMin) & ":" & Format(tempSec, "00")
             
