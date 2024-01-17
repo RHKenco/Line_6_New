@@ -147,7 +147,7 @@ Public OssSpeed1 As String
 Public OssSpeed2 As String
 Public OssSpeed3 As String
 Public OssSpeed4 As String
-Public JogOn As Boolean
+Public jogOn As Boolean
 Public JogInput1 As Boolean
 Public JogInput2 As Boolean
 ' Rick
@@ -156,6 +156,23 @@ Public c6kOps As New ClassC6K_Operations
 Public fsmMain As New FSM_Line6
 Public fsmRun As New FSM_Line6_Run
 Public woMgr As New ClassWO_Manager
+
+'Oft-Used Labels
+Public Const passBlade As Integer = 1
+Public Const passAugEdg As Integer = 2
+Public Const passAugFac As Integer = 3
+
+Public Const joyFree As Integer = 1
+Public Const joyPause As Integer = 2
+Public Const joyRun As Integer = 3
+
+'Drive Indicies
+Public Const driveX As Integer = 1
+Public Const driveY As Integer = 6
+Public Const driveZ As Integer = 2
+Public Const driveZa As Integer = 3
+Public Const driveO As Integer = 4
+Public Const driveR As Integer = 5
 
 Type joystickState      'Structure to store joystick state
 
@@ -167,15 +184,17 @@ Type joystickState      'Structure to store joystick state
     axisFB As Integer
     axisUD As Integer
     
-    inBin(9) As Long        'Input Binary - To allow binary comparisons to input values in loops
+    inBin(8) As Long        'Input Binary - To allow binary comparisons to input values in loops
     
-    inDeb(9) As Integer     'Input Debounce Counters
+    inDeb(8) As Integer     'Input Debounce Counters
     
-    stateNow(9) As Boolean  'Array of bools containing current input state
-    stateLast(9) As Boolean 'Array of bools containing the previous input state
-    stateUpd As Boolean     'Bool to indicate if the input state has changed
+    stateNow(8) As Boolean  'Array of bools containing current input state
+    stateLast(8) As Boolean 'Array of bools containing the previous input state
+    stateJoyUpd As Boolean  'Bool to indicate if the joystick input state has changed
+    stateBtnUpd As Boolean  'Bool to indicate if the button input state has changed
     
-    outOpt(6) As Integer    'Array of integers to store joystick output options
+    inSt(2) As Integer     'Array to store current function of joystick direction
+    outSt(6) As Integer    'Array of integers to store joystick output options
     
     joyJogStr As String     'String to contain jog state the joystick is currently using
     joyMcStr As String      'String to contain MC state the joystick is currently using
