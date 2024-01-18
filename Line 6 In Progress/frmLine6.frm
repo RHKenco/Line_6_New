@@ -661,6 +661,7 @@ btnState ("Inactive")
 
 '--
 Call c6kOps.Enable
+Call Joy.createJoystick
 
 '-- Run motor setup subroutine
 Call c6kOps.bootDrives
@@ -752,10 +753,10 @@ End Sub
 Private Sub Topbar_Joystick_Click()
 
 ' Toggle joystick active boolean
-If Not c6kOps.getJoyActive Then
-    c6kOps.runJoy ("Enable")
+If Not Joy.getJoyActive Then
+    Call Joy.runJoy(joyFree)
 Else
-    c6kOps.runJoy ("Disable")
+    Call Joy.runJoy(joyDisable)
     Var_Label_Joystick_Status.Visible = False
 End If
 

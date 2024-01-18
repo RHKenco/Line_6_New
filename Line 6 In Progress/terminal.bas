@@ -156,15 +156,18 @@ Public c6kOps As New ClassC6K_Operations
 Public fsmMain As New FSM_Line6
 Public fsmRun As New FSM_Line6_Run
 Public woMgr As New ClassWO_Manager
+Public Joy As New ClassJoy
 
 'Oft-Used Labels
 Public Const passBlade As Integer = 1
 Public Const passAugEdg As Integer = 2
 Public Const passAugFac As Integer = 3
 
-Public Const joyFree As Integer = 1
-Public Const joyPause As Integer = 2
-Public Const joyRun As Integer = 3
+Public Const joyDisable As Integer = 0
+Public Const joyEnable As Integer = 1
+Public Const joyFree As Integer = 2
+Public Const joyPause As Integer = 3
+Public Const joyRun As Integer = 4
 
 'Drive Indicies
 Public Const driveX As Integer = 1
@@ -198,13 +201,14 @@ Type joystickState      'Structure to store joystick state
     
     joyJogStr As String     'String to contain jog state the joystick is currently using
     joyMcStr As String      'String to contain MC state the joystick is currently using
+    joyMcDirStr As String   'String for MC direction, dilleniated with ','
     
 End Type
 
-Type motionState        'Structure to store motion state being sent to 6k
+'Type motionState        'Structure to store motion state being sent to 6k
     
 
-End Type
+'End Type
 
 Function roundToString(math As Double, places As Integer) As String
 
@@ -301,16 +305,16 @@ Function BitText32Ex(v As Long) As String
 ' roughly .31 milliseconds to run - about double that of BitText32
     
     Dim temp$
-    Dim n%, I%, mask&
+    Dim n%, i%, mask&
     
-    I = 0
+    i = 0
     For n = 0 To 30
-        I = I + 1
+        i = i + 1
         mask = 2 ^ n
         temp = temp & CStr((v And mask) \ mask)
-        If I = 4 Then
+        If i = 4 Then
             temp = temp & "_"
-            I = 0
+            i = 0
         End If
     Next 'n
     

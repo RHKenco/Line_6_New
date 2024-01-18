@@ -73,13 +73,13 @@ Call c6kOps.updFastStatus
     
     
     '-- Run Joystick if active
-        If c6kOps.getJoyActive And Not c6kOps.chkE_Stop() Then
+        If Joy.getJoyActive Then
         
             'Run JoyRun function, and if it returns true,
-            If c6kOps.runJoy("Free") Then
+            If Joy.runJoy(joyFree) Then
         
                 'Set Joystick Status Message
-                frmLine6.Var_Label_Joystick_Status.Caption = "Joystick" & Chr(13) & "Enabled:" & Chr(13) & Chr(13) & c6kOps.getJoyStr() & Chr(13) & "Mode"
+                frmLine6.Var_Label_Joystick_Status.Caption = "Joystick" & Chr(13) & "Enabled:" & Chr(13) & Chr(13) & Joy.getJoyStr() & Chr(13) & "Mode"
                 frmLine6.Var_Label_Joystick_Status.Visible = True
         
             Else

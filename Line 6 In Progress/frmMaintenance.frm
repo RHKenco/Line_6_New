@@ -1674,7 +1674,7 @@ If Not c6kOps.chkE_Stop Then
     If c6kOps.getJoyActive And Not c6kOps.chkE_Stop() Then
     
         'Run JoyRun function, and if it returns true,
-        If c6kOps.runJoy("Free") Then
+        If Joy.runJoy("Free") Then
     
             'Set Joystick Status Message
             Var_Label_Joystick_Status.Caption = "Joystick Enabled:" & Chr(13) & c6kOps.getJoyStr() & " Mode"
@@ -1710,9 +1710,9 @@ Private Sub Topbar_Joystick_Click()
 
 ' Toggle joystick active boolean
 If Not c6kOps.getJoyActive Then
-    c6kOps.runJoy ("Enable")
+    Joy.runJoy ("Enable")
 Else
-    c6kOps.runJoy ("Disable")
+    Joy.runJoy ("Disable")
     Var_Label_Joystick_Status.Visible = False
 End If
 

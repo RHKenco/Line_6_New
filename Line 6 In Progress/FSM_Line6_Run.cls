@@ -74,7 +74,7 @@ Private Sub runState0() 'Setup State - Runs any necessary FSM Setup code and mov
 Call c6kOps.setOutput("Water Pump", True)
     
 'Initialize Joystick
-Call c6kOps.runJoy("Enable")
+Call Joy.runJoy("Enable")
     
 'Initialize internal variables
 stateInner = 0
@@ -91,7 +91,7 @@ Select Case stateInner
         'Set status message
         Call statusMsg("Strike", "")
         'Wait until joystick is inactive
-        If c6kOps.runJoy("Free") Then Exit Sub
+        If Joy.runJoy("Free") Then Exit Sub
         stateInner = 1
     Case 1
         'Strike Arc
@@ -122,10 +122,10 @@ Private Sub runState2() 'Pause State - Joystick movement & Oscillator Only
 
 
 '-- Run Joystick
-If Not c6kOps.runJoy("Pause") Then      'If the joystick is released, figure out why
+If Not Joy.runJoy("Pause") Then      'If the joystick is released, figure out why
 
     '-- Check for Inputs
-    If Not c6kOps.getJoyToggle Then 'If switch is not on
+    If Not Joy.getJoyToggle Then 'If switch is not on
         
         'Revert to Run state
         State = 3
@@ -151,7 +151,7 @@ Private Sub runState3() 'Run State - Joystick in pass adjustment mode, Oscillato
 Call c6kOps.RunPass("Update")
 
 '-- Run Joystick
-If Not c6kOps.runJoy("Run") Then        'If the joystick is released, figure out why
+If Not Joy.runJoy("Run") Then        'If the joystick is released, figure out why
     
     '-- Check for switch
     If c6kOps.getJoyToggle Then 'If switch is on
