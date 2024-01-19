@@ -68,7 +68,7 @@ End Sub
 Private Sub runState0() 'Setup State - Runs any necessary FSM Setup code and moves immediately to state 1
 
 'Home Oscillator
-'Call c6kOps.homeOsc
+Call c6kOps.homeOsc
 
 'Start Water Pump
 Call c6kOps.setOutput(outH2O, True)
@@ -134,12 +134,12 @@ If Not Joy.runJoy(joyPause) Then      'If the joystick is released, figure out w
         Call statusMsg(msgRunning)
         
         'On first run, start carbide
-        If innerState = 0 Then
+        If stateInner = 0 Then
             Call c6kOps.setOutput(outTcFeed, True)
             stateInner = 1
         End If
         
-        Exit Sub
+        GoTo runOsc2
     End If
     
     'If the switch is on, then release was pressed - Switch to Return state
@@ -147,8 +147,14 @@ If Not Joy.runJoy(joyPause) Then      'If the joystick is released, figure out w
     Call c6kOps.RunPass("Stop")
     Call c6kOps.setOutput(outTcFeed, False)
     stateInner = 0
-
+    Exit Sub
 End If
+
+runOsc2:
+
+'Run Oscillator
+Call c6kOps.runOsc
+
 
 End Sub
 
@@ -170,18 +176,27 @@ If Not Joy.runJoy(joyRun) Then        'If the joystick is released, figure out w
         'Set status message
         Call statusMsg(msgPaused)
             
-        Exit Sub
+        GoTo runOsc3
         
     End If
     
     'If the switch is not on and the joystick was released, an error occurred
     MsgBox "Run Joystick Incorrectly Released"
+    
+    Exit Sub
 
 End If
+
+runOsc3:
+
+'Run Oscillator
+Call c6kOps.runOsc
 
 End Sub
 
 Private Sub runState4() 'Return State - moves head back to start of pass, then backs away perpendicularly by set distance
+
+Call c6kOps.returnOsc
 
 Call Joy.getJoyInputs(c6kOps.getInputState)
 

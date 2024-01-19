@@ -3,8 +3,8 @@ Begin VB.Form frmLine6
    BackColor       =   &H00C00000&
    Caption         =   "Line 6"
    ClientHeight    =   6660
-   ClientLeft      =   165
-   ClientTop       =   810
+   ClientLeft      =   225
+   ClientTop       =   855
    ClientWidth     =   19410
    LinkTopic       =   "Form6"
    ScaleHeight     =   6660
@@ -579,7 +579,7 @@ Call btnState(btnRunning)
 
 fsmMain.State = 2
 
-Text_Focus_Trap.SetFocus
+'Text_Focus_Trap.SetFocus
 
 End Sub
 
@@ -616,9 +616,9 @@ Text_Enter_Pass_Width.SetFocus
 
 End Sub
 
-Private Sub Option_Auger_Direction_Click(Index As Integer)
+Private Sub Option_Auger_Direction_Click(index As Integer)
 
-If Index = 0 Then
+If index = 0 Then
     If Option_Auger_Direction(0).value = True Then
         Option_Auger_Direction(0).value = False
         Option_Auger_Direction(1).value = True
@@ -700,7 +700,7 @@ Label_Estop.Visible = False
 'Initialize Focus Trap Textbox
 Text_Focus_Trap.Visible = False
 Text_Focus_Trap.TabStop = False
-Text_Focus.SetFocus
+'Text_Focus_Trap.SetFocus
 
 'Initialize Form Buttons
 Call btnState(btnInactive)

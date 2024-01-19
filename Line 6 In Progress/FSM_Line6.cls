@@ -146,8 +146,7 @@ End Sub
 
 Private Sub runState4() 'Run Pass State - Runs sub-FSM to operate the machine while running a pass
 
-Call btnState(btnActive)
-Call statusMsg(msgActive)
+Call btnState(btnStarted)
 
 State = 1
 

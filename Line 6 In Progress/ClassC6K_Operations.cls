@@ -150,6 +150,9 @@ End If
 
 Call setSpeeds
 
+'Initialize Oscillator with new pass width
+Call initOsc
+
 Exit Sub
 
 ErrHand:
@@ -663,15 +666,32 @@ c6k.Write "A,10:AD,3:V,13:D,0.9:GO01:1OUT.16-1:WAIT(MOV=b000000)" & Chr$(13)
 
 End Sub
 
+Public Sub initOsc()
+    'Create oscillator program to check if motion has stopped and toggle direction
+    c6k.Write ("VAR1=0:Var2=0:DEL CHECK1:DEF CHECK1" & Chr(13))
+    'Each time the program is called, run it a set number of times
+    c6k.Write ("VAR1=2:REPEAT" & Chr(13))
+    'Check to see if the oscillator has stopped moving
+    c6k.Write ("IF(MOV=bXXX0XX)" & Chr(13))
+        c6k.Write ("IF(VAR2=0):V,,," & Str$(baseOscSpeed) & ",,:VAR2=1:NIF" & Chr(13))                        'Set osc velocity
+        c6k.Write ("IF(VAR2=1):D,,," & Str$(passWidth) & ",,:VAR2=2" & Chr(13))       'If last pass was -, then set + distance & reset bool
+        c6k.Write ("ELSE(VAR2=2):D,,,-" & Str$(passWidth) & ",,:VAR2=1:NIF" & Chr(13))      'If last pass was +, then set - distance & reset bool
+    c6k.Write ("GOXXX1XX:NIF:VAR1=VAR1-1:UNTIL(VAR1<1)" & Chr(13))                                            'Initiate motion, increment counter
+    c6k.Write ("END" & Chr(13))
+    
+    'Create oscillator program to check which direction was last called, and return to start if necessary
+    c6k.Write ("DEL CHECK2:DEF CHECK2" & Chr(13))
+        '*** Create program here
+    c6k.Write ("END" & Chr(13))
+    
+End Sub
+
 Public Sub runOsc()
-    Static oscDir
+    c6k.Write ("GOSUB CHECK1" & Chr(13))
+End Sub
 
-    c6k.Write ("IF(MOV=bXXX0XX)" & Chr(13))                                         'If osc motion has stopped
-        c6k.Write ("IF(VAR1=0):V,,," & Str$(baseOscSpeed) & ",,:VAR1=1:NIF" & Chr(13))                        'Set osc velocity
-        c6k.Write ("IF(VAR1=1):D,,," & Str$(passWidth) & ",,:VAR1=2:NIF" & Chr(13))       'If last pass was -, then set + distance & reset bool
-        c6k.Write ("IF(VAR1=2):D,,,-" & Str$(passWidth) & ",,:VAR1=1:NIF" & Chr(13))      'If last pass was +, then set - distance & reset bool
-    c6k.Write ("GOXXX1XX:NIF" & Chr(13))                                                'Initiate motion
-
+Public Sub returnOsc()
+    c6k.Write ("GOSUB CHECK2" & Chr(13))
 End Sub
 
 Public Sub RunPass(passRunState As String)
