@@ -22,7 +22,7 @@ Begin VB.Form frmLine6
          Strikethrough   =   0   'False
       EndProperty
       Height          =   1095
-      Left            =   5400
+      Left            =   7800
       TabIndex        =   26
       Top             =   5040
       Width           =   2175
@@ -551,7 +551,7 @@ Call c6kOps.setPassType
 Button_Set_Auger.Visible = True
 Button_Set_Auger.Refresh
 
-Call statusMsg("Active Blade", "")
+Call statusMsg(msgActive)
 
 End Sub
 
@@ -565,6 +565,9 @@ Private Sub Button_Go_Click()
 
 'Set pass width
 Call c6kOps.setPassWidth
+
+'Set Button State
+Call btnState(btnRunning)
 
 fsmMain.State = 2
 
@@ -650,14 +653,14 @@ Var_Label_WO_Active.Tag = "No Active Work Order"
 Var_Label_WO_Active.Caption = Var_Label_WO_Active.Tag
 Var_Label_WO_Active.Visible = True
 
-Call statusMsg("Inactive", "")
+Call statusMsg(msgInactive)
 
 Var_Label_Joystick_Status.Visible = False
 
 Label_Estop.Visible = False
 
 'Initialize Form Buttons
-btnState ("Inactive")
+Call btnState(btnInactive)
 
 '--
 Call c6kOps.Enable
@@ -670,8 +673,8 @@ Call c6kOps.bootDrives
 'Call woMgr.chkActiveWO
 
 '-- Start Airblade & Exhaust Fan
-Call c6kOps.setOutput("Airblade", True)
-Call c6kOps.setOutput("Exhaust", True)
+Call c6kOps.setOutput(outAirblade, True)
+Call c6kOps.setOutput(outExhaust, True)
 
 '-- Enable FSM
 Timer_FSM.Enabled = True

@@ -1535,7 +1535,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
-Private Sub Button_Move_Axis_Click(Index As Integer)
+Private Sub Button_Move_Axis_Click(index As Integer)
 
 Const MoveVelocities = "1,1,1,1,1,1"
 
@@ -1546,7 +1546,7 @@ Dim tempGO As String
 For i = 0 To 5
 
     If i = 0 Then
-        If i = Index Then
+        If i = index Then
             tempD = Format(CDbl(Text_In_Des(i).Text), "0.000")
             tempGO = "1"
         Else
@@ -1554,7 +1554,7 @@ For i = 0 To 5
             tempGO = "0"
         End If
     Else
-        If i = Index Then
+        If i = index Then
             tempD = tempD & "," & Format(CDbl(Text_In_Des(i).Text), "0.000")
             tempGO = tempGO & "1"
         Else
@@ -1592,18 +1592,18 @@ End Sub
 
 Private Sub setInputText(currentInputState As Long)
 
-Dim Index As Integer
+Dim index As Integer
 Dim inputOn As Boolean
 
 For i = 0 To 15
 
     'Set up index for selecting proper label & Input binary
-    If i > 7 Then Index = i + 8 Else Index = i
+    If i > 7 Then index = i + 8 Else index = i
     
-    inputOn = (currentInputState And (2 ^ Index))
+    inputOn = (currentInputState And (2 ^ index))
     
     'Set text to red if input is active
-    If inputOn Then Label_Block_Pin(Index).ForeColor = (&HCF&) Else Label_Block_Pin(Index).ForeColor = (&H8000000E)
+    If inputOn Then Label_Block_Pin(index).ForeColor = (&HCF&) Else Label_Block_Pin(index).ForeColor = (&H8000000E)
 
 Next i
 
@@ -1632,14 +1632,14 @@ For i = 0 To 14
     ' If the current output is not enabled and checkbox is checked
     If Not outputOn And boxChecked Then
         'Acivate Output
-        Call c6kOps.setOutputNum((outputIndex + 1), True)
+        Call c6kOps.setOutput((outputIndex + 1), True)
         'Set text color to red
         Label_Block_Pin(outputIndex).ForeColor = (&HCF&)
         
     ' If the current output is enabled and the box not checked
     ElseIf outputOn And Not boxChecked Then
         'Disable Output
-        Call c6kOps.setOutputNum((outputIndex + 1), False)
+        Call c6kOps.setOutput((outputIndex + 1), False)
         'Set text color to white
         Label_Block_Pin(outputIndex).ForeColor = (&H8000000E)
         
@@ -1671,13 +1671,13 @@ Call c6kOps.updFastStatus
 If Not c6kOps.chkE_Stop Then
 
 '-- Run Joystick if active
-    If c6kOps.getJoyActive And Not c6kOps.chkE_Stop() Then
+    If Joy.getJoyActive And Not c6kOps.chkE_Stop() Then
     
         'Run JoyRun function, and if it returns true,
-        If Joy.runJoy("Free") Then
+        If Joy.runJoy(joyFree) Then
     
             'Set Joystick Status Message
-            Var_Label_Joystick_Status.Caption = "Joystick Enabled:" & Chr(13) & c6kOps.getJoyStr() & " Mode"
+            Var_Label_Joystick_Status.Caption = "Joystick Enabled:" & Chr(13) & Joy.getJoyStr() & " Mode"
             Var_Label_Joystick_Status.Visible = True
     
         Else
@@ -1709,10 +1709,10 @@ End Sub
 Private Sub Topbar_Joystick_Click()
 
 ' Toggle joystick active boolean
-If Not c6kOps.getJoyActive Then
-    Joy.runJoy ("Enable")
+If Not Joy.getJoyActive Then
+    Joy.runJoy (joyFree)
 Else
-    Joy.runJoy ("Disable")
+    Joy.runJoy (joyDisable)
     Var_Label_Joystick_Status.Visible = False
 End If
 

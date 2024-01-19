@@ -129,10 +129,10 @@ If frmLine6.Text_Enter_WO.Text <> frmLine6.Text_Enter_WO.Tag And frmLine6.Text_E
         frmLine6.Var_Label_WO_Active.Caption = "Work Order " + woNum + " Active"
         frmLine6.Var_Label_WO_Active.Visible = True
         
-        Call statusMsg("Active Blade", "")
+        Call statusMsg(msgActive)
         
         'Update Buttons
-        Call btnState("Active Blade")
+        Call btnState(btnActive)
         
         frmLine6.Refresh
         
@@ -167,7 +167,7 @@ Public Sub clearWO()
     frmLine6.Var_Label_WO_Active.Caption = frmLine6.Var_Label_WO_Active.Tag
     frmLine6.Var_Label_WO_Active.Visible = True
     
-    Call statusMsg("Inactive", "")
+    Call statusMsg(msgInactive)
     
     'Clear Stored FORM.ASC Variables
     woNum = ""
@@ -184,7 +184,7 @@ Public Sub clearWO()
     Call c6kOps.clearAugerParam
     
     'Update Buttons
-    btnState ("Inactive")
+    btnState (btnInactive)
     
     frmLine6.Refresh
     
@@ -242,7 +242,7 @@ End Sub
 Public Sub startWO()
     Call updTemp("Start")
     Call writeData("Start")
-    Call btnState("Started")
+    Call btnState(btnStarted)
     
     'Start Timeout Timer
     Call woTimer("Start")
@@ -253,20 +253,20 @@ End Sub
 Public Sub notfinishWO()
     Call updTemp("End")
     Call writeData("N/F")
-    Call btnState("Active")
+    Call btnState(btnActive)
     
     'Stop Timeout Timer
     Call woTimer("Reset")
     woStarted = False
     
-    Call statusMsg("Not-Finish", "")
+    Call statusMsg(msgNotFinished)
 
 End Sub
 
 Public Sub finishWO()
     Call updTemp("End")
     Call writeData("Finish")
-    Call btnState("Active")
+    Call btnState(btnActive)
 
     'Stop Timeout Timer
     Call woTimer("Reset")
@@ -276,7 +276,7 @@ End Sub
 
 Private Sub timeoutWO()
     Call writeData("TimeOut")
-    Call btnState("Active")
+    Call btnState(btnActive)
     
     Call systemMsg("Timeout")
 
@@ -395,7 +395,7 @@ Select Case Punch
         Close #1
         
         'Write status message to Form
-        Call statusMsg("Finish", CStr(FinishedQty))
+        Call statusMsg(msgFinished, CStr(FinishedQty))
         
     Case Else
         MsgBox ("Error in Punch Handler")
@@ -541,7 +541,7 @@ Select Case timerCmd
             
             tempStr = CStr(tempMin) & ":" & Format(tempSec, "00")
             
-            Call statusMsg("Started", tempStr)
+            Call statusMsg(msgStarted, tempStr)
             
         Else
             

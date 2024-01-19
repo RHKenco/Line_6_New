@@ -23,27 +23,6 @@ Attribute VB_Exposed = False
 
 '-- Class Constants & Variables ---------------------------------------------------------------------------------------
 
-'Inputs - bINPUT corresponds to the binary from FastStatus, INPUT corresponds to index in input array (joyIn(9))
-Private Const bJoyLeft As Long = Input1
-Private Const joyLeft As Integer = 0
-Private Const bJoyRight As Long = Input2
-Private Const joyRight As Integer = 1
-Private Const bJoyFront As Long = Input3
-Private Const joyFront As Integer = 2
-Private Const bJoyBack As Long = Input4
-Private Const joyBack As Integer = 3
-Private Const bJoyUp As Long = Input5
-Private Const joyUp As Integer = 4
-Private Const bJoyDown As Long = Input6
-Private Const joyDown As Integer = 5
-
-Private Const bJoySelect As Long = Input22
-Private Const joySelect As Integer = 6
-Private Const bJoyRelease As Long = Input23
-Private Const joyRelease As Integer = 7
-Private Const bJoyToggle As Long = Input24
-Private Const joyToggle As Integer = 8
-
 'Drive States
 Private Const driveJog As Integer = 1
 Private Const driveMcJog As Integer = 2
@@ -97,7 +76,15 @@ Private Const arS As Integer = 18
 Private Const arSstr As String = "Run Speed"
 
 'Internal Variables & Defaults
-Private Const inDebCount As Integer = 5      'Time in FSM cycles of input debounce
+Private Const inDebCount As Integer = 5     'Time in FSM cycles of input debounce
+
+Private userSpeedMult As Single             'Speed Multiplier to be applied to speed for varying pass speeds on the fly
+Private Const speedMultInc = 0.05           'Constant for incrementing the speedmult increase
+Private Const speedMultBounds = 0.5         ' +/- Speed Mult Allowance
+
+Private userSpeedBoost(6) As Integer        'Speed Boost Int for each axis - joystick adjustment of multi-axis movements
+Private Const userSpeedBoostMod = 0.25      'Constant for speed boost for multi-axis joystick operations
+
 
 'Read-Only Variables
 Private myJoy As joystickState
@@ -119,6 +106,8 @@ myJoy.inBin(joyDown) = bJoyDown
 myJoy.inBin(joySelect) = bJoySelect
 myJoy.inBin(joyRelease) = bJoyRelease
 myJoy.inBin(joyToggle) = bJoyToggle
+
+Call resetSpeedMult
 
 'Initialize joystick jog parameters
 Call initJoy
@@ -211,6 +200,15 @@ Public Function getJoyInputs(c6kInput As Long, Optional returnIndex As Integer) 
         'Store the current input value
         tempIn = (c6kInput And myJoy.inBin(i))
         
+        'Set Normally Open / Normally Closed
+        Select Case i
+            Case joyLeft, joyRight, joyFront, joyBack, joyUp, joyDown
+                'Do nothing to Normally Open inputs
+            Case joySelect, joyRelease, joyToggle
+                tempIn = Not tempIn     'Normally Closed inputs reversed
+        End Select
+        
+        
         'See if the current input value is different from the previous one
         If tempIn <> myJoy.stateNow(i) Then
             'If it is, Store last input value
@@ -235,6 +233,7 @@ Public Function getJoyInputs(c6kInput As Long, Optional returnIndex As Integer) 
             End If
             
             If isUpdated = True And i < 6 Then myJoy.stateJoyUpd = True Else myJoy.stateJoyUpd = False
+            If isUpdated = True And i > 5 Then myJoy.stateBtnUpd = True Else myJoy.stateBtnUpd = False
             
         End If
         
@@ -252,6 +251,26 @@ Public Function getJoyInputs(c6kInput As Long, Optional returnIndex As Integer) 
         MsgBox "Error in getJoyInputs: " & returnIndex & " is not a valid input"
     End If
     
+End Function
+
+Public Function getJoyButtons(index As Integer) As Boolean
+    If index < 9 Then
+        getJoyButtons = myJoy.stateNow(index)
+    Else
+        MsgBox "Invalid Button Index Request"
+    End If
+End Function
+
+Public Function getJoySelect() As Boolean
+    getJoySelect = myJoy.stateNow(joySelect)
+End Function
+
+Public Function getJoyRelease() As Boolean
+    getJoyRelease = myJoy.stateNow(joyRelease)
+End Function
+
+Public Function getJoyToggle() As Boolean
+    getJoyToggle = myJoy.stateNow(joyToggle)
 End Function
 
 '-- initJoy - Function to set up basic joystick parameters. Called when initializing joystick
@@ -449,7 +468,7 @@ If myJoy.stateBtnUpd Or Not myJoy.active Then
         
 End If
     
-Call jogOn
+'Call jogOn
 joyModeSet = True
 myJoy.active = True
 
@@ -479,10 +498,6 @@ End If
 Call jogOff
 
 myJoy.stateStr = getStr(joyLR) & " - " & getStr(joyFB) & " - " & getStr(joyUD)
-
-'Clear joyMode vars and JogState vars
-joyModeX = 0
-joyModeY = 0
 
 Dim i As Integer
 For i = 1 To 6
@@ -623,7 +638,7 @@ If myJoy.inSt(0) = driveJog Or myJoy.inSt(1) = driveJog Or myJoy.inSt(2) = drive
         If i <> 4 Then  'For all i except 4 (Osc)
         
             Select Case myJoy.outSt(i)
-                Case 0, driveMcJog, driveMcRun, driveBoosLR, driveBoostFB, driveBoostUD         ' If jogState is not 1
+                Case 0, driveMcJog, driveMcRun, driveBoostLR, driveBoostFB, driveBoostUD         ' If jogState is not 1
                     'First loop through, set initial variable value, else append character
                     If i = 1 Then
                         tempJog = "X"
@@ -655,7 +670,7 @@ If myJoy.inSt(0) = driveJog Or myJoy.inSt(1) = driveJog Or myJoy.inSt(2) = drive
 End If
 
 '-- Set c6k Mc State if necessary
-If myJoy.inSt(0) = driveJog Or myJoy.inSt(1) = driveJog Or myJoy.inSt(2) = driveJog Then
+If myJoy.inSt(0) = driveMcJog Or myJoy.inSt(1) = driveMcJog Or myJoy.inSt(2) = driveMcJog Then
     Dim tempMc As String
     Dim tempMcVel As String
     'For all values in joyJogState (except index 0, which is unused)
@@ -663,7 +678,7 @@ If myJoy.inSt(0) = driveJog Or myJoy.inSt(1) = driveJog Or myJoy.inSt(2) = drive
         If i <> 4 Then  'For all i except 4 (Osc)
         
             Select Case myJoy.outSt(i)
-                Case 0, driveMcJog, driveMcRun, driveBoosLR, driveBoostFB, driveBoostUD         ' If jogState is not 1
+                Case 0, driveJog, driveMcRun, driveBoostLR, driveBoostFB, driveBoostUD         ' If jogState is not 1
                     'First loop through, set initial variable value, else append character
                     If i = 1 Then
                         tempMc = "X"
@@ -673,7 +688,7 @@ If myJoy.inSt(0) = driveJog Or myJoy.inSt(1) = driveJog Or myJoy.inSt(2) = drive
                         tempMcVel = tempMcVel & ","
                     End If
                     
-                Case driveJog          'If drive is in jog mode, make it active
+                Case driveMcJog          'If drive is in jog mode, make it active
                     If i = 1 Then
                         tempMc = "1"
                         tempMcVel = "*,"
@@ -692,11 +707,12 @@ If myJoy.inSt(0) = driveJog Or myJoy.inSt(1) = driveJog Or myJoy.inSt(2) = drive
     Next i
     
     'Disable Previous Jog Jog mode
-    If myJoy.joyJogStr <> "" Then c6k.Write ("MC" & Replace(myJoy.joyJogStr, "1", "0") & Chr(13))
+    If myJoy.joyMcStr <> "" Then c6k.Write ("MC" & Replace(myJoy.joyMcStr, "1", "0") & Chr(13))
     'Enable Current MC Jog Mode
     c6k.Write ("MC" & tempMc & Chr(13))
     
     myJoy.joyMcStr = tempMc
+    myJoy.joyMcDirStr = tempMcVel
 End If
 
 Exit Sub
@@ -743,32 +759,42 @@ For i = 0 To 2
 
 Next i
 
-'-- If any of the axes are set to speed control, adjust speedmult
+'-- If any of the axes are set to speed control, call for speed to be adjusted
 If runSc Then
+    Dim changeSpeed As Integer
+
     For i = 0 To 2  'For each joystick direction
         If myJoy.inSt(i) = driveMcRun Then
             Select Case i
                 Case 0
-                    If myJoy.stateNow(joyLeft) Then
-                        userSpeedMult = userSpeedMult + speedMultInc
-                    ElseIf myJoy.stateNow(joyRight) Then
-                        userSpeedMult = userSpeedMult - speedMultInc
+                    If myJoy.stateNow(joyRight) Then
+                        changeSpeed = 1
+                    ElseIf myJoy.stateNow(joyLeft) Then
+                        changeSpeed = 2
                     End If
                 Case 1
                     If myJoy.stateNow(joyFront) Then
-                        userSpeedMult = userSpeedMult + speedMultInc
+                        changeSpeed = 1
                     ElseIf myJoy.stateNow(joyBack) Then
-                        userSpeedMult = userSpeedMult - speedMultInc
+                        changeSpeed = 2
                     End If
                 Case 2
                     If myJoy.stateNow(joyUp) Then
-                        userSpeedMult = userSpeedMult + speedMultInc
+                        changeSpeed = 1
                     ElseIf myJoy.stateNow(joyDown) Then
-                        userSpeedMult = userSpeedMult - speedMultInc
+                        changeSpeed = 2
                     End If
             End Select
         End If
     Next i
+    
+    'Adjust Speed Accordingly, respecting speed bounds
+    If changeSpeed = 1 Then
+        If userSpeedMult <= (1 + speedMultBounds) Then userSpeedMult = userSpeedMult + speedMultInc
+    ElseIf changeSpeed = 2 Then
+        If userSpeedMult >= (1 - speedMultBounds) Then userSpeedMult = userSpeedMult - speedMultInc
+    End If
+    
 End If
 
 '-- If any of the axes require Continuous Motion outside of non-run axes
@@ -816,7 +842,83 @@ If runMc Then
 
 End If
 
-'*** Add Boost Function
+'-- Clear boost array
+For i = 1 To 6
+    userSpeedBoost(i) = 0
+Next i
+
+'-- If any of the axes require Continuous Motion outside of non-run axes
+If runBst Then
+    
+    Dim tempBst As Integer
+    
+    For i = 0 To 2
+            
+        Select Case i
+            Case 0
+                'Determine what direction to boost
+                If myJoy.inSt(i) = driveBoostLR Then
+                    If myJoy.stateNow(joyRight) Then
+                        tempBst = 1
+                    ElseIf myJoy.stateNow(joyLeft) Then
+                        tempBst = 2
+                    End If
+                End If
+                'Determine which axes to boost
+                Dim A As Integer
+                For A = 1 To 6
+                    If myJoy.outSt(A) = driveBoostLR Then userSpeedBoost(A) = tempBst
+                Next A
+                
+            Case 1
+                'Determine what direction to boost
+                If myJoy.inSt(i) = driveBoostFB Then
+                    If myJoy.stateNow(joyFront) Then
+                        tempBst = 1
+                    ElseIf myJoy.stateNow(joyBack) Then
+                        tempBst = 2
+                    End If
+                End If
+                'Determine which axes to boost
+                For A = 1 To 6
+                    If myJoy.outSt(A) = driveBoostFB Then userSpeedBoost(A) = tempBst
+                Next A
+                
+            Case 2
+                'Determine what direction to boost
+                If myJoy.inSt(i) = driveBoostUD Then
+                    If myJoy.stateNow(joyUp) Then
+                        tempBst = 1
+                    ElseIf myJoy.stateNow(joyDown) Then
+                        tempBst = 2
+                    End If
+                End If
+                'Determine which axes to boost
+                For A = 1 To 6
+                    If myJoy.outSt(A) = driveBoostUD Then userSpeedBoost(A) = tempBst
+                Next A
+                
+        End Select
+        
+    Next i
+
+End If
 
 
 End Sub
+
+Public Function getUserSpeedMult() As Single
+    getUserSpeedMult = userSpeedMult
+End Function
+
+Public Sub resetSpeedMult()
+    userSpeedMult = 1
+End Sub
+
+Public Function getUserSpeedBoost(drive As Integer) As Integer
+    getUserSpeedBoost = userSpeedBoost(drive)
+End Function
+
+Public Function getUserSpeedBoostMod() As Single
+    getUserSpeedBoostMod = userSpeedBoostMod
+End Function

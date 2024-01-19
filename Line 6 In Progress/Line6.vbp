@@ -22,6 +22,7 @@ Module=Button_State; Button_State.bas
 Reference=*\G{6B263850-900B-11D0-9484-00A0C91110ED}#1.0#0#C:\windows\SysWow64\MSSTDFMT.DLL#Microsoft Data Formatting Object Library 6.0 (SP6)
 Module=Status_Messages; Status_Messages.bas
 Class=ClassJoy; ClassJoy.cls
+Module=c6k_IO_Definitions; c6k_IO_Definitions.bas
 Startup="frmMain"
 HelpFile=""
 Command32=""

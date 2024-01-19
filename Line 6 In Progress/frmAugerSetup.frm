@@ -286,7 +286,7 @@ Text_Pop_Auger_Angle.Text = tempAngle
 Label_Auger_Ready.Visible = True
 Label_Auger_Ready.Refresh
 
-Call btnState("Active Auger")
-Call statusMsg("Active Auger", "")
+Call btnState(btnActive)
+Call statusMsg(msgActive)
 
 End Sub

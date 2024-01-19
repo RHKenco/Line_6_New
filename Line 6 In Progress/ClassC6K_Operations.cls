@@ -11,68 +11,11 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
-'Line 6 Compumotor I/O:
-'       - 1  - Input  - JoyLeft
-'       - 2  - Input  - JoyRight
-'       - 3  - Input  - JoyFront
-'       - 4  - Input  - JoyBack
-'       - 5  - UNUSED
-'       - 6  - UNUSED
-'       - 7  - UNUSED
-'       - 8  - Input  - UNKNOWN <-----
 
-'       - 9  - Output - Airblade for View
-'       - 10 - UNUSED
-'       - 11 - UNUSED
-'       - 12 - Output - Argon
-'       - 13 - Output - Exhaust Fan
-'       - 14 - Output - TC Feeder
-'       - 15 - Output - Water Pump
-'       - 16 - Output - Welder Contact
 
-'       - 17 - UNUSED
-'       - 18 - Input  - Osc. Limit Switch
-'       - 19 - Input  - Water Flow Switch
-'       - 20 - Input  - "E-Stop"
-'       - 21 - Input  - Rotate Prox Switch <--------
-'       - 22 - Input  - JoySelect
-'       - 23 - Input  - JoyRelease
-'       - 24 - Input  - JoyToggle
 
-'       - 25 - UNUSED
-'       - 26 - UNUSED
-'       - 27 - UNUSED
-'       - 28 - UNUSED
-'       - 29 - UNUSED
-'       - 30 - UNUSED
-'       - 31 - UNUSED
-'       - 32 - UNUSED
-
-'Line 6 c6k Drives:
-'       - 1 - X-Axis
-'       - 2 - Z-Axis
-'       - 3 - Z-Alt Axis
-'       - 4 - Oscillator
-'       - 5 - Auger Rotation
-'       - 6 - Y-Axis - 2 controllers ganged
-'       - 7 - Unused?
-'       - 8 - Unused
 
 Option Explicit
-
-
-'-- Constants for readability of Inputs
-Private Const inEstop As Long = Input20
-Private Const inH2O As Long = Input19
-
-Private Const joyLeft As Long = Input1
-Private Const joyRight As Long = Input2
-Private Const joyUp As Long = Input3
-Private Const joyDown As Long = Input4
-Private Const joySelect As Long = Input22
-Private Const joyRelease As Long = Input23
-Private Const joyToggle As Long = Input24
-
 
 '-- c6k Constants and Variables
 Private FSinputState As Long        'Variable to store FastStatus input Data
@@ -156,12 +99,6 @@ Private baseRotVel As String
 Private baseVelY As String
 Private baseVelZ As String
 
-Private userSpeedMult As Single         'Speed Multiplier to be applied to speed for varying pass speeds on the fly
-Private Const speedMultInc = 0.05       'Constant for incrementing the speedmult increase
-Private userSpeedBoost(6) As Boolean    'Speed Boost Multiplier for each axis - joystick adjustment of multi-axis movements
-Private Const userSpeedBoostMult = 1.5  'Constant for speed boost for multi-axis joystick operations
-
-
 Private Const speedSetupPath As String = "C:\line 6\files\speedSetup6.asc"  '"F:\apps\exe\line 6\files\speedSetup6.asc"
 
 
@@ -178,8 +115,6 @@ FSoutputState = 0
 joyBtnState = 0
 joyActive = False
 joyStr = ""
-
-userSpeedMult = 1
 
 passType = passBlade
 
@@ -332,7 +267,7 @@ If augerSet Then
 End If
 
 'Reset speedmult to 1 (as this function will be called before a pass is started
-userSpeedMult = 1
+Call Joy.resetSpeedMult
 
 End Sub
 
@@ -582,38 +517,11 @@ Public Sub stopAllOut()
     c6k.Write "!S:!JOG000000:!1OUTALL9,16,0:!1OUTALL25,32,0:T2" & Chr$(13)
 End Sub
 
-
-Public Sub setOutput(output As String, value As Boolean)
-
-Dim outputTemp As Integer
-
-Select Case output
-    Case "Airblade"
-        outputTemp = 9
-    Case "Argon"
-        outputTemp = 12
-    Case "Exhaust"
-        outputTemp = 13
-    Case "TC Feeder"
-        outputTemp = 14
-    Case "Water Pump"
-        outputTemp = 15
-    Case "Welder Contact"
-        outputTemp = 16
-    Case Else
-        MsgBox ("Error in Output Handler:" & Chr$(13) & "Invalid Input - " & output)
-        Exit Sub
-End Select
-
-Call setOutputNum(outputTemp, value)
-
-End Sub
-
-' -- setOutputNum() - Function to set the state of a single output pin
+' -- setOutput() - Function to set the state of an output
 '   - Inputs:
 '       - output - Integer corresponding to the output pin to be set. Valid values are 9-16 and 25-32
 '       - value - boolean for the desired state of the output (true for on, false for off)
-Public Sub setOutputNum(output As Integer, value As Boolean)
+Public Sub setOutput(output As Integer, value As Boolean)
 
 ' If the output indicated is in either of the two output ranges, set according to the boolean input
 If (output >= 9 And output <= 16) Or (output >= 25 And output <= 32) Then
@@ -640,7 +548,7 @@ Call updFastStatus
 
 Dim isEstopPressed As Boolean
 
-isEstopPressed = (FSinputState And inEstop)
+isEstopPressed = (FSinputState And bInEstop)
 
 
 If (isEstopPressed And Not setE_Stop) Then          'If Estop is pressed and the was not pressed last time the function ran
@@ -659,8 +567,8 @@ ElseIf (Not isEstopPressed And setE_Stop) Then      'If Estop is not pressed but
 
     'Lower E-Stop Flag and re-enable airblade and blower fan
     setE_Stop = False
-    Call setOutput("Airblade", True)
-    Call setOutput("Exhaust", True)
+    Call setOutput(outAirblade, True)
+    Call setOutput(outExhaust, True)
     frmLine6.Label_Estop.Visible = False
     frmLine6.Label_Estop.Refresh
     
@@ -684,7 +592,7 @@ Call updFastStatus
 
 Dim isWaterFlowing As Boolean
 
-isWaterFlowing = (FSinputState And inH2O)
+isWaterFlowing = (FSinputState And bInH2O)
 
 'E-Stop supersedes this algorithm - if the E-stop is pressed, H2O processing is irrelevant
 If Not setE_Stop Then
@@ -710,8 +618,8 @@ If Not setE_Stop Then
         'Lower E-Stop Flag and re-enable airblade and blower fan
         chkH2O = False
         countH2O = 0
-        Call setOutput("Airblade", True)
-        Call setOutput("Exhaust", True)
+        Call setOutput(outAirblade, True)
+        Call setOutput(outExhaust, True)
         frmLine6.Label_Estop.Visible = False
         frmLine6.Label_Estop.Refresh
         
@@ -747,11 +655,11 @@ Public Sub strikeArc()
 'Capture position of z-axis - further z inputs will be relative to strike (which should be surface of blade)
 c6k.Write "PSETX,0,0,X:" & Chr$(13)
 'Turn on inputs as necessary
-Call setOutput("Argon", True)
-Call setOutput("Airblade", True)
+Call setOutput(outArgon, True)
+Call setOutput(outAirblade, True)
 
 'Close contacts and Move main z-axis up by 0.9"
-c6k.Write "A,10:AD,3:V,13:D,0.9:GO01:1OUT.16-1:WAIT(MOV=b000000):JOG100001" & Chr$(13)
+c6k.Write "A,10:AD,3:V,13:D,0.9:GO01:1OUT.16-1:WAIT(MOV=b000000)" & Chr$(13)
 
 End Sub
 
@@ -778,13 +686,13 @@ Select Case passRunState
     ' Start the motors in continuous move mode
     Case "Start"
         Select Case passType
-            Case "Blade"
+            Case passBlade
                 c6k.Write "MC100X00:GO100X00" & Chr(13)
                 
-            Case "Auger Edge"
+            Case passAugEdg
                 c6k.Write "MC000X11:GO000X11" & Chr(13)
             
-            Case "Auger Face"
+            Case passAugFac
                 c6k.Write "MC010X11:GO010X11" & Chr(13)
             
             Case Else
@@ -808,7 +716,7 @@ End Select
 
 End Sub
 
-Private Sub setPassVel(passType As String)
+Private Sub setPassVel(passType As Integer)
 
 'Create temporary variables to store pass speeds as strings
 Dim vX As String
@@ -823,56 +731,70 @@ vO = ""
 
 Dim currentPassSpeed As Double
 Dim currentRotSpeed As Double
-currentPassSpeed = (basePassSpeed * userSpeedMult)
-If baseRotVel <> "" Then currentRotSpeed = (baseRotVel * userSpeedMult)
+currentPassSpeed = (basePassSpeed * Joy.getUserSpeedMult)
+If baseRotVel <> "" Then currentRotSpeed = (baseRotVel * Joy.getUserSpeedMult)
+
+Dim tempSpeed1 As Double
+Dim tempSpeed2 As Double
+Dim tempSpeed3 As Double
+tempSpeed1 = currentPassSpeed
+tempSpeed2 = tempSpeed1
+tempSpeed3 = currentRotSpeed
 
 Select Case passType
-    Case "Blade"
+    Case passBlade
         
         'Check for speed boost
-        If userSpeedBoost(1) Then currentPassSpeed = currentPassSpeed * userSpeedBoostMult
+        If Joy.getUserSpeedBoost(driveX) = 1 Then tempSpeed1 = currentPassSpeed * (1 + Joy.getUserSpeedBoostMod)
+        If Joy.getUserSpeedBoost(driveX) = 2 Then tempSpeed1 = currentPassSpeed * (1 - Joy.getUserSpeedBoostMod)
         
         'Set necessary Speeds
-        vX = Format(currentPassSpeed, "X0.000")
+        vX = Format(tempSpeed1, "0.000")
         
         vY = ""
         vZ = ""
         vZa = ""
         vR = ""
         
-    Case "Auger Edge"
+    Case passAugEdg
     
         'Check for speed boost
-        If userSpeedBoost(1) Then currentPassSpeed = currentPassSpeed * userSpeedBoostMult
+        If Joy.getUserSpeedBoost(driveY) = 1 Then tempSpeed1 = currentPassSpeed * (1 + Joy.getUserSpeedBoostMod)
+        If Joy.getUserSpeedBoost(driveY) = 2 Then tempSpeed1 = currentPassSpeed * (1 - Joy.getUserSpeedBoostMod)
         
-        If userSpeedBoost(5) Then currentRotSpeed = currentRotSpeed * userSpeedBoostMult
+        If Joy.getUserSpeedBoost(driveR) = 1 Then tempSpeed3 = currentRotSpeed * (1 + Joy.getUserSpeedBoostMod)
+        If Joy.getUserSpeedBoost(driveR) = 2 Then tempSpeed3 = currentRotSpeed * (1 - Joy.getUserSpeedBoostMod)
         
         'Set necessary Speeds
-        vX = Format(currentPassSpeed, "X0.000")
-        vR = Format(currentRotSpeed, "X0.000")
+        vY = Format(tempSpeed1, "0.000")
+        vR = Format(tempSpeed2, "0.000")
         
-        vY = ""
+        vX = ""
         vZ = ""
         vZa = ""
 
     
-    Case "Auger Face"
+    Case passAugFac
         
         Dim currentSpeedY As String
         Dim currentSpeedZ As String
-        currentSpeedY = baseVelY * userSpeedMult
-        currentSpeedZ = baseVelZ * userSpeedMult
+        currentSpeedY = baseVelY * Joy.getUserSpeedMult
+        currentSpeedZ = baseVelZ * Joy.getUserSpeedMult
         
         'Check for speed boost
-        If userSpeedBoost(6) Then currentSpeedY = currentSpeedY * userSpeedBoostMult
-        If userSpeedBoost(2) Then currentSpeedZ = currentSpeedZ * userSpeedBoostMult
+        If Joy.getUserSpeedBoost(driveY) = 1 Then tempSpeed1 = currentSpeedY * (1 + Joy.getUserSpeedBoostMod)
+        If Joy.getUserSpeedBoost(driveY) = 2 Then tempSpeed1 = currentSpeedY * (1 - Joy.getUserSpeedBoostMod)
+      
+        If Joy.getUserSpeedBoost(driveZ) = 1 Then tempSpeed2 = currentSpeedZ * (1 + Joy.getUserSpeedBoostMod)
+        If Joy.getUserSpeedBoost(driveZ) = 2 Then tempSpeed2 = currentSpeedZ * (1 - Joy.getUserSpeedBoostMod)
+      
+        If Joy.getUserSpeedBoost(driveR) = 1 Then tempSpeed3 = currentRotSpeed * (1 + Joy.getUserSpeedBoostMod)
+        If Joy.getUserSpeedBoost(driveR) = 2 Then tempSpeed3 = currentRotSpeed * (1 - Joy.getUserSpeedBoostMod)
         
-        If userSpeedBoost(5) Then currentRotSpeed = currentRotSpeed * userSpeedBoostMult
         
-        
-        vY = Format(currentSpeedY, "X0.000")
-        vZ = Format(currentSpeedZ, "X0.000")
-        vR = Format(currentRotSpeed, "X0.000")
+        vY = Format(tempSpeed1, "0.000")
+        vZ = Format(tempSpeed2, "0.000")
+        vR = Format(tempSpeed3, "0.000")
         
         vX = ""
         vZa = ""
@@ -882,6 +804,15 @@ Select Case passType
 End Select
 
 c6k.Write "V" & vX & "," & vZ & "," & vZa & "," & vO & "," & vR & "," & vY & Chr(13)
+
+Select Case passType
+    Case passBlade
+        c6k.Write "GO1XXXXX" & Chr(13)
+    Case passAugEdg
+        c6k.Write "GOXXXX11" & Chr(13)
+    Case passAugEdg
+        c6k.Write "GOX1XX11" & Chr(13)
+End Select
 
 End Sub
 

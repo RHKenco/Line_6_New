@@ -71,10 +71,10 @@ Private Sub runState0() 'Setup State - Runs any necessary FSM Setup code and mov
 'Call c6kOps.homeOsc
 
 'Start Water Pump
-Call c6kOps.setOutput("Water Pump", True)
+Call c6kOps.setOutput(outH2O, True)
     
 'Initialize Joystick
-Call Joy.runJoy("Enable")
+Call Joy.runJoy(joyFree)
     
 'Initialize internal variables
 stateInner = 0
@@ -87,31 +87,31 @@ End Sub
 Private Sub runState1() 'Set Torch & Strike Arc State - Set torch for initial pass, then strike arc
 
 Select Case stateInner
-    Case 0
-        'Set status message
-        Call statusMsg("Strike", "")
-        'Wait until joystick is inactive
-        If Joy.runJoy("Free") Then Exit Sub
-        stateInner = 1
-    Case 1
-        'Strike Arc
-        Call c6kOps.setMachineHome
-        Call c6kOps.strikeArc
-        stateInner = 2
-    Case 2
-        'Verify that the pause switch is thrown, then
-        If c6kOps.getJoyToggle Then
-            'Proceed to pause state
-            State = 2
-            stateInner = 0
-            
-            'Set status message
-            Call statusMsg("Paused", "")
-        
+    Case 0  'Verify that the pause switch is thrown
+        If Joy.getJoyToggle Then
+            stateInner = 1
         Else
             'Set status message
-            Call statusMsg("Toggle", "")
+            Call statusMsg(msgToggle)
+            Call Joy.getJoyInputs(c6kOps.getInputState)
         End If
+    Case 1  'Run Joystick to set strike location
+        'Set status message
+        Call statusMsg(msgStrike)
+        'Wait until joystick is inactive
+        If Joy.runJoy(joyFree) Then Exit Sub
+        stateInner = 2
+    Case 2  'Strike Arc
+        Call c6kOps.setMachineHome
+        Call c6kOps.strikeArc
+        c6k.Write "COMEXC1" & Chr(13)    'Enable continuous Command Processing
+        stateInner = 3
+    Case 3  'Proceed to pause state
+        'Set status message
+        Call statusMsg(msgPaused)
+        State = 2
+        stateInner = 0
+    
     Case Else
         MsgBox "Error in Pass Initialization"
 End Select
@@ -120,9 +120,8 @@ End Sub
 
 Private Sub runState2() 'Pause State - Joystick movement & Oscillator Only
 
-
 '-- Run Joystick
-If Not Joy.runJoy("Pause") Then      'If the joystick is released, figure out why
+If Not Joy.runJoy(joyPause) Then      'If the joystick is released, figure out why
 
     '-- Check for Inputs
     If Not Joy.getJoyToggle Then 'If switch is not on
@@ -132,7 +131,13 @@ If Not Joy.runJoy("Pause") Then      'If the joystick is released, figure out wh
         Call c6kOps.RunPass("Start")
         
         'Set status message
-        Call statusMsg("Running", "")
+        Call statusMsg(msgRunning)
+        
+        'On first run, start carbide
+        If innerState = 0 Then
+            Call c6kOps.setOutput(outTcFeed, True)
+            stateInner = 1
+        End If
         
         Exit Sub
     End If
@@ -140,6 +145,8 @@ If Not Joy.runJoy("Pause") Then      'If the joystick is released, figure out wh
     'If the switch is on, then release was pressed - Switch to Return state
     State = 4
     Call c6kOps.RunPass("Stop")
+    Call c6kOps.setOutput(outTcFeed, False)
+    stateInner = 0
 
 End If
 
@@ -151,17 +158,17 @@ Private Sub runState3() 'Run State - Joystick in pass adjustment mode, Oscillato
 Call c6kOps.RunPass("Update")
 
 '-- Run Joystick
-If Not Joy.runJoy("Run") Then        'If the joystick is released, figure out why
+If Not Joy.runJoy(joyRun) Then        'If the joystick is released, figure out why
     
     '-- Check for switch
-    If c6kOps.getJoyToggle Then 'If switch is on
+    If Joy.getJoyToggle Then 'If switch is on
         
         'Revert to Pause State
         State = 2
         Call c6kOps.RunPass("Stop")
         
         'Set status message
-        Call statusMsg("Paused", "")
+        Call statusMsg(msgPaused)
             
         Exit Sub
         
@@ -176,16 +183,43 @@ End Sub
 
 Private Sub runState4() 'Return State - moves head back to start of pass, then backs away perpendicularly by set distance
 
-Call statusMsg("Returned")
+Call Joy.getJoyInputs(c6kOps.getInputState)
 
-'*** Return to Start Position
-
-'-- Check for Release / Toggle
-If c6kOps.getJoyToggle And c6kOps.getJoyRelease Then
-    'Revert to Pause State
-    State = 1
-    Exit Sub
+Select Case stateInner
+    Case 0
+        'Update Status Message
+        Call statusMsg(msgCompleted)
+        
+        'Clear joystick speed adjustments
+        Call Joy.resetSpeedMult
+        
+        c6k.Write "COMEXC0" & Chr(13)    'Disable continuous Command Processing
+        
+        stateInner = 1
+        
+    Case 1
+        'Wait for input
+        If Not Joy.getJoyToggle Then
+            Call statusMsg(msgReturning)
+            stateInner = 2
+        ElseIf Joy.getJoyRelease Then
+            'Reset inner State & Set Main FSM state to pass complete
+            stateInner = 0
+            fsmMain.State = 4
+        End If
+    Case 2
+        '*** Create code to send machine back to 0,0
+        stateInner = 3
+    Case 3
+        Call statusMsg(msgNextPass)
+        
+        '*** Add timeout function here
+        
+        If Joy.getJoyToggle Then
+            stateInner = 0
+            State = 1
+        End If
     
-End If
+End Select
 
 End Sub

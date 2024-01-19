@@ -23,8 +23,10 @@ Attribute VB_Exposed = False
 '|                  - Waits for input from Form
 '|          - 2 - Transition
 '|                  - Initializes Run mode FSM
-'|          - 3 - Run
+'|          - 3 - Run Pass
 '|                  - Operates Run mode FSM
+'|          - 4 - Finsh Pass
+'|                  - Finishes pass & resets program for idle
 '|
 '|
 '|====================================================================================================================|
@@ -55,6 +57,8 @@ Select Case State
         Call runState2
     Case 3
         Call runState3
+    Case 4
+        Call runState4
 End Select
 
 End Sub
@@ -137,5 +141,11 @@ Call c6kOps.updFastStatus
         Call fsmRun.Run
 
     End If
+
+End Sub
+
+Private Sub runState4() 'Run Pass State - Runs sub-FSM to operate the machine while running a pass
+
+State = 1
 
 End Sub
