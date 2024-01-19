@@ -113,18 +113,18 @@ Private Sub runState2() 'Initialize Pass State - Runs setup for pass operation
 '-- Call Fast Status
 Call c6kOps.updFastStatus
 '-- Check for E-Stop and H2O Flow
-    If Not c6kOps.chkE_Stop Then
-    
-    
-    '-- Run subFSM initialization state
-    
-        fsmRun.State = 0
-        Call fsmRun.Run
-        
-    'Proceed to main run state
-    State = 3
+If Not c6kOps.chkE_Stop Then
 
-    End If
+
+'-- Run subFSM initialization state
+
+    fsmRun.State = 0
+    Call fsmRun.Run
+    
+'Proceed to main run state
+State = 3
+
+End If
 
 End Sub
 
@@ -145,6 +145,9 @@ Call c6kOps.updFastStatus
 End Sub
 
 Private Sub runState4() 'Run Pass State - Runs sub-FSM to operate the machine while running a pass
+
+Call btnState(btnActive)
+Call statusMsg(msgActive)
 
 State = 1
 

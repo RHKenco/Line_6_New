@@ -3,13 +3,21 @@ Begin VB.Form frmLine6
    BackColor       =   &H00C00000&
    Caption         =   "Line 6"
    ClientHeight    =   6660
-   ClientLeft      =   225
-   ClientTop       =   855
+   ClientLeft      =   165
+   ClientTop       =   810
    ClientWidth     =   19410
    LinkTopic       =   "Form6"
    ScaleHeight     =   6660
    ScaleWidth      =   19410
    StartUpPosition =   3  'Windows Default
+   Begin VB.TextBox Text_Focus_Trap 
+      Height          =   375
+      Left            =   120
+      TabIndex        =   27
+      Text            =   "Text1"
+      Top             =   6240
+      Width           =   615
+   End
    Begin VB.CommandButton Button_Set_Auger 
       Caption         =   "Auger Setup"
       BeginProperty Font 
@@ -22,7 +30,7 @@ Begin VB.Form frmLine6
          Strikethrough   =   0   'False
       EndProperty
       Height          =   1095
-      Left            =   7800
+      Left            =   5400
       TabIndex        =   26
       Top             =   5040
       Width           =   2175
@@ -571,6 +579,8 @@ Call btnState(btnRunning)
 
 fsmMain.State = 2
 
+Text_Focus_Trap.SetFocus
+
 End Sub
 
 Private Sub Button_NF_Click()
@@ -602,6 +612,32 @@ Else
    Call woMgr.clearWO
 End If
 
+Text_Enter_Pass_Width.SetFocus
+
+End Sub
+
+Private Sub Option_Auger_Direction_Click(Index As Integer)
+
+If Index = 0 Then
+    If Option_Auger_Direction(0).value = True Then
+        Option_Auger_Direction(0).value = False
+        Option_Auger_Direction(1).value = True
+    Else
+        Option_Auger_Direction(0).value = True
+        Option_Auger_Direction(1).value = False
+    End If
+Else
+    If Option_Auger_Direction(1).value = True Then
+        Option_Auger_Direction(1).value = False
+        Option_Auger_Direction(0).value = True
+    Else
+        Option_Auger_Direction(1).value = True
+        Option_Auger_Direction(0).value = False
+    End If
+End If
+
+Call statusMsg(msgActive)
+
 End Sub
 
 Private Sub Text_Enter_Pass_Width_Change()
@@ -624,6 +660,8 @@ Private Sub Text_Enter_WO_KeyPress(KeyAscii As Integer)
 
 If KeyAscii = (13) Then
 Call Button_WO_Enter_Clear_Click
+
+Text_Enter_Pass_Width.SetFocus
 End If
 
 End Sub
@@ -658,6 +696,11 @@ Call statusMsg(msgInactive)
 Var_Label_Joystick_Status.Visible = False
 
 Label_Estop.Visible = False
+
+'Initialize Focus Trap Textbox
+Text_Focus_Trap.Visible = False
+Text_Focus_Trap.TabStop = False
+Text_Focus.SetFocus
 
 'Initialize Form Buttons
 Call btnState(btnInactive)
