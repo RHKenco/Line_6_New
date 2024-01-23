@@ -223,7 +223,7 @@ Select Case stateInner
             fsmMain.State = 4
         End If
     Case 2
-        '*** Create code to send machine back to 0,0
+        Call c6kOps.returnPass
         stateInner = 3
     Case 3
         Call statusMsg(msgNextPass)

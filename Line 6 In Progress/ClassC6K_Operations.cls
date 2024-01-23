@@ -36,25 +36,6 @@ Private Const revCalZ = 25000 'rev
 Private Const revCalZa = 25000 'rev
 Private Const revCalO = 25000 'rev
 Private Const revCalR = 25000 'rev
-
-'-- Joystick Constants and variables
-Private joyActive As Boolean        'Boolean to determine if the joystick is active
-Private joyStr As String            'String to describe current joystick state for Form Display
-Private joyBtnState As Integer      'Integer containing state of joystick buttons
-Private joyLastBtnInput As Integer  'Integer containing previous state of joystick buttons
-Private joyStkInputs As Integer      'Integer containing state of joystick directional input
-Private joyLastStkInputs As Integer  'Integer containing previous directional state
-
-Private joyJogState(6) As Integer   'Array of 7 single Numbers (of which index 0 is ignored) to contain jog / MC parameters
-                                    '   - 0 indicates no motion
-                                    '   - 1 indicates jog motion
-                                    '   - 2 indicates continuous motion directed by joy horiz.
-                                    '   - 3 indicates continuous motion directed by joy vert.
-                                    
-Private joyModeX As Integer         'Integers to store state of joystick axes
-Private joyModeY As Integer         '   - 0 indicates jog mode
-                                    '   - 1 indicates MC jog mode
-                                    '   - 2 indicates SpeedMult mode
                                 
 '-- Critical input booleans and related variables
 Private setE_Stop As Boolean    'Local E-stop variable
@@ -679,11 +660,6 @@ Public Sub initOsc()
     c6k.Write ("GOXXX1XX:NIF:VAR1=VAR1-1:UNTIL(VAR1<1)" & Chr(13))                                            'Initiate motion, increment counter
     c6k.Write ("END" & Chr(13))
     
-    'Create oscillator program to check which direction was last called, and return to start if necessary
-    c6k.Write ("DEL CHECK2:DEF CHECK2" & Chr(13))
-        '*** Create program here
-    c6k.Write ("END" & Chr(13))
-    
 End Sub
 
 Public Sub runOsc()
@@ -691,7 +667,8 @@ Public Sub runOsc()
 End Sub
 
 Public Sub returnOsc()
-    c6k.Write ("GOSUB CHECK2" & Chr(13))
+    'Set var3 to be negative the commanded position to return it to 0
+    c6k.Write ("VAR3=-4PC:D,,,,VAR3,,:GOXXX1XX" & Chr(13))
 End Sub
 
 Public Sub RunPass(passRunState As String)
@@ -734,6 +711,10 @@ Select Case passRunState
         
 End Select
 
+End Sub
+
+Public Sub returnPass()
+    c6k.Write ("MC000X00:D,6,,,,:GOX1XXXX:WAIT(MOVX0XXXX):VAR4=-1PC:VAR5=-5PC:VAR6=-6PC:DVAR4,,,,,VAR5,VAR6:GO1XXX11" & Chr(13))
 End Sub
 
 Private Sub setPassVel(passType As Integer)

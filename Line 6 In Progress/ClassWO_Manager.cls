@@ -22,7 +22,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 ' Constant Values
-Private Const woTimeoutTime = 300   'Work Order Timeout Clock Time in Seconds
+Private Const woTimeoutTime = 60   'Work Order Timeout Clock Time in Seconds
 Private Const woTimeoutCalib = 20   'Calibration constant - cycle of timer in Hz
 
 
@@ -278,7 +278,7 @@ Private Sub timeoutWO()
     Call writeData("TimeOut")
     Call btnState(btnActive)
     
-    Call systemMsg("Timeout")
+    Call statusMsg(msgTimeout)
 
 End Sub
 
