@@ -52,7 +52,8 @@ Private passWidth As Single     'Pass Width variable
 Private passType As Integer
 
 Private augerSet As Boolean         'Auger Active Bool
-Private augerPitch As Double        'Auger Pitch & Angle
+Private augerPitch As Double        'Auger Pitch, Diameter, & Angle
+Private augerDiam As Double
 Private augerAngle As Double
 Private augerCoil As String
 
@@ -125,7 +126,7 @@ Else
     End If
 End If
 
-Call setSpeeds
+Call setBaseSpeed
 
 'Initialize Oscillator with new pass width
 Call initOsc
@@ -215,7 +216,7 @@ Next i
 
 End Sub
 
-Private Sub setSpeeds()
+Private Sub setBaseSpeed()
 
 'Set speed to match osc pass width based on set thresholds
 If (passWidth > 0) And (passWidth < passThreshold(0)) Then
@@ -235,17 +236,6 @@ Else
     Exit Sub
 End If
 
-'If auger pitch has been declared, then
-If augerSet Then
-
-    'Set speed values for Auger operations
-    baseRotVel = basePassSpeed / augerPitch
-    
-    baseVelY = (augerPitch / (2 * PI)) * Sin(augerAngle) * baseRotVel
-    baseVelZ = (augerPitch / (2 * PI)) * Cos(augerAngle) * baseRotVel
-    
-End If
-
 'Reset speedmult to 1 (as this function will be called before a pass is started
 Call Joy.resetSpeedMult
 
@@ -256,8 +246,9 @@ Public Function setAugerParam(augerPitchIn As String, augerDiamIn As String, aug
 'Compute Auger Angle from Pitch and Diameter
 augerAngle = Atn(augerPitchIn / (augerDiamIn * PI))
 
-'Store Auger Pitch
+'Store Auger Pitch & Diameter
 augerPitch = CDbl(augerPitchIn)
+augerDiam = CDbl(augerDiamIn)
 
 'Store Auger Coil Direction
 If augerCoilDirection = "Right" Or augerCoilDirection = "Left" Then
@@ -576,10 +567,10 @@ isWaterFlowing = (FSinputState And bInH2O)
 
 'E-Stop supersedes this algorithm - if the E-stop is pressed, H2O processing is irrelevant
 If Not setE_Stop Then
-    If Not isWaterFlowing Then                          'If Water is flowing, ensure count is 0
+    If isWaterFlowing Then                          'If Water is flowing, ensure count is 0
         countH2O = 0
     
-    ElseIf (isWaterFlowing And Not chkH2O) Then         'If H2O not flowing and the H2O fault flag was not set last time the function ran
+    ElseIf (Not isWaterFlowing And Not chkH2O) Then         'If H2O not flowing and the H2O fault flag was not set last time the function ran
         
         'If the H2O counter has not reached the trigger point, increment the count
         If countH2O >= (H2Ocount * H2Oconst) Then
@@ -680,13 +671,13 @@ Select Case passRunState
     Case "Start"
         Select Case passType
             Case passBlade
-                c6k.Write "MC100X00:GO100X00" & Chr(13)
+                c6k.Write "MC100X00:D-,,,,,:GO100X00" & Chr(13)
                 
             Case passAugEdg
-                c6k.Write "MC000X11:GO000X11" & Chr(13)
+                c6k.Write "MC000X11:D,,,,,:GO000X11" & Chr(13)
             
             Case passAugFac
-                c6k.Write "MC010X11:GO010X11" & Chr(13)
+                c6k.Write "MC010X11:D,,,,,:GO010X11" & Chr(13)
             
             Case Else
                 MsgBox ("Error in pass type select")
@@ -726,18 +717,16 @@ Dim vR As String
 ' Ensure Oscillator Speed is not affected by this sub
 vO = ""
 
+' Set base pass speed
 Dim currentPassSpeed As Double
 Dim currentRotSpeed As Double
+
 currentPassSpeed = (basePassSpeed * Joy.getUserSpeedMult)
-If baseRotVel <> "" Then currentRotSpeed = (baseRotVel * Joy.getUserSpeedMult)
 
 Dim tempSpeed1 As Double
 Dim tempSpeed2 As Double
 Dim tempSpeed3 As Double
-tempSpeed1 = currentPassSpeed
-tempSpeed2 = tempSpeed1
-tempSpeed3 = currentRotSpeed
-
+    
 Select Case passType
     Case passBlade
         
@@ -754,6 +743,11 @@ Select Case passType
         vR = ""
         
     Case passAugEdg
+    
+        'Adjust base speed for pass type
+        currentRotSpeed = currentPassSpeed / (PI * augerDiam)   'Rotational speed necessary for pass speed (linVel = (rotVel * (diam/2)) * (1rot/2PI rad)) in ROTATIONS/SEC
+        currentPassSpeed = currentRotSpeed * augerPitch         'Linear speed to keep pace with the auger edge (linVel = rot/s * in/rot) in INCHES/SEC
+        currentRotSpeed = currentRotSpeed * 360     'Convert to degrees per second
     
         'Check for speed boost
         If Joy.getUserSpeedBoost(driveY) = 1 Then tempSpeed1 = currentPassSpeed * (1 + Joy.getUserSpeedBoostMod)
@@ -772,11 +766,17 @@ Select Case passType
 
     
     Case passAugFac
-        
+    
+        '*** WAY TO TRACK CURRENT DIAMETER
+            
+        currentRotSpeed = currentPassSpeed / (PI * currentDiam)   'Rotational speed necessary for pass speed (linVel = (rotVel * (diam/2)) * (1rot/2PI rad)) in ROTATIONS/SEC
+    
         Dim currentSpeedY As String
         Dim currentSpeedZ As String
-        currentSpeedY = baseVelY * Joy.getUserSpeedMult
-        currentSpeedZ = baseVelZ * Joy.getUserSpeedMult
+        currentSpeedY = augerPitch * Sin(augerAngle) * currentRotSpeed
+        currentSpeedZ = augerPitch * Cos(augerAngle) * currentRotSpeed
+        
+        currentRotSpeed = currentRotSpeed * 360     'DEGREES/SEC
         
         'Check for speed boost
         If Joy.getUserSpeedBoost(driveY) = 1 Then tempSpeed1 = currentSpeedY * (1 + Joy.getUserSpeedBoostMod)
