@@ -30,9 +30,9 @@ Begin VB.Form frmLine6
          Strikethrough   =   0   'False
       EndProperty
       Height          =   1095
-      Left            =   5400
+      Left            =   8400
       TabIndex        =   26
-      Top             =   5040
+      Top             =   4800
       Width           =   2175
    End
    Begin VB.OptionButton Option_Auger_Direction 
@@ -181,6 +181,7 @@ Begin VB.Form frmLine6
    Begin VB.TextBox Text_Pop_Total_Qty 
       Alignment       =   2  'Center
       BackColor       =   &H00FFFFFF&
+      Enabled         =   0   'False
       BeginProperty Font 
          Name            =   "MS Sans Serif"
          Size            =   9.75
@@ -194,10 +195,12 @@ Begin VB.Form frmLine6
       Left            =   1920
       Locked          =   -1  'True
       TabIndex        =   10
+      TabStop         =   0   'False
       Top             =   3720
       Width           =   1575
    End
    Begin VB.TextBox Text_Pop_Part_Num 
+      Enabled         =   0   'False
       BeginProperty Font 
          Name            =   "MS Sans Serif"
          Size            =   9.75
@@ -211,6 +214,7 @@ Begin VB.Form frmLine6
       Left            =   600
       Locked          =   -1  'True
       TabIndex        =   8
+      TabStop         =   0   'False
       Top             =   2160
       Width           =   2895
    End
@@ -246,6 +250,7 @@ Begin VB.Form frmLine6
    Begin VB.TextBox Text_Pop_Due_Date 
       Alignment       =   2  'Center
       BackColor       =   &H00FFFFFF&
+      Enabled         =   0   'False
       BeginProperty Font 
          Name            =   "MS Sans Serif"
          Size            =   9.75
@@ -259,10 +264,12 @@ Begin VB.Form frmLine6
       Left            =   600
       Locked          =   -1  'True
       TabIndex        =   5
+      TabStop         =   0   'False
       Top             =   3720
       Width           =   975
    End
    Begin VB.TextBox Text_Pop_Dwg_Num 
+      Enabled         =   0   'False
       BeginProperty Font 
          Name            =   "MS Sans Serif"
          Size            =   9.75
@@ -276,6 +283,7 @@ Begin VB.Form frmLine6
       Left            =   600
       Locked          =   -1  'True
       TabIndex        =   3
+      TabStop         =   0   'False
       Top             =   2880
       Width           =   2895
    End
@@ -616,27 +624,24 @@ Text_Enter_Pass_Width.SetFocus
 
 End Sub
 
-Private Sub Option_Auger_Direction_Click(index As Integer)
+Private Sub Option_Auger_Direction_Click(Index As Integer)
 
-If index = 0 Then
+If Index = 0 Then
     If Option_Auger_Direction(0).value = True Then
-        Option_Auger_Direction(0).value = False
-        Option_Auger_Direction(1).value = True
-    Else
-        Option_Auger_Direction(0).value = True
         Option_Auger_Direction(1).value = False
+    Else
+        Option_Auger_Direction(1).value = True
     End If
 Else
     If Option_Auger_Direction(1).value = True Then
-        Option_Auger_Direction(1).value = False
-        Option_Auger_Direction(0).value = True
-    Else
-        Option_Auger_Direction(1).value = True
         Option_Auger_Direction(0).value = False
+    Else
+        Option_Auger_Direction(0).value = True
     End If
 End If
 
 Call statusMsg(msgActive)
+Call c6kOps.setPassType
 
 End Sub
 
@@ -656,15 +661,28 @@ End If
 
 End Sub
 
-Private Sub Text_Enter_WO_KeyPress(KeyAscii As Integer)
+
+Private Sub Text_Enter_Pass_Width_KeyPress(KeyAscii As Integer)
 
 If KeyAscii = (13) Then
-Call Button_WO_Enter_Clear_Click
 
-Text_Enter_Pass_Width.SetFocus
+Call Button_Go_Click
+
 End If
 
 End Sub
+
+Private Sub Text_Enter_WO_KeyPress(KeyAscii As Integer)
+
+If KeyAscii = (13) Then
+    'If enter is pressed and the work order is not already active
+    If Not woMgr.isWOactive Then Call Button_WO_Enter_Clear_Click
+    
+    Text_Enter_Pass_Width.SetFocus
+End If
+
+End Sub
+
 
 Private Sub Form_Activate()
 
@@ -705,6 +723,7 @@ Text_Focus_Trap.TabStop = False
 'Initialize Form Buttons
 Call btnState(btnInactive)
 
+
 '--
 Call c6kOps.Enable
 Call Joy.createJoystick
@@ -713,7 +732,7 @@ Call Joy.createJoystick
 Call c6kOps.bootDrives
 
 '-- Check for previously active WO
-'Call woMgr.chkActiveWO
+Call woMgr.chkActiveWO
 
 '-- Start Airblade & Exhaust Fan
 Call c6kOps.setOutput(outAirblade, True)

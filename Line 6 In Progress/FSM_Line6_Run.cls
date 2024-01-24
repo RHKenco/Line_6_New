@@ -196,12 +196,13 @@ End Sub
 
 Private Sub runState4() 'Return State - moves head back to start of pass, then backs away perpendicularly by set distance
 
-Call c6kOps.returnOsc
-
 Call Joy.getJoyInputs(c6kOps.getInputState)
 
 Select Case stateInner
     Case 0
+        'Return Osc. to Home
+        Call c6kOps.returnOsc
+        
         'Update Status Message
         Call statusMsg(msgCompleted)
         

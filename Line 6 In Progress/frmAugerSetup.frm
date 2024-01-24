@@ -26,6 +26,7 @@ Begin VB.Form frmAugerSetup
       Left            =   480
       Locked          =   -1  'True
       TabIndex        =   11
+      TabStop         =   0   'False
       Top             =   4800
       Width           =   2175
    End
@@ -268,6 +269,11 @@ Private Sub Button_Compute_Click()
 
 Dim tempDirection As String
 
+If Text_Enter_Auger_Pitch.Text = "" Or Text_Enter_Auger_Pitch.Text = "" Then
+    MsgBox "Must Enter Parameters"
+    Exit Sub
+End If
+
 If Option_Auger_Coil(0).value = True Then
     tempDirection = "Right"
 ElseIf Option_Auger_Coil(1).value = True Then
@@ -290,3 +296,52 @@ Call btnState(btnActive)
 Call statusMsg(msgActive)
 
 End Sub
+
+Private Sub Option_Auger_Coil_Click(Index As Integer)
+If Index = 0 Then
+    If Option_Auger_Coil(0).value = True Then
+        Option_Auger_Coil(1).value = False
+    Else
+        Option_Auger_Coil(1).value = True
+    End If
+Else
+    If Option_Auger_Coil(1).value = True Then
+        Option_Auger_Coil(0).value = False
+    Else
+        Option_Auger_Coil(0).value = True
+    End If
+End If
+
+Option_Auger_Coil(0).Refresh
+Option_Auger_Coil(1).Refresh
+
+End Sub
+
+Private Sub Text_Enter_Auger_Dia_Change()
+Static adOldInput As Single
+Dim adNewInput As String
+
+adNewInput = Text_Enter_Auger_Dia.Text
+If IsNumeric(adNewInput) Then
+    adOldInput = CSng(adNewInput)
+ElseIf adNewInput = "" Then
+    Exit Sub
+Else
+    Text_Enter_Auger_Dia.Text = CStr(adOldInput)
+End If
+End Sub
+
+Private Sub Text_Enter_Auger_Pitch_Change()
+Static apOldInput As Single
+Dim apNewInput As String
+
+apNewInput = Text_Enter_Auger_Pitch.Text
+If IsNumeric(apNewInput) Then
+    apOldInput = CSng(apNewInput)
+ElseIf apNewInput = "" Then
+    Exit Sub
+Else
+    Text_Enter_Auger_Pitch.Text = CStr(apOldInput)
+End If
+End Sub
+

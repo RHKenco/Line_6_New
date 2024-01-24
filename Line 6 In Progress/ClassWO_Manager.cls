@@ -188,26 +188,25 @@ Public Sub clearWO()
     
     frmLine6.Refresh
     
-    'Kill WO temp files (if they exist)
+    'Kill WO main temp file (if it exists)
     If Dir(woTempMain) <> "" Then Kill woTempMain
-    If Dir(woTempData) <> "" Then
-        Kill woTempData
-        woTempData = ""
-    End If
+    'If WO still has temp file
+    If woTempData <> "" And Dir(woTempData) <> "" Then Call MsgBox("Current WO Not Finished - Clear anyway?" & Chr(13) & "Data will be retained", vbYesNo, "Clear WO?")
     
 End Sub
 
 ' -- chkActiveWO - Function to be called when loading program to check for a temporary file containing the currently active work order. ------------------------------------------------
 '                - Allows for work-order to be maintained if program is shut down improperly
-Public Sub chkActiveWO()
+Public Function chkActiveWO()
 
 ' Check to see if temp file exists. If it does not, exit subroutine. Else,
 If Dir(woTempMain) = "" Then
-   Exit Sub
+    chkActiveWO = False
+   Exit Function
 Else
     
     ' Prompt the user to check if they would like to load the temp file
-    If MsgBox("Previously Active WO Detected. Would you like to load?", vbYesNo) = vbNo Then Exit Sub
+    If MsgBox("Previously Active WO Detected. Would you like to load?", vbYesNo) = vbNo Then Exit Function
     
     Dim DAT As String
     
@@ -233,9 +232,11 @@ Else
     
     Call loadWO
     
+    chkActiveWO = True
+    
 End If
 
-End Sub
+End Function
 
 
 
@@ -272,11 +273,22 @@ Public Sub finishWO()
     Call woTimer("Reset")
     woStarted = False
     
+    'Kill WO temp data file (if it exists) - This should be done by the FINISH button only
+    If Dir(woTempData) <> "" Then
+        Kill woTempData
+        woTempData = ""
+    End If
+    
 End Sub
 
 Private Sub timeoutWO()
+    Call updTemp("TimeOut")
     Call writeData("TimeOut")
     Call btnState(btnActive)
+    
+    'Stop Timeout Timer
+    Call woTimer("Reset")
+    woStarted = False
     
     Call statusMsg(msgTimeout)
 
@@ -460,7 +472,7 @@ Select Case cmd
         
         GoTo SaveData:
         
-    Case "Timeout"
+    Case "TimeOut"
         woIsTimedout = True
         
         GoTo SaveData:
@@ -484,7 +496,7 @@ SaveData:
         woLastEndTime$ = Now()
         
         ' Generate new total time based on last start time, current N/F time, and previous total time
-        woTotalTime = DateDiff("s", woLastEndTime$, woLastStartTime$) + woTotalTimeTemp!
+        woTotalTime = DateDiff("s", woLastStartTime$, woLastEndTime$) + woTotalTimeTemp!
         
         If woIsTimedout Then woTotalTime = woTotalTime - (woTimeoutTime)
         

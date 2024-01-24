@@ -22,12 +22,12 @@ Private FSinputState As Long        'Variable to store FastStatus input Data
 Private FSoutputState As Long       'Variable to store FastStatus output Data
 
 Private posCal(6) As Long                'Array to store position calibration data. These following constant values will be stored upon initialization,
-Private Const posCalX = 26550 'counts/in    '       and will convert positional data from counts to appropriate units for each axis
-Private Const posCalY = 62500 'counts/in
-Private Const posCalZ = 39683 'counts/in
-Private Const posCalZa = 510204 'counts/in
-Private Const posCalO = 62500 'counts/in?
-Private Const posCalR = 62500 'counts/degree?
+Private Const posCalX = 26550 'counts/in        '26550      '       and will convert positional data from counts to appropriate units for each axis
+Private Const posCalY = 38462 'counts/in        '62500
+Private Const posCalZ = 253971 'counts/in       '39683
+Private Const posCalZa = 255102 'counts/in      '510204
+Private Const posCalO = 7987 'counts/in         '62500
+Private Const posCalR = 2166 'counts/degree     '62500
 
 Private revCal(6) As Long                'Array to store revolution calibration data. These following constant values will be stored upon initialization,
 Private Const revCalX = 25000 'rev          '       and will convert motor revolutions to appropriate units for each axis. Current numbers are simple conversion to revolutions
@@ -92,10 +92,6 @@ c6k.FSEnabled = True
 'Set up variables
 FSinputState = 0
 FSoutputState = 0
-
-joyBtnState = 0
-joyActive = False
-joyStr = ""
 
 passType = passBlade
 
@@ -316,12 +312,12 @@ End Function
 Public Sub setPassType()
 
 If augerSet = False Then
-    passType = "Blade"
+    passType = passBlade
 Else
     If frmLine6.Option_Auger_Direction(0).value = True Then
-        passType = "Auger Face"
+        passType = passAugFac
     Else
-        passType = "Auger Edge"
+        passType = passAugEdg
     End If
 End If
 
