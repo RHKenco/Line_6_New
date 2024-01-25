@@ -118,7 +118,7 @@ If ((tempSpeed - 5) > speedLast) Or ((tempSpeed + 5) < speedLast) Then
     
     i = 145
     
-    While i > 50
+    Do While i > 50
     
         If i = 100 Then
             If tempSpeed = 100 Then
@@ -138,7 +138,7 @@ If ((tempSpeed - 5) > speedLast) Or ((tempSpeed + 5) < speedLast) Then
         
     Loop
 
-    frmLine6.Var_Label_Pass_Speed.Text = tempLabel
+    frmLine6.Var_Label_Pass_Speed.Caption = tempLabel
     frmLine6.Var_Label_Pass_Speed.Refresh
     
 End If

@@ -419,7 +419,7 @@ c6k.Write ("HOMA4.1:HOMAD4.50:@HOMZ0:HOMV4.1:HOMVF4.1:" & Chr$(13))
 'Adtl motion parameters, call home function
 c6k.Write ("HOMBAC111011:HOMEDG111111:HOMDF000100:HOM,,,0,,:" & Chr$(13))
 'Wait until homing motion has stopped, then move back to standby position
-c6k.Write ("WAIT(6AS=XXX1X):T.1:D,,,-2.375,,:GO0001000:VAR1=0" & Chr$(13))
+c6k.Write ("WAIT(6AS=XXX1X):T.1:D,,,-1,,:GO0001000:VAR1=0" & Chr$(13))
 
 End Sub
 
@@ -571,7 +571,7 @@ If Not setE_Stop Then
     If isWaterFlowing Then                          'If Water is flowing, ensure count is 0
         countH2O = 0
     
-    ElseIf (Not isWaterFlowing And Not chkH2O) Then         'If H2O not flowing and the H2O fault flag was not set last time the function ran
+    ElseIf (isWaterFlowing And Not chkH2O) Then         'If H2O not flowing and the H2O fault flag was not set last time the function ran
         
         'If the H2O counter has not reached the trigger point, increment the count
         If countH2O >= (H2Ocount * H2Oconst) Then
@@ -648,7 +648,7 @@ Select Case passType
     Case passAugEdg
     
         Dim tempSetPos As Double
-        tempSetPos = (augDiam / 2) - 1  'Strike position will be 1" from radial edge of auger
+        tempSetPos = (augerDiam / 2) - 1  'Strike position will be 1" from radial edge of auger
         
         If augerCoil = "Right" Then tempSetPos = -tempSetPos    'Facing Line6, a Right-Handed Auger will be impregnated on the Left Side such that the strike location will be -
             
@@ -679,8 +679,8 @@ Public Sub initOsc()
     'Check to see if the oscillator has stopped moving
     c6k.Write ("IF(MOV=bXXX0XX)" & Chr(13))
         c6k.Write ("IF(VAR2=0):V,,," & Str$(baseOscSpeed) & ",,:VAR2=1:NIF" & Chr(13))                        'Set osc velocity
-        c6k.Write ("IF(VAR2=1):D,,," & Str$(tempPassWidth) & ",,:VAR2=2" & Chr(13))             'If last pass was -, then set + distance & reset bool
-        c6k.Write ("ELSE(VAR2=2):D,,,-" & Str$(tempPassWidth) & ",,:VAR2=1:NIF" & Chr(13))      'If last pass was +, then set - distance & reset bool
+        c6k.Write ("IF(VAR2=1):D,,,-" & Str$(tempPassWidth) & ",,:VAR2=2" & Chr(13))             'If last pass was -, then set + distance & reset bool
+        c6k.Write ("ELSE(VAR2=2):D,,," & Str$(tempPassWidth) & ",,:VAR2=1:NIF" & Chr(13))      'If last pass was +, then set - distance & reset bool
     c6k.Write ("GOXXX1XX:NIF:VAR1=VAR1-1:UNTIL(VAR1<1)" & Chr(13))                                            'Initiate motion, increment counter
     c6k.Write ("END" & Chr(13))
     
@@ -763,9 +763,13 @@ currentPassSpeed = (basePassSpeed * Joy.getUserSpeedMult)
 Dim tempSpeed1 As Double
 Dim tempSpeed2 As Double
 Dim tempSpeed3 As Double
+tempSpeed1 = currentPassSpeed
+tempSpeed2 = currentPassSpeed
+tempSpeed3 = currentPassSpeed
     
 Select Case passType
     Case passBlade
+        
         
         'Check for speed boost
         If Joy.getUserSpeedBoost(driveX) = 1 Then tempSpeed1 = currentPassSpeed * (1 + Joy.getUserSpeedBoostMod)
@@ -803,6 +807,8 @@ Select Case passType
 
     
     Case passAugFac
+            
+        Dim currentDiam As Single
             
         currentDiam = 1 * Val(fsinfo.MotorPos(1))
         If augerCoil = "Right" Then currentDiam = -currentDiam
