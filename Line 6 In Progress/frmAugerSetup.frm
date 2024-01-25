@@ -13,6 +13,7 @@ Begin VB.Form frmAugerSetup
    Begin VB.TextBox Text_Pop_Auger_Angle 
       Alignment       =   2  'Center
       BackColor       =   &H00FFFFFF&
+      Enabled         =   0   'False
       BeginProperty Font 
          Name            =   "MS Sans Serif"
          Size            =   9.75
@@ -297,8 +298,8 @@ Call statusMsg(msgActive)
 
 End Sub
 
-Private Sub Option_Auger_Coil_Click(Index As Integer)
-If Index = 0 Then
+Private Sub Option_Auger_Coil_Click(index As Integer)
+If index = 0 Then
     If Option_Auger_Coil(0).value = True Then
         Option_Auger_Coil(1).value = False
     Else
@@ -331,6 +332,10 @@ Else
 End If
 End Sub
 
+Private Sub Text_Enter_Auger_Dia_KeyPress(KeyAscii As Integer)
+    If KeyAscii = (13) And IsNumeric(Text_Enter_Auger_Dia.Text) Then Text_Enter_Auger_Pitch.SetFocus    'If enter is pressed, go to Pitch
+End Sub
+
 Private Sub Text_Enter_Auger_Pitch_Change()
 Static apOldInput As Single
 Dim apNewInput As String
@@ -345,3 +350,6 @@ Else
 End If
 End Sub
 
+Private Sub Text_Enter_Auger_Pitch_KeyPress(KeyAscii As Integer)
+    If KeyAscii = (13) And IsNumeric(Text_Enter_Auger_Pitch.Text) Then Call Button_Compute_Click    'If enter is pressed, Run Calculations
+End Sub

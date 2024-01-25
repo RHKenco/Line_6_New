@@ -251,7 +251,7 @@ Public Sub startWO()
             
 End Sub
 
-Public Sub notfinishWO()
+Public Sub notfinishWO(Optional isEstop As Boolean)
     Call updTemp("End")
     Call writeData("N/F")
     Call btnState(btnActive)
@@ -260,7 +260,11 @@ Public Sub notfinishWO()
     Call woTimer("Reset")
     woStarted = False
     
-    Call statusMsg(msgNotFinished)
+    If Not isEstop Then
+        Call statusMsg(msgNotFinished)
+    Else
+        Call statusMsg(msgEstopPressed)
+    End If
 
 End Sub
 

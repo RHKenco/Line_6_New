@@ -163,6 +163,10 @@ Private Sub runState3() 'Run State - Joystick in pass adjustment mode, Oscillato
 '-- Run Pass
 Call c6kOps.RunPass("Update")
 
+'-- Show pass Speed
+frmLine6.Var_Label_Pass_Speed.Visible = True
+Call passSpeedDisplay(Joy.getUserSpeedMult())
+
 '-- Run Joystick
 If Not Joy.runJoy(joyRun) Then        'If the joystick is released, figure out why
     
@@ -171,6 +175,7 @@ If Not Joy.runJoy(joyRun) Then        'If the joystick is released, figure out w
         
         'Revert to Pause State
         State = 2
+        frmLine6.Var_Label_Pass_Speed.Visible = False
         Call c6kOps.RunPass("Stop")
         
         'Set status message

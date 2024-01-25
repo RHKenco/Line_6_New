@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin VB.Form frmLine6 
    BackColor       =   &H00C00000&
-   Caption         =   "Line 6"
+   Caption         =   "No Active Work Order"
    ClientHeight    =   6660
-   ClientLeft      =   225
-   ClientTop       =   855
+   ClientLeft      =   165
+   ClientTop       =   810
    ClientWidth     =   19410
    LinkTopic       =   "Form6"
    ScaleHeight     =   6660
@@ -30,9 +30,9 @@ Begin VB.Form frmLine6
          Strikethrough   =   0   'False
       EndProperty
       Height          =   1095
-      Left            =   8400
+      Left            =   5400
       TabIndex        =   26
-      Top             =   4800
+      Top             =   5040
       Width           =   2175
    End
    Begin VB.OptionButton Option_Auger_Direction 
@@ -304,6 +304,27 @@ Begin VB.Form frmLine6
       Top             =   840
       Width           =   3495
    End
+   Begin VB.Label Var_Label_Pass_Speed 
+      Alignment       =   2  'Center
+      BackStyle       =   0  'Transparent
+      Caption         =   "Pass Speed"
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   18
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H8000000E&
+      Height          =   6375
+      Left            =   17160
+      TabIndex        =   28
+      Top             =   120
+      Visible         =   0   'False
+      Width           =   2175
+   End
    Begin VB.Label Label_Estop 
       Alignment       =   2  'Center
       BackStyle       =   0  'Transparent
@@ -382,7 +403,7 @@ Begin VB.Form frmLine6
       Height          =   2055
       Left            =   6120
       TabIndex        =   13
-      Top             =   960
+      Top             =   840
       Width           =   12615
    End
    Begin VB.Label Var_Label_WO_Active 
@@ -624,9 +645,9 @@ Text_Enter_Pass_Width.SetFocus
 
 End Sub
 
-Private Sub Option_Auger_Direction_Click(Index As Integer)
+Private Sub Option_Auger_Direction_Click(index As Integer)
 
-If Index = 0 Then
+If index = 0 Then
     If Option_Auger_Direction(0).value = True Then
         Option_Auger_Direction(1).value = False
     Else
@@ -873,5 +894,9 @@ Private Sub topbar_test_4_Click()
 
 c6k.Write ("!JOG000000:" & Chr$(13))
 c6k.Write ("JOG000000:1INFNC1-5J:1INFNC2-5K:1INFNC3-2K:1INFNC4-2J:JOGA4,5,5,1,5,5:JOGAD50,99,99,99,99,15:JOGVH8,8,10,2,5,3:JOGVL8,15,10,5,5,5:JOG01010" & Chr$(13))
+
+End Sub
+
+Private Sub Var_Label_System_Status_Click()
 
 End Sub

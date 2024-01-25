@@ -14,6 +14,6 @@ FSM_Line6 = 517, 50, 1885, 955,
 FSM_Line6_Run = 215, 18, 1428, 832, 
 ClassWO_Manager = 28, 36, 1571, 800, 
 Button_State = 132, 112, 1359, 852, 
-Status_Messages = 235, 38, 1501, 815, 
+Status_Messages = 235, 38, 1501, 815, I
 ClassJoy = 312, 68, 1498, 834, 
 c6k_IO_Definitions = 50, 50, 812, 713, 

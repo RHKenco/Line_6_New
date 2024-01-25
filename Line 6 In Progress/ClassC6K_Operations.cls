@@ -111,8 +111,8 @@ Dim tempPassW As String
 tempPassW = frmLine6.Text_Enter_Pass_Width.Text
 
 If tempPassW = "" Then
-    frmLine6.Text_Enter_Pass_Width.Text = "1.000"
-    passWidth = 1#
+    frmLine6.Text_Enter_Pass_Width.Text = "0.875"
+    passWidth = 0.875
 Else
     passWidth = CSng(tempPassW)
     
@@ -219,7 +219,10 @@ End Sub
 Private Sub setBaseSpeed()
 
 'Set speed to match osc pass width based on set thresholds
-If (passWidth > 0) And (passWidth < passThreshold(0)) Then
+If (passWidth = 0.875) Then                                                 'Pass width at base of 0.875, no oscillation
+    basePassSpeed = passSpeed(0)
+    baseOscSpeed = 0
+ElseIf (passWidth > 0.875) And (passWidth < passThreshold(0)) Then
     basePassSpeed = passSpeed(0)
     baseOscSpeed = oscSpeed(0)
 ElseIf (passWidth >= passThreshold(0)) And (passWidth < passThreshold(1)) Then
@@ -526,7 +529,7 @@ If (isEstopPressed And Not setE_Stop) Then          'If Estop is pressed and the
 
     'Raise E-Stop Flag, disable jog mode on all axes, shut down all c6k outputs, and wait 2 seconds before accepting further commands
     setE_Stop = True
-    Call stopAllOut
+    Call activeEstop
 
     'Update form
     frmLine6.Label_Estop.Caption = "E-Stop Has Been Pressed!"
@@ -542,8 +545,6 @@ ElseIf (Not isEstopPressed And setE_Stop) Then      'If Estop is not pressed but
     Call setOutput(outExhaust, True)
     frmLine6.Label_Estop.Visible = False
     frmLine6.Label_Estop.Refresh
-    
-    '***Move to appropriate state
     
 End If
                                                     'If Estop is not pressed and was not pressed last time Or
@@ -578,7 +579,7 @@ If Not setE_Stop Then
         Else
             'Raise H2O Fault Flag, disable jog mode on all axes, shut down all c6k outputs, and wait 2 seconds before accepting further commands
             chkH2O = True
-            Call stopAllOut
+            Call activeEstop
             frmLine6.Label_Estop.Caption = "Insufficient Water Flow!"
             frmLine6.Label_Estop.Visible = True
             frmLine6.Label_Estop.Refresh
@@ -602,12 +603,24 @@ chkH2Oflow = chkH2O
 
 End Function
 
+Public Sub activeEstop()
+
+'Immediately stop everything (All axes, all outputs)
+Call stopAllOut
+
+'Reset FSMs to return to WO Active State
+fsmMain.State = 1
+fsmRun.State = 0
+
+'Call not-finished on WO
+Call woMgr.notfinishWO
+
+End Sub
+
 Public Function updDro()
 
 'update inputs
 Call updFastStatus
-
-
 
 'For each drive axis, pull position from fast status data and display on maintenance DRO
 Dim temp As Double
@@ -625,6 +638,26 @@ Public Sub strikeArc()
 
 'Capture position of z-axis - further z inputs will be relative to strike (which should be surface of blade)
 c6k.Write "PSETX,0,0,X:" & Chr$(13)
+
+'Capture current position based on pass type
+Select Case passType
+    Case passBlade
+        c6k.Write "PSET0,X,X,X,X,0" & Chr$(13)  'Set X-Y to 0
+    Case passAugFac
+        c6k.Write "PSET0,X,X,X,0,0" & Chr$(13)  'Set X-Y-R to 0
+    Case passAugEdg
+    
+        Dim tempSetPos As Double
+        tempSetPos = (augDiam / 2) - 1  'Strike position will be 1" from radial edge of auger
+        
+        If augerCoil = "Right" Then tempSetPos = -tempSetPos    'Facing Line6, a Right-Handed Auger will be impregnated on the Left Side such that the strike location will be -
+            
+        c6k.Write "PSET" & Format(tempSetPos, "0.000") & ",X,X,X,0,0" & Chr$(13)     'Set Y-R to 0 and X to 1" from radial edge. This will be used in speed calcs
+    
+    Case Else
+        MsgBox "Error in Strike Arc Pset Routine"
+End Select
+
 'Turn on inputs as necessary
 Call setOutput(outArgon, True)
 Call setOutput(outAirblade, True)
@@ -635,6 +668,10 @@ c6k.Write "A,10:AD,3:V,13:D,0.9:GO01:1OUT.16-1:WAIT(MOV=b000000)" & Chr$(13)
 End Sub
 
 Public Sub initOsc()
+    'Adjust pass with for base 0.875 pass width
+    Dim tempPassWidth As Single
+    tempPassWidth = passWidth - 0.875
+
     'Create oscillator program to check if motion has stopped and toggle direction
     c6k.Write ("VAR1=0:Var2=0:DEL CHECK1:DEF CHECK1" & Chr(13))
     'Each time the program is called, run it a set number of times
@@ -642,15 +679,15 @@ Public Sub initOsc()
     'Check to see if the oscillator has stopped moving
     c6k.Write ("IF(MOV=bXXX0XX)" & Chr(13))
         c6k.Write ("IF(VAR2=0):V,,," & Str$(baseOscSpeed) & ",,:VAR2=1:NIF" & Chr(13))                        'Set osc velocity
-        c6k.Write ("IF(VAR2=1):D,,," & Str$(passWidth) & ",,:VAR2=2" & Chr(13))       'If last pass was -, then set + distance & reset bool
-        c6k.Write ("ELSE(VAR2=2):D,,,-" & Str$(passWidth) & ",,:VAR2=1:NIF" & Chr(13))      'If last pass was +, then set - distance & reset bool
+        c6k.Write ("IF(VAR2=1):D,,," & Str$(tempPassWidth) & ",,:VAR2=2" & Chr(13))             'If last pass was -, then set + distance & reset bool
+        c6k.Write ("ELSE(VAR2=2):D,,,-" & Str$(tempPassWidth) & ",,:VAR2=1:NIF" & Chr(13))      'If last pass was +, then set - distance & reset bool
     c6k.Write ("GOXXX1XX:NIF:VAR1=VAR1-1:UNTIL(VAR1<1)" & Chr(13))                                            'Initiate motion, increment counter
     c6k.Write ("END" & Chr(13))
     
 End Sub
 
 Public Sub runOsc()
-    c6k.Write ("GOSUB CHECK1" & Chr(13))
+    If baseOscSpeed > 0 Then c6k.Write ("GOSUB CHECK1" & Chr(13))   'If oscillator is enabled, run osc.
 End Sub
 
 Public Sub returnOsc()
@@ -766,8 +803,14 @@ Select Case passType
 
     
     Case passAugFac
-    
-        '*** WAY TO TRACK CURRENT DIAMETER
+            
+        currentDiam = 1 * Val(fsinfo.MotorPos(1))
+        If augerCoil = "Right" Then currentDiam = -currentDiam
+            
+        If currentDiam = 0 Then
+            MsgBox "No Diameter Input in Pass Speed Calculation!"
+            Exit Sub
+        End If
             
         currentRotSpeed = currentPassSpeed / (PI * currentDiam)   'Rotational speed necessary for pass speed (linVel = (rotVel * (diam/2)) * (1rot/2PI rad)) in ROTATIONS/SEC
     

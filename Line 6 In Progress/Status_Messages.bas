@@ -19,6 +19,7 @@ Public Const msgNextPass As Integer = 13
 Public Const msgNotFinished As Integer = 14
 Public Const msgFinished As Integer = 15
 Public Const msgTimeout As Integer = 16
+Public Const msgEstopPressed As Integer = 17
 
 Public Sub statusMsg(newStatus As Integer, Optional displayStr As String)
 
@@ -78,6 +79,9 @@ Select Case newStatus
         tempLabel = "Finished " & displayStr & " Parts." & Chr(13) & "Press start for next set of parts," & Chr(13) & "or press clear to enter new WO"
     Case msgTimeout
         tempLabel = "System Timed Out - Press Start to Resume"
+        
+    Case msgEstopPressed
+        tempLabel = "E-Stop Pressed - Thuroughly check the machine;" & Chr(13) & "If faults cleared, press Start to Resume"
 
     Case Else
         MsgBox "Error in Status Message Display - Case: " & newStatus
@@ -95,5 +99,48 @@ Exit Sub
 strInError:
 
 MsgBox "Display String Error - String must not be null"
+
+End Sub
+
+Public Sub passSpeedDisplay(speed As Single)
+
+Static speedLast As Integer
+Dim tempSpeed As Integer
+Dim tempLabel As String
+    
+Dim i As Integer
+    
+tempSpeed = (Joy.getUserSpeedMult * 1000) \ 10
+
+If ((tempSpeed - 5) > speedLast) Or ((tempSpeed + 5) < speedLast) Then
+
+    tempLabel = "=== - 150%" & Chr(13)
+    
+    i = 145
+    
+    While i > 50
+    
+        If i = 100 Then
+            If tempSpeed = 100 Then
+                tempLabel = tempLabel & "--- - 100%" & Chr(13)
+            Else
+                tempLabel = tempLabel & "    - 100%" & Chr(13)
+            End If
+        Else
+            If tempSpeed >= i Then
+                tempLabel = tempLabel & "---" & Chr(13)
+            Else
+                tempLabel = tempLabel & "   " & Chr(13)
+            End If
+        End If
+        
+        i = i - 5
+        
+    Loop
+
+    frmLine6.Var_Label_Pass_Speed.Text = tempLabel
+    frmLine6.Var_Label_Pass_Speed.Refresh
+    
+End If
 
 End Sub
