@@ -333,7 +333,7 @@ End If
 End Sub
 
 Private Sub Text_Enter_Auger_Dia_KeyPress(KeyAscii As Integer)
-    If KeyAscii = (13) And IsNumeric(Text_Enter_Auger_Dia.Text) Then Text_Enter_Auger_Pitch.SetFocus    'If enter is pressed, go to Pitch
+    If KeyAscii = (13) And IsNumeric(CDbl(Text_Enter_Auger_Dia.Text)) Then Text_Enter_Auger_Pitch.SetFocus    'If enter is pressed, go to Pitch
 End Sub
 
 Private Sub Text_Enter_Auger_Pitch_Change()
@@ -351,5 +351,5 @@ End If
 End Sub
 
 Private Sub Text_Enter_Auger_Pitch_KeyPress(KeyAscii As Integer)
-    If KeyAscii = (13) And IsNumeric(Text_Enter_Auger_Pitch.Text) Then Call Button_Compute_Click    'If enter is pressed, Run Calculations
+    If KeyAscii = (13) And IsNumeric(CDbl(Text_Enter_Auger_Pitch.Text)) Then Call Button_Compute_Click    'If enter is pressed, Run Calculations
 End Sub
