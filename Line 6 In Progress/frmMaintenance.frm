@@ -3,8 +3,8 @@ Begin VB.Form frmMaintenance
    BackColor       =   &H00C00000&
    Caption         =   "Maintainance"
    ClientHeight    =   5775
-   ClientLeft      =   225
-   ClientTop       =   855
+   ClientLeft      =   165
+   ClientTop       =   810
    ClientWidth     =   10740
    LinkTopic       =   "Form6"
    ScaleHeight     =   5775
@@ -1535,7 +1535,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
-Private Sub Button_Move_Axis_Click(index As Integer)
+Private Sub Button_Move_Axis_Click(Index As Integer)
 
 Const MoveVelocities = "1,1,1,1,1,1"
 
@@ -1546,7 +1546,7 @@ Dim tempGO As String
 For i = 0 To 5
 
     If i = 0 Then
-        If i = index Then
+        If i = Index Then
             tempD = Format(CDbl(Text_In_Des(i).Text), "0.000")
             tempGO = "1"
         Else
@@ -1554,7 +1554,7 @@ For i = 0 To 5
             tempGO = "0"
         End If
     Else
-        If i = index Then
+        If i = Index Then
             tempD = tempD & "," & Format(CDbl(Text_In_Des(i).Text), "0.000")
             tempGO = tempGO & "1"
         Else
@@ -1592,18 +1592,18 @@ End Sub
 
 Private Sub setInputText(currentInputState As Long)
 
-Dim index As Integer
+Dim Index As Integer
 Dim inputOn As Boolean
 
 For i = 0 To 15
 
     'Set up index for selecting proper label & Input binary
-    If i > 7 Then index = i + 8 Else index = i
+    If i > 7 Then Index = i + 8 Else Index = i
     
-    inputOn = (currentInputState And (2 ^ index))
+    inputOn = (currentInputState And (2 ^ Index))
     
     'Set text to red if input is active
-    If inputOn Then Label_Block_Pin(index).ForeColor = (&HCF&) Else Label_Block_Pin(index).ForeColor = (&H8000000E)
+    If inputOn Then Label_Block_Pin(Index).ForeColor = (&HCF&) Else Label_Block_Pin(Index).ForeColor = (&H8000000E)
 
 Next i
 
@@ -1661,6 +1661,29 @@ Next i
 
 End Sub
 
+
+Private Sub Text_Pop_DRO_Change(Index As Integer)
+
+Static dOldInput(5) As Single
+Dim dNewInput As String
+
+dNewInput = Text_Pop_DRO.Text
+If IsNumeric(dNewInput) Then
+    dOldInput(Index) = CSng(dNewInput)
+ElseIf dNewInput = "" Then
+    Exit Sub
+Else
+    TextPop_DRO.Text = CStr(dOldInput(Index))
+End If
+
+End Sub
+
+Private Sub Text_Pop_DRO_Change(Index As Integer, KeyAscii As Integer)
+
+If KeyAscii = (13) Then Call Button_Move_Axis_Click(Index)
+
+
+End Sub
 
 Private Sub Timer_c6kRead_Timer()
 

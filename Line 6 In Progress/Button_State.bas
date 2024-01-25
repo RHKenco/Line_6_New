@@ -7,6 +7,7 @@ Public Const btnActiveBlade As Integer = 3
 Public Const btnActiveAuger As Integer = 4
 Public Const btnStarted As Integer = 5
 Public Const btnRunning As Integer = 6
+Public Const btnEstop As Integer = 7
 
 
 '-- btnState() - Function to handle visibility and enabling of Enter, Go, Start, N/F, and Finish Buttons -------------------------------------
@@ -50,7 +51,7 @@ Select Case btn_state       'States: "Inactive", "Active Blade", "Active Auger",
         frmLine6.Button_WO_Enter_Clear.Caption = "Clear"
         frmLine6.Text_Enter_WO.Locked = True
         
-    Case btnStarted, btnRunning
+    Case btnStarted, btnRunning, btnEstop
         frmLine6.Button_WO_Enter_Clear.Enabled = False
         
     Case Else
@@ -69,7 +70,7 @@ Select Case btn_state       'States: "Inactive", "Active Blade", "Active Auger",
     Case btnActiveBlade, btnActiveAuger
         frmLine6.Button_Start.Enabled = True
         frmLine6.Button_Start.Visible = True
-    Case btnStarted, btnRunning
+    Case btnStarted, btnRunning, btnEstop
         frmLine6.Button_Start.Enabled = False
         frmLine6.Button_Start.Visible = False
     Case Else
@@ -84,7 +85,7 @@ Private Sub btnSt_Button_NF_Fin(btn_state As Integer)
 Select Case btn_state       'States: "Inactive", "Active Blade", "Active Auger", "Started", "Running"
 
         
-    Case btnInactive, btnActiveBlade, btnActiveAuger
+    Case btnInactive, btnActiveBlade, btnActiveAuger, btnEstop
         frmLine6.Button_NF.Enabled = False
         frmLine6.Button_NF.Visible = False
         
@@ -114,15 +115,10 @@ Private Sub btnSt_Button_Go(btn_state As Integer)
 Select Case btn_state       'States: "Inactive", "Active Blade", "Active Auger", "Started", "Running"
 
         
-    Case btnInactive, btnActiveBlade, btnActiveAuger
+    Case btnInactive, btnActiveBlade, btnActiveAuger, btnRunning, btnEstop
         frmLine6.Button_Go.Enabled = False
-        frmLine6.Button_Go.Visible = True
     Case btnStarted
         frmLine6.Button_Go.Enabled = True
-        frmLine6.Button_Go.Visible = True
-    Case btnRunning
-        frmLine6.Button_Go.Enabled = False
-        frmLine6.Button_Go.Visible = True
     Case Else
         MsgBox "Unspecified Button State for GO Button: " & btn_state
         
@@ -133,7 +129,7 @@ End Sub
 Private Sub btnSt_Button_Set_Clear_Auger(btn_state As Integer)
 
 Select Case btn_state       'States: "Inactive", "Active Blade", "Active Auger", "Started", "Running"
-    Case btnInactive
+    Case btnInactive, btnEstop
         frmLine6.Button_Set_Auger.Enabled = False
         frmLine6.Button_Set_Auger.Visible = True
         

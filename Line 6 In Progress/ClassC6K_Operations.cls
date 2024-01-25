@@ -541,6 +541,7 @@ ElseIf (Not isEstopPressed And setE_Stop) Then      'If Estop is not pressed but
 
     'Lower E-Stop Flag and re-enable airblade and blower fan
     setE_Stop = False
+    btnState (btnActive)
     Call setOutput(outAirblade, True)
     Call setOutput(outExhaust, True)
     frmLine6.Label_Estop.Visible = False
@@ -590,6 +591,7 @@ If Not setE_Stop Then
         'Lower E-Stop Flag and re-enable airblade and blower fan
         chkH2O = False
         countH2O = 0
+        btnState (btnActive)
         Call setOutput(outAirblade, True)
         Call setOutput(outExhaust, True)
         frmLine6.Label_Estop.Visible = False
@@ -607,6 +609,8 @@ Public Sub activeEstop()
 
 'Immediately stop everything (All axes, all outputs)
 Call stopAllOut
+
+btnState (btnEstop)
 
 'Reset FSMs to return to WO Active State
 fsmMain.State = 1
