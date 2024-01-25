@@ -671,23 +671,22 @@ Public Sub initOsc()
     'Adjust pass with for base 0.875 pass width
     Dim tempPassWidth As Single
     tempPassWidth = passWidth - 0.875
-
+    'Set Osc. Velocity
+    c6k.Write ("V,,," & Str$(baseOscSpeed) & ",," & Chr(13))
+    
     'Create oscillator program to check if motion has stopped and toggle direction
-    c6k.Write ("VAR1=0:Var2=0:DEL CHECK1:DEF CHECK1" & Chr(13))
-    'Each time the program is called, run it a set number of times
-    c6k.Write ("VAR1=2:REPEAT" & Chr(13))
+    c6k.Write ("VAR1=0:DEL OSCRUN:DEF OSCRUN" & Chr(13))
     'Check to see if the oscillator has stopped moving
     c6k.Write ("IF(MOV=bXXX0XX)" & Chr(13))
-        c6k.Write ("IF(VAR2=0):V,,," & Str$(baseOscSpeed) & ",,:VAR2=1:NIF" & Chr(13))                        'Set osc velocity
-        c6k.Write ("IF(VAR2=1):D,,,-" & Str$(tempPassWidth) & ",,:VAR2=2" & Chr(13))             'If last pass was -, then set + distance & reset bool
-        c6k.Write ("ELSE(VAR2=2):D,,," & Str$(tempPassWidth) & ",,:VAR2=1:NIF" & Chr(13))      'If last pass was +, then set - distance & reset bool
-    c6k.Write ("GOXXX1XX:NIF:VAR1=VAR1-1:UNTIL(VAR1<1)" & Chr(13))                                            'Initiate motion, increment counter
+        c6k.Write ("IF(VAR1=0):D,,,-" & Str$(tempPassWidth) & ",,:VAR1=1" & Chr(13))             'If last pass was -, then set + distance & reset bool
+        c6k.Write ("ELSE:D,,," & Str$(tempPassWidth) & ",,:VAR1=0:NIF" & Chr(13))      'If last pass was +, then set - distance & reset bool
+    c6k.Write ("GOXXX1XX:NIF" & Chr(13))                                            'Initiate motion, increment counter
     c6k.Write ("END" & Chr(13))
     
 End Sub
 
 Public Sub runOsc()
-    If baseOscSpeed > 0 Then c6k.Write ("GOSUB CHECK1" & Chr(13))   'If oscillator is enabled, run osc.
+    If baseOscSpeed > 0 Then c6k.Write ("GOSUB OSCRUN" & Chr(13))   'If oscillator is enabled, run osc.
 End Sub
 
 Public Sub returnOsc()

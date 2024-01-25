@@ -3,8 +3,8 @@ Begin VB.Form frmLine6
    BackColor       =   &H00C00000&
    Caption         =   "No Active Work Order"
    ClientHeight    =   6660
-   ClientLeft      =   165
-   ClientTop       =   810
+   ClientLeft      =   225
+   ClientTop       =   855
    ClientWidth     =   19410
    LinkTopic       =   "Form6"
    ScaleHeight     =   6660
@@ -309,7 +309,7 @@ Begin VB.Form frmLine6
       Caption         =   "Pass Speed"
       BeginProperty Font 
          Name            =   "Courier"
-         Size            =   9.75
+         Size            =   12
          Charset         =   0
          Weight          =   700
          Underline       =   0   'False
@@ -322,7 +322,7 @@ Begin VB.Form frmLine6
       TabIndex        =   28
       Top             =   840
       Visible         =   0   'False
-      Width           =   2175
+      Width           =   2775
    End
    Begin VB.Label Label_Estop 
       Alignment       =   2  'Center
@@ -896,6 +896,3 @@ c6k.Write ("JOG000000:1INFNC1-5J:1INFNC2-5K:1INFNC3-2K:1INFNC4-2J:JOGA4,5,5,1,5,
 
 End Sub
 
-Private Sub Var_Label_Pass_Speed_Click()
-
-End Sub

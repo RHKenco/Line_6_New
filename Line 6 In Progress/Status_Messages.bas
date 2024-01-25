@@ -113,36 +113,34 @@ Dim j As Integer
     
 tempSpeed = ((Joy.getUserSpeedMult * 1000) \ 10)   'X.YZ --> XYZ
 
-If ((tempSpeed - 5) > speedLast) Or ((tempSpeed + 5) < speedLast) Then
+If ((tempSpeed - 3) > speedLast) Or ((tempSpeed + 3) < speedLast) Then
 
-    tempLabel = "========== 240%" & Chr(13)
+    tempLabel = "========== < 250%" & Chr(13)
     
-    i = 210
+    i = 220
     
-    Do While i > 40
+    Do While i >= 40
     
+        If tempSpeed > i Then
+            j = i + 30
+            Do While j > i
+                If tempSpeed >= j Then
+                    tempLabel = tempLabel & "-"
+                Else
+                    tempLabel = tempLabel & " "
+                End If
+                j = j - 3
+            Loop
+            tempLabel = tempLabel & Chr(13)
+        Else
+            tempLabel = tempLabel & "          " & Chr(13)
+        End If
+        
         If i = 100 Then
             If tempSpeed < 103 And tempSpeed > 97 Then
-                tempLabel = tempLabel & "========== 100%" & Chr(13)
-            ElseIf tempSpeed > 100 Then
-                tempLabel = tempLabel & "---------- 100%" & Chr(13)
+                tempLabel = tempLabel & "========== < 100%" & Chr(13)
             Else
-                tempLabel = tempLabel & "           100%" & Chr(13)
-            End If
-        Else
-            If tempSpeed > i Then
-                j = i + 30
-                Do While j >= i
-                    If tempSpeed >= j Then
-                        tempLabel = tempLabel & "-"
-                    Else
-                        tempLabel = tempLabel & " "
-                    End If
-                    j = j - 3
-                Loop
-                tempLabel = tempLabel & Chr(13)
-            Else
-                tempLabel = tempLabel & "          " & Chr(13)
+                tempLabel = tempLabel & "---------- < 100%" & Chr(13)
             End If
         End If
         
@@ -150,10 +148,13 @@ If ((tempSpeed - 5) > speedLast) Or ((tempSpeed + 5) < speedLast) Then
         
     Loop
 
-    tempLabel = tempLabel & "========== 40%" & Chr(13)
+    tempLabel = tempLabel & "========== < 40%" & Chr(13)
 
     frmLine6.Var_Label_Pass_Speed.Caption = tempLabel
     frmLine6.Var_Label_Pass_Speed.Refresh
+ 
+ 
+    speedLast = tempSpeed
     
 End If
 

@@ -80,7 +80,7 @@ Private Const inDebCount As Integer = 5     'Time in FSM cycles of input debounc
 
 Private userSpeedMult As Single             'Speed Multiplier to be applied to speed for varying pass speeds on the fly
 Private Const speedMultInc As Single = 0.03           'Constant for incrementing the speedmult increase
-Private Const speedMultUpperBound As Single = 2.4     ' +/- Speed Mult Allowance
+Private Const speedMultUpperBound As Single = 2.5     ' +/- Speed Mult Allowance
 Private Const speedMultLowerBound As Single = 0.4
 Private userSpeedBoost(6) As Integer        'Speed Boost Int for each axis - joystick adjustment of multi-axis movements
 Private Const userSpeedBoostMod = 0.25      'Constant for speed boost for multi-axis joystick operations
