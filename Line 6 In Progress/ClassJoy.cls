@@ -253,9 +253,9 @@ Public Function getJoyInputs(c6kInput As Long, Optional returnIndex As Integer) 
     
 End Function
 
-Public Function getJoyButtons(index As Integer) As Boolean
-    If index < 9 Then
-        getJoyButtons = myJoy.stateNow(index)
+Public Function getJoyButtons(Index As Integer) As Boolean
+    If Index < 9 Then
+        getJoyButtons = myJoy.stateNow(Index)
     Else
         MsgBox "Invalid Button Index Request"
     End If
@@ -280,7 +280,7 @@ Private Sub initJoy()
 c6k.Write ("!JOG000000" & Chr$(13))
 
 'Set motion parameters for Joystick Motion
-c6k.Write ("JOG000000:JOGA4,5,5,1,5,5:JOGAD50,99,99,99,99,15:JOGVH8,8,10,2,5,3:JOGVL8,15,10,5,5,5" & Chr$(13))
+c6k.Write ("JOG000000:JOGA4,4,4,4,144,4:JOGAD10,10,10,10,360,10:JOGVH1,1,1,1,36,1:JOGVL0.5,0.5,0.5,0.5,18,0.5:V1,1,1,1,36,1" & Chr$(13))
 
 End Sub
 

@@ -30,12 +30,12 @@ Private Const posCalO = 7987 'counts/in         '62500
 Private Const posCalR = 2166 'counts/degree     '62500
 
 Private revCal(6) As Long                'Array to store revolution calibration data. These following constant values will be stored upon initialization,
-Private Const revCalX = 25000 'rev          '       and will convert motor revolutions to appropriate units for each axis. Current numbers are simple conversion to revolutions
-Private Const revCalY = 25000 'rev
-Private Const revCalZ = 25000 'rev
-Private Const revCalZa = 25000 'rev
-Private Const revCalO = 25000 'rev
-Private Const revCalR = 25000 'rev
+Private Const revCalX = 26550 'counts/in         '25000      '       and will convert motor revolutions to appropriate units for each axis. Current numbers are simple conversion to revolutions
+Private Const revCalY = 38426 'counts/in
+Private Const revCalZ = 253971 'counts/in
+Private Const revCalZa = 255102 'counts/in
+Private Const revCalO = 7987 'counts/in
+Private Const revCalR = 2166 'counts/degree
                                 
 '-- Critical input booleans and related variables
 Private setE_Stop As Boolean    'Local E-stop variable
@@ -700,9 +700,8 @@ End Sub
 
 Public Sub RunPass(passRunState As String)
 
-'-- Update Pass Velocity
-Call setPassVel(passType)
-
+'-- Update Pass Velocity if running
+If passRunState <> "Stop" Then Call setPassVel(passType)
 
 '-- Set motor behavior
 Select Case passRunState
@@ -731,7 +730,7 @@ Select Case passRunState
         
     ' Stop continuous move mode
     Case "Stop"
-        c6k.Write "!S111011:MC000X00" & Chr(13)
+        c6k.Write "!S111011:MC000X00:V1,1,1,X,36,1" & Chr(13)
         
     Case Else
         MsgBox ("Error in runPass function")
