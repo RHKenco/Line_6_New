@@ -3,8 +3,8 @@ Begin VB.Form frmMaintenance
    BackColor       =   &H00C00000&
    Caption         =   "Maintainance"
    ClientHeight    =   5775
-   ClientLeft      =   165
-   ClientTop       =   810
+   ClientLeft      =   225
+   ClientTop       =   855
    ClientWidth     =   10740
    LinkTopic       =   "Form6"
    ScaleHeight     =   5775
@@ -1667,18 +1667,18 @@ Private Sub Text_Pop_DRO_Change(Index As Integer)
 Static dOldInput(5) As Single
 Dim dNewInput As String
 
-dNewInput = Text_Pop_DRO.Text
+dNewInput = Text_Pop_DRO(Index).Text
 If IsNumeric(dNewInput) Then
     dOldInput(Index) = CSng(dNewInput)
 ElseIf dNewInput = "" Then
     Exit Sub
 Else
-    TextPop_DRO.Text = CStr(dOldInput(Index))
+    Text_Pop_DRO(Index).Text = CStr(dOldInput(Index))
 End If
 
 End Sub
 
-Private Sub Text_Pop_DRO_Change(Index As Integer, KeyAscii As Integer)
+Private Sub Text_Pop_DRO_KeyPress(Index As Integer, KeyAscii As Integer)
 
 If KeyAscii = (13) Then Call Button_Move_Axis_Click(Index)
 

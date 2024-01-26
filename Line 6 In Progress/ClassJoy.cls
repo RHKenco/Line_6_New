@@ -280,7 +280,7 @@ Private Sub initJoy()
 c6k.Write ("!JOG000000" & Chr$(13))
 
 'Set motion parameters for Joystick Motion
-c6k.Write ("JOG000000:JOGA4,4,4,4,144,4:JOGAD10,10,10,10,360,10:JOGVH1,1,1,1,36,1:JOGVL0.5,0.5,0.5,0.5,18,0.5:V1,1,1,1,36,1" & Chr$(13))
+c6k.Write ("JOG000000:JOGA4,4,4,4,144,4:JOGAD10,10,10,10,360,10:JOGVH10,10,10,10,360,10:JOGVL5,5,5,5,36,5:V10,10,10,10,360,10" & Chr$(13))
 
 End Sub
 
@@ -377,7 +377,7 @@ If myJoy.stateBtnUpd Or Not myJoy.active Then
         Case joyFree         'Standard X-Y-Z Mode. Used for Blades & Positioning
         
             Select Case buttons
-                Case 0, 4  ' No Keys Pressed or Toggle Only - Pass Coordinate Mode
+                Case 0, 4  ' No Keys Pressed or Toggle Only
                     Select Case passType
                         Case passBlade
                             Call setJoyInputs(aX, aY, aZ)

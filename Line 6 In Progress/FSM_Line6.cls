@@ -73,38 +73,41 @@ Private Sub runState1() 'Idle State - Joystick motion & UI Operation
 Call c6kOps.updFastStatus
 
 '-- Check for E-Stop
-    If Not c6kOps.chkE_Stop Then
+If Not c6kOps.chkE_Stop Then
+
+
+'-- Run Joystick if active
+    If Joy.getJoyActive Then
     
+        'Run JoyRun function, and if it returns true,
+        If Joy.runJoy(joyFree) Then
     
-    '-- Run Joystick if active
-        If Joy.getJoyActive Then
-        
-            'Run JoyRun function, and if it returns true,
-            If Joy.runJoy(joyFree) Then
-        
-                'Set Joystick Status Message
-                frmLine6.Var_Label_Joystick_Status.Caption = "Joystick" & Chr(13) & "Enabled:" & Chr(13) & Chr(13) & Joy.getJoyStr() & Chr(13) & "Mode"
-                frmLine6.Var_Label_Joystick_Status.Visible = True
-        
-            Else
-                'If the joystick becomes inactive hide label
-                frmLine6.Var_Label_Joystick_Status.Visible = False
-        
-            End If
-        
-        '--Input State Debug - Uncomment these two lines to enter input debug mode
-        'frmLine6.Var_Label_Joystick_Status.Caption = c6kOps.getInputState
-        'frmLine6.Var_Label_Joystick_Status.Visible = True
-            
+            'Set Joystick Status Message
+            frmLine6.Var_Label_Joystick_Status.Caption = "Joystick" & Chr(13) & "Enabled:" & Chr(13) & Chr(13) & Joy.getJoyStr() & Chr(13) & "Mode"
+            frmLine6.Var_Label_Joystick_Status.Visible = True
+    
+        Else
+            'If the joystick becomes inactive hide label
+            frmLine6.Var_Label_Joystick_Status.Visible = False
+    
         End If
-        
-        
-    '-- Run Timeout Timer if Start has been pressed
-        If woMgr.isWOstarted Then
-            woMgr.woTimer ("Count")
-        End If
+    
+    '--Input State Debug - Uncomment these two lines to enter input debug mode
+    'frmLine6.Var_Label_Joystick_Status.Caption = c6kOps.getInputState
+    'frmLine6.Var_Label_Joystick_Status.Visible = True
         
     End If
+    
+    
+'-- Run Timeout Timer if Start has been pressed
+    If woMgr.isWOstarted Then
+        woMgr.woTimer ("Count")
+    End If
+    
+End If
+
+'Update DRO if it is visible
+If frmLine6.Frame_Motors.Visible Then Call c6kOps.updDro
 
 End Sub
 
@@ -133,14 +136,18 @@ Private Sub runState3() 'Run Pass State - Runs sub-FSM to operate the machine wh
 
 '-- Call Fast Status
 Call c6kOps.updFastStatus
-'-- Check for E-Stop and H2O Flow
-    If Not c6kOps.chkE_Stop And Not c6kOps.chkH2Oflow Then
-    
-    
-    '-- Run subFSM for run-state
-        Call fsmRun.Run
 
-    End If
+'-- Check for E-Stop and H2O Flow
+If Not c6kOps.chkE_Stop And Not c6kOps.chkH2Oflow Then
+
+
+'-- Run subFSM for run-state
+    Call fsmRun.Run
+
+End If
+
+'Update DRO if it is visible
+If frmLine6.Frame_Motors.Visible Then Call c6kOps.updDro
 
 End Sub
 

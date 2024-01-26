@@ -298,8 +298,8 @@ Call statusMsg(msgActive)
 
 End Sub
 
-Private Sub Option_Auger_Coil_Click(index As Integer)
-If index = 0 Then
+Private Sub Option_Auger_Coil_Click(Index As Integer)
+If Index = 0 Then
     If Option_Auger_Coil(0).value = True Then
         Option_Auger_Coil(1).value = False
     Else
@@ -333,7 +333,15 @@ End If
 End Sub
 
 Private Sub Text_Enter_Auger_Dia_KeyPress(KeyAscii As Integer)
-    If KeyAscii = (13) And IsNumeric(CDbl(Text_Enter_Auger_Dia.Text)) Then Text_Enter_Auger_Pitch.SetFocus    'If enter is pressed, go to Pitch
+    If KeyAscii = (13) And Text_Enter_Auger_Dia.Text <> "" Then
+        If IsNumeric(CDbl(Text_Enter_Auger_Dia.Text)) Then
+            If Text_Enter_Auger_Pitch = "" Then
+                Text_Enter_Auger_Pitch.SetFocus    'If enter is pressed, go to Pitch
+            Else
+                Call Button_Compute_Click
+            End If
+        End If
+    End If
 End Sub
 
 Private Sub Text_Enter_Auger_Pitch_Change()
@@ -351,5 +359,13 @@ End If
 End Sub
 
 Private Sub Text_Enter_Auger_Pitch_KeyPress(KeyAscii As Integer)
-    If KeyAscii = (13) And IsNumeric(CDbl(Text_Enter_Auger_Pitch.Text)) Then Call Button_Compute_Click    'If enter is pressed, Run Calculations
+    If KeyAscii = (13) And Text_Enter_Auger_Pitch.Text <> "" Then
+        If IsNumeric(CDbl(Text_Enter_Auger_Pitch.Text)) Then
+            If Text_Enter_Auger_Dia <> "" Then
+                Call Button_Compute_Click    'If enter is pressed, Run Calculations
+            Else
+                Text_Enter_Auger_Pitch.SetFocus
+            End If
+        End If
+    End If
 End Sub

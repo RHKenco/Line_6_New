@@ -627,11 +627,17 @@ Public Function updDro()
 Call updFastStatus
 
 'For each drive axis, pull position from fast status data and display on maintenance DRO
-Dim temp As Double
+Dim temp1 As Double
+Dim temp2 As String
 Dim i As Integer
 For i = 1 To 6
-    temp = Val(fsinfo.MotorPos(i))
-    frmMaintenance.Text_Pop_DRO(i - 1).Text = Format((temp / posCal(i)), "0.000")
+    temp1 = Val(fsinfo.MotorPos(i))
+    temp2 = Format((temp / posCal(i)), "0.000")
+    frmMaintenance.Text_Pop_DRO(i - 1).Text = temp2
+    frmLine6.Text_Pop_DRO(i - 1).Text = temp2
+    
+    frmMaintenance.Text_Pop_DRO(i - 1).Refresh
+    frmLine6.Text_Pop_DRO(i - 1).Refresh
 Next i
     
 End Function

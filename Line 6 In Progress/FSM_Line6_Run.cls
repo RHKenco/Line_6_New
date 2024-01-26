@@ -94,12 +94,24 @@ Select Case stateInner
             'Set status message
             Call statusMsg(msgToggle)
             Call Joy.getJoyInputs(c6kOps.getInputState)
+            
+            'If release is pressed, exit pass
+            If Joy.getJoyRelease Then
+                'Reset inner State & Set Main FSM state to pass complete
+                stateInner = 0
+                fsmMain.State = 4
+            End If
         End If
     Case 1  'Run Joystick to set strike location
         'Set status message
         Call statusMsg(msgStrike)
         'Wait until joystick is inactive
         If Joy.runJoy(joyFree) Then Exit Sub
+        'If joystick inactivates and toggle is flipped, return to previous innerState
+        If Joy.getJoyToggle Then
+            stateInner = 1
+            Exit Sub
+        End If
         stateInner = 2
     Case 2  'Strike Arc
         Call c6kOps.setMachineHome

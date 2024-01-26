@@ -59,7 +59,7 @@ Select Case newStatus
     Case msgStrike
         tempLabel = "Move to strike location, then press Release"
     Case msgToggle
-        tempLabel = "Please flip switch to proceed"
+        tempLabel = "Please flip switch to proceed, or press Release to Exit Pass"
     Case msgRunning
         tempLabel = "Running Pass. Flip Switch to Pause"
     Case msgPaused

@@ -1,15 +1,404 @@
 VERSION 5.00
 Begin VB.Form frmLine6 
    BackColor       =   &H00C00000&
-   Caption         =   "No Active Work Order"
+   Caption         =   "Line 6"
    ClientHeight    =   6660
-   ClientLeft      =   225
-   ClientTop       =   855
+   ClientLeft      =   8295
+   ClientTop       =   6840
    ClientWidth     =   19410
    LinkTopic       =   "Form6"
    ScaleHeight     =   6660
    ScaleWidth      =   19410
-   StartUpPosition =   3  'Windows Default
+   Begin VB.Frame Frame_Motors 
+      BackColor       =   &H00C00000&
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   12
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ForeColor       =   &H8000000E&
+      Height          =   4095
+      Left            =   17040
+      TabIndex        =   29
+      Top             =   2400
+      Visible         =   0   'False
+      Width           =   2175
+      Begin VB.TextBox Text_Pop_DRO 
+         Alignment       =   1  'Right Justify
+         Enabled         =   0   'False
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   285
+         Index           =   5
+         Left            =   600
+         Locked          =   -1  'True
+         TabIndex        =   35
+         TabStop         =   0   'False
+         Text            =   "0.000"
+         Top             =   1200
+         Width           =   855
+      End
+      Begin VB.TextBox Text_Pop_DRO 
+         Alignment       =   1  'Right Justify
+         Enabled         =   0   'False
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   285
+         Index           =   4
+         Left            =   600
+         Locked          =   -1  'True
+         TabIndex        =   34
+         TabStop         =   0   'False
+         Text            =   "0.000"
+         Top             =   3600
+         Width           =   855
+      End
+      Begin VB.TextBox Text_Pop_DRO 
+         Alignment       =   1  'Right Justify
+         Enabled         =   0   'False
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   285
+         Index           =   3
+         Left            =   600
+         Locked          =   -1  'True
+         TabIndex        =   33
+         TabStop         =   0   'False
+         Text            =   "0.000"
+         Top             =   3000
+         Width           =   855
+      End
+      Begin VB.TextBox Text_Pop_DRO 
+         Alignment       =   1  'Right Justify
+         Enabled         =   0   'False
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   285
+         Index           =   2
+         Left            =   600
+         Locked          =   -1  'True
+         TabIndex        =   32
+         Text            =   "0.000"
+         Top             =   2400
+         Width           =   855
+      End
+      Begin VB.TextBox Text_Pop_DRO 
+         Alignment       =   1  'Right Justify
+         Enabled         =   0   'False
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   285
+         Index           =   1
+         Left            =   600
+         Locked          =   -1  'True
+         TabIndex        =   31
+         TabStop         =   0   'False
+         Text            =   "0.000"
+         Top             =   1800
+         Width           =   855
+      End
+      Begin VB.TextBox Text_Pop_DRO 
+         Alignment       =   1  'Right Justify
+         Enabled         =   0   'False
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   285
+         Index           =   0
+         Left            =   600
+         Locked          =   -1  'True
+         TabIndex        =   30
+         TabStop         =   0   'False
+         Text            =   "0.000"
+         Top             =   600
+         Width           =   855
+      End
+      Begin VB.Label Label_Drive_Units 
+         BackColor       =   &H00C00000&
+         Caption         =   "in"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   5
+         Left            =   1560
+         TabIndex        =   47
+         Top             =   1200
+         Width           =   375
+      End
+      Begin VB.Label Label_Drive_Units 
+         BackColor       =   &H00C00000&
+         Caption         =   "deg"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   4
+         Left            =   1560
+         TabIndex        =   46
+         Top             =   3600
+         Width           =   495
+      End
+      Begin VB.Label Label_Drive_Units 
+         BackColor       =   &H00C00000&
+         Caption         =   "in"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   3
+         Left            =   1560
+         TabIndex        =   45
+         Top             =   3000
+         Width           =   375
+      End
+      Begin VB.Label Label_Drive_Units 
+         BackColor       =   &H00C00000&
+         Caption         =   "in"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   2
+         Left            =   1560
+         TabIndex        =   44
+         Top             =   2400
+         Width           =   375
+      End
+      Begin VB.Label Label_Drive_Units 
+         BackColor       =   &H00C00000&
+         Caption         =   "in"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   1
+         Left            =   1560
+         TabIndex        =   43
+         Top             =   1800
+         Width           =   375
+      End
+      Begin VB.Label Label_Drive_Units 
+         BackColor       =   &H00C00000&
+         Caption         =   "in"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   0
+         Left            =   1560
+         TabIndex        =   42
+         Top             =   600
+         Width           =   375
+      End
+      Begin VB.Label Label_Drive_Num 
+         BackColor       =   &H00C00000&
+         Caption         =   "6 - Y-Axis"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   5
+         Left            =   240
+         TabIndex        =   41
+         Top             =   960
+         Width           =   1575
+      End
+      Begin VB.Label Label_Drive_Num 
+         BackColor       =   &H00C00000&
+         Caption         =   "5 - APT Rot"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   4
+         Left            =   240
+         TabIndex        =   40
+         Top             =   3360
+         Width           =   1575
+      End
+      Begin VB.Label Label_Drive_Num 
+         BackColor       =   &H00C00000&
+         Caption         =   "4 - Osc"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   3
+         Left            =   240
+         TabIndex        =   39
+         Top             =   2760
+         Width           =   1575
+      End
+      Begin VB.Label Label_Drive_Num 
+         BackColor       =   &H00C00000&
+         Caption         =   "3 - Z-Alt"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   2
+         Left            =   240
+         TabIndex        =   38
+         Top             =   2160
+         Width           =   1575
+      End
+      Begin VB.Label Label_Drive_Num 
+         BackColor       =   &H00C00000&
+         Caption         =   "2 - Z-Axis"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   1
+         Left            =   240
+         TabIndex        =   37
+         Top             =   1560
+         Width           =   1575
+      End
+      Begin VB.Label Label_Drive_Num 
+         BackColor       =   &H00C00000&
+         Caption         =   "1 - X-Axis"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   9.75
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   0
+         Left            =   240
+         TabIndex        =   36
+         Top             =   360
+         Width           =   1575
+      End
+   End
    Begin VB.TextBox Text_Focus_Trap 
       Height          =   375
       Left            =   120
@@ -218,12 +607,6 @@ Begin VB.Form frmLine6
       Top             =   2160
       Width           =   2895
    End
-   Begin VB.Timer Timer_Oscillator 
-      Enabled         =   0   'False
-      Interval        =   5
-      Left            =   480
-      Top             =   0
-   End
    Begin VB.Timer Timer_FSM 
       Enabled         =   0   'False
       Interval        =   50
@@ -360,6 +743,7 @@ Begin VB.Form frmLine6
       EndProperty
       ForeColor       =   &H8000000E&
       Height          =   3495
+      Index           =   0
       Left            =   5400
       TabIndex        =   23
       Top             =   840
@@ -547,6 +931,12 @@ Begin VB.Form frmLine6
    End
    Begin VB.Menu Topbar_Maintenance 
       Caption         =   "Maintenance"
+      Begin VB.Menu Topbar_Maint_Open 
+         Caption         =   "Open Maintenance Form"
+      End
+      Begin VB.Menu Topbar_Show_DRO 
+         Caption         =   "Show DRO"
+      End
    End
    Begin VB.Menu Topbar_Test_Dropdown 
       Caption         =   "Test"
@@ -644,9 +1034,9 @@ Text_Enter_Pass_Width.SetFocus
 
 End Sub
 
-Private Sub Option_Auger_Direction_Click(index As Integer)
+Private Sub Option_Auger_Direction_Click(Index As Integer)
 
-If index = 0 Then
+If Index = 0 Then
     If Option_Auger_Direction(0).value = True Then
         Option_Auger_Direction(1).value = False
     Else
@@ -780,23 +1170,25 @@ End Sub
 Private Sub FL6_End_Program()
 
     'Shut Down c6k - Immediate jog off, disable outputs, disable drives, clear command buffer
-    c6k.Write "!JOG00000000:1OUTALL9,16,0:1OUTALL25,32,0:DRIVE0,0,0,0,0,0,0,0:S"
+    c6k.Write "!S:!JOG00000000:1OUTALL9,16,0:1OUTALL25,32,0:DRIVE0,0,0,0,0,0,0,0"
     
     'Reset c6k Controller to avoid retained settings & commands in next boot. Will disconnect ethernet
     c6k.Write ("RESET")
     
-    Var_Label_WO_Active.Caption = "Unloading all forms, Please Wait"
-    Var_Label_WO_Active.Refresh
+    'Var_Label_WO_Active.Caption = "Unloading all forms, Please Wait"
+    'Var_Label_WO_Active.Refresh
     
     'Unload all Forms except frmLine6 and frmMain
-    For Each tmpForm In Forms
-        If (tmpForm.Name <> "frmLine6") Or (tmpForm.Name <> "frmMain") Then
-            Unload tmpForm
-            Set tmpForm = Nothing
-        End If
-    Next
-        
+    'For Each tmpForm In Forms
+    '    If (tmpForm.Name <> "frmLine6") Or (tmpForm.Name <> "frmMain") Then
+    '        Unload tmpForm
+    '        Set tmpForm = Nothing
+    '    End If
+    'Next
+            
     'Show frmMain
+    Set c6k = Nothing
+    frmMain.Launch_Cmd.Enabled = False
     frmMain.Show
 End Sub
 
@@ -823,11 +1215,6 @@ Call fsmMain.Run
 
 End Sub
 
-Private Sub Timer_Oscillator_Timer()
-
-Call c6kOps.runOsc
-
-End Sub
 
 Private Sub Topbar_Calibration_Click()
 
@@ -847,7 +1234,7 @@ End If
 
 End Sub
 
-Private Sub Topbar_Maintenance_Click()
+Private Sub Topbar_Maint_Open_Click()
 
 'Show Maintenance Form
 frmMaintenance.Show
@@ -879,6 +1266,14 @@ If temp = 0 Then
     Call c6kOps.setMachineHome
 End If
 
+End Sub
+
+Private Sub Topbar_Show_DRO_Click()
+    If Frame_Motors.Visible Then
+        Frame_Motors.Visible = False
+    Else
+        Frame_Motors.Visible = True
+    End If
 End Sub
 
 Private Sub topbar_test_1_Click()
