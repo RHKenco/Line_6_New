@@ -934,6 +934,9 @@ Begin VB.Form frmLine6
       Begin VB.Menu Topbar_Maint_Open 
          Caption         =   "Open Maintenance Form"
       End
+      Begin VB.Menu Topbar_Show_FastStatus 
+         Caption         =   "Show FastStatus"
+      End
       Begin VB.Menu Topbar_Show_DRO 
          Caption         =   "Show DRO"
       End
@@ -1121,7 +1124,7 @@ Var_Label_WO_Active.Visible = True
 
 Call statusMsg(msgInactive)
 
-Var_Label_Joystick_Status.Visible = False
+Var_Label_Joystick_Status(0).Visible = False
 
 Label_Estop.Visible = False
 
@@ -1175,20 +1178,26 @@ Private Sub FL6_End_Program()
     'Reset c6k Controller to avoid retained settings & commands in next boot. Will disconnect ethernet
     c6k.Write ("RESET")
     
-    'Var_Label_WO_Active.Caption = "Unloading all forms, Please Wait"
-    'Var_Label_WO_Active.Refresh
+    Var_Label_WO_Active.Caption = "Unloading all forms, Please Wait"
+    Var_Label_WO_Active.Refresh
+    
+    'Clear All Variables
+    
+    
     
     'Unload all Forms except frmLine6 and frmMain
-    'For Each tmpForm In Forms
-    '    If (tmpForm.Name <> "frmLine6") Or (tmpForm.Name <> "frmMain") Then
-    '        Unload tmpForm
-    '        Set tmpForm = Nothing
-    '    End If
-    'Next
+    For Each tmpForm In Forms
+        If (tmpForm.Name <> "frmLine6") Or (tmpForm.Name <> "frmMain") Then
+            Unload tmpForm
+            Set tmpForm = Nothing
+        End If
+    Next
             
     'Show frmMain
     Set c6k = Nothing
     frmMain.Launch_Cmd.Enabled = False
+    frmMain.Connect_Cmd.Caption = "Connect"
+    frmMain.Connect_Cmd.Enabled = False         'Until variable clearing is set up and fucntional, this prevents problems with variables that got set but not cleared by forcing the user to close the program
     frmMain.Show
 End Sub
 
@@ -1229,7 +1238,7 @@ If Not Joy.getJoyActive Then
     Call Joy.runJoy(joyFree)
 Else
     Call Joy.runJoy(joyDisable)
-    Var_Label_Joystick_Status.Visible = False
+    Var_Label_Joystick_Status(0).Visible = False
 End If
 
 End Sub
@@ -1274,6 +1283,10 @@ Private Sub Topbar_Show_DRO_Click()
     Else
         Frame_Motors.Visible = True
     End If
+End Sub
+
+Private Sub Topbar_Show_FastStatus_Click()
+    frmFastStatus.Show
 End Sub
 
 Private Sub topbar_test_1_Click()

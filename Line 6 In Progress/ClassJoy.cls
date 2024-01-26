@@ -380,9 +380,9 @@ If myJoy.stateBtnUpd Or Not myJoy.active Then
                 Case 0, 4  ' No Keys Pressed or Toggle Only
                     Select Case passType
                         Case passBlade
-                            Call setJoyInputs(aX, aY, aZ)
+                            Call setJoyInputs(aY, aX, aZ)
                         Case passAugEdg
-                            Call setJoyInputs(aYR, aY, aZ)
+                            Call setJoyInputs(aYR, aX, aZ) 'Axis 2 should be aY, changed for test
                         Case passAugFac
                             Call setJoyInputs(aX, aZpR, aZp)
                     End Select
@@ -490,6 +490,7 @@ End Function
 
 Private Sub setJoyInputs(joyLR As Integer, joyFB As Integer, joyUD As Integer)
 
+'Ensure no overlap
 If joyLR = joyFB Or joyLR = joyUD Or joyFB = joyUD Then
     MsgBox "Cannot assign multiple joystick directions to the same axis!"
     Exit Sub
@@ -497,8 +498,13 @@ End If
 
 Call jogOff
 
+'Set joyString
 myJoy.stateStr = getStr(joyLR) & " - " & getStr(joyFB) & " - " & getStr(joyUD)
 
+'Disable inputs to prevent carry-over commands
+c6k.Write ("1INFNC1-A:1INFNC2-A:1INFNC3-A:1INFNC4-A:1INFNC5-A:1INFNC6-A")
+
+'Clear outSt array to ensure no carry-over
 Dim i As Integer
 For i = 1 To 6
     myJoy.outSt(i) = 0
@@ -543,7 +549,6 @@ For i = 0 To 2
             myJoy.outSt(driveX) = driveJog      'Set axis in Joystick object to drive mode
             myJoy.inSt(i) = driveJog            'Set joystick direction in joystick object to drive mode
         Case aXb
-            c6k.Write "1INFNC" & temp1 & "-A:1INFNC" & temp2 & "-A" & Chr$(13)      'Clear axis inputs
             myJoy.outSt(driveX) = temp3
             myJoy.inSt(i) = temp3
     
@@ -553,7 +558,6 @@ For i = 0 To 2
             myJoy.outSt(driveY) = driveJog      'Set axis in Joystick object to drive mode
             myJoy.inSt(i) = driveJog            'Set joystick direction in joystick object to drive mode
         Case aYb
-            c6k.Write "1INFNC" & temp1 & "-A:1INFNC" & temp2 & "-A" & Chr$(13)      'Clear axis inputs
             myJoy.outSt(driveY) = temp3
             myJoy.inSt(i) = temp3
 
@@ -563,7 +567,6 @@ For i = 0 To 2
             myJoy.outSt(driveZ) = driveJog      'Set axis in Joystick object to drive mode
             myJoy.inSt(i) = driveJog            'Set joystick direction in joystick object to drive mode
         Case aZb
-            c6k.Write "1INFNC" & temp1 & "-A:1INFNC" & temp2 & "-A" & Chr$(13)      'Clear axis inputs
             myJoy.outSt(driveZ) = temp3
             myJoy.inSt(i) = temp3
     
@@ -573,7 +576,6 @@ For i = 0 To 2
             myJoy.outSt(driveZa) = driveJog      'Set axis in Joystick object to drive mode
             myJoy.inSt(i) = driveJog            'Set joystick direction in joystick object to drive mode
         Case aZab
-            c6k.Write "1INFNC" & temp1 & "-A:1INFNC" & temp2 & "-A" & Chr$(13)      'Clear axis inputs
             myJoy.outSt(driveZa) = temp3
             myJoy.inSt(i) = temp3
     
@@ -583,7 +585,6 @@ For i = 0 To 2
             myJoy.outSt(driveR) = driveJog      'Set axis in Joystick object to drive mode
             myJoy.inSt(i) = driveJog            'Set joystick direction in joystick object to drive mode
         Case aRb
-            c6k.Write "1INFNC" & temp1 & "-A:1INFNC" & temp2 & "-A" & Chr$(13)      'Clear axis inputs
             myJoy.outSt(driveR) = temp3
             myJoy.inSt(i) = temp3
     
@@ -671,6 +672,9 @@ End If
 
 '-- Set c6k Mc State if necessary
 If myJoy.inSt(0) = driveMcJog Or myJoy.inSt(1) = driveMcJog Or myJoy.inSt(2) = driveMcJog Then
+    
+    If myJoy.joyMcStr = "" And fsmRun.State <> 2 And fsmRun.State <> 3 Then c6k.Write "COMEXC1" & Chr(13)   'Enable cont. Com ex when enabling MC mode
+    
     Dim tempMc As String
     Dim tempMcVel As String
     'For all values in joyJogState (except index 0, which is unused)
@@ -701,7 +705,7 @@ If myJoy.inSt(0) = driveMcJog Or myJoy.inSt(1) = driveMcJog Or myJoy.inSt(2) = d
                     GoTo JogError
             End Select
         Else    ' If i = 4 (Oscillator Axis)
-            tempJog = tempMc & "X"
+            tempMc = tempMc & "X"
             tempMcVel = tempMcVel & ","
         End If
     Next i
@@ -713,6 +717,9 @@ If myJoy.inSt(0) = driveMcJog Or myJoy.inSt(1) = driveMcJog Or myJoy.inSt(2) = d
     
     myJoy.joyMcStr = tempMc
     myJoy.joyMcDirStr = tempMcVel
+ElseIf myJoy.joyMcStr <> "" Then
+    myJoy.joyMcStr = ""
+    If fsmRun.State <> 2 And fsmRun.State <> 3 Then c6k.Write "COMEXC0" & Chr(13)   'Disable con com ex first loop after MC disabled
 End If
 
 Exit Sub
@@ -829,9 +836,11 @@ If runMc Then
             'Stop the axes if direction is not active, else set the direction and tell the axes to go.
             Select Case mcStart
                 Case 0
-                    c6k.Write "S" & myJoy.joyMcStr & Chr(13)
+                    If True Then
+                        c6k.Write "!S" & myJoy.joyMcStr & Chr(13)
+                    End If
                 Case 1
-                    c6k.Write "D" & Replace(myJoy.joyMcDirStr, "*", "") & ":GO" & myJoy.joyMcStr & Chr(13)
+                    c6k.Write "D" & Replace(myJoy.joyMcDirStr, "*", "+") & ":GO" & myJoy.joyMcStr & Chr(13)
                 Case 2
                     c6k.Write "D" & Replace(myJoy.joyMcDirStr, "*", "-") & ":GO" & myJoy.joyMcStr & Chr(13)
             End Select

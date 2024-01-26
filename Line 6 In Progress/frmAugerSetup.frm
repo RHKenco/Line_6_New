@@ -293,6 +293,8 @@ Text_Pop_Auger_Angle.Text = tempAngle
 Label_Auger_Ready.Visible = True
 Label_Auger_Ready.Refresh
 
+Call c6kOps.setPassType
+
 Call btnState(btnActive)
 Call statusMsg(msgActive)
 
@@ -364,7 +366,7 @@ Private Sub Text_Enter_Auger_Pitch_KeyPress(KeyAscii As Integer)
             If Text_Enter_Auger_Dia <> "" Then
                 Call Button_Compute_Click    'If enter is pressed, Run Calculations
             Else
-                Text_Enter_Auger_Pitch.SetFocus
+                Text_Enter_Auger_Dia.SetFocus
             End If
         End If
     End If

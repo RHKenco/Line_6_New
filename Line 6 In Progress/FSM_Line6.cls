@@ -83,12 +83,12 @@ If Not c6kOps.chkE_Stop Then
         If Joy.runJoy(joyFree) Then
     
             'Set Joystick Status Message
-            frmLine6.Var_Label_Joystick_Status.Caption = "Joystick" & Chr(13) & "Enabled:" & Chr(13) & Chr(13) & Joy.getJoyStr() & Chr(13) & "Mode"
-            frmLine6.Var_Label_Joystick_Status.Visible = True
+            frmLine6.Var_Label_Joystick_Status(0).Caption = "Joystick" & Chr(13) & "Enabled:" & Chr(13) & Chr(13) & Joy.getJoyStr() & Chr(13) & "Mode"
+            frmLine6.Var_Label_Joystick_Status(0).Visible = True
     
         Else
             'If the joystick becomes inactive hide label
-            frmLine6.Var_Label_Joystick_Status.Visible = False
+            frmLine6.Var_Label_Joystick_Status(0).Visible = False
     
         End If
     
