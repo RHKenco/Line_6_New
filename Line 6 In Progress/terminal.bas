@@ -201,7 +201,8 @@ Type joystickState      'Structure to store joystick state
     
     joyJogStr As String     'String to contain jog state the joystick is currently using
     joyMcStr As String      'String to contain MC state the joystick is currently using
-    joyMcDirStr As String   'String for MC direction, dilleniated with ','
+    joyMcDelStr As String   'String for MC direction & velocity, dilleniated with ','
+    joyMcAxisVel(6) As Single 'String for Velocity of MC Jog Axes
     
 End Type
 
