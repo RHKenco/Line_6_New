@@ -106,9 +106,6 @@ If Not c6kOps.chkE_Stop Then
     
 End If
 
-'Update DRO if it is visible
-If frmLine6.Frame_Motors.Visible Then Call c6kOps.updDro
-
 End Sub
 
 Private Sub runState2() 'Initialize Pass State - Runs setup for pass operation

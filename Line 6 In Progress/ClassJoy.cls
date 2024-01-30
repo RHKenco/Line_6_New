@@ -694,12 +694,12 @@ If myJoy.inSt(0) = driveJog Or myJoy.inSt(1) = driveJog Or myJoy.inSt(2) = drive
 End If
 
 '-- Set c6k Mc State if necessary
-Dim check1 As Boolean
+Dim Check1 As Boolean
 For i = 0 To 2
-    If myJoy.inSt(i) = driveMcJogLR Or myJoy.inSt(i) = driveMcJogFB Or myJoy.inSt(i) = driveMcJogUD Then check1 = True
+    If myJoy.inSt(i) = driveMcJogLR Or myJoy.inSt(i) = driveMcJogFB Or myJoy.inSt(i) = driveMcJogUD Then Check1 = True
 Next i
 
-If check1 Then
+If Check1 Then
     
     If myJoy.joyMcStr = "" And fsmRun.State <> 2 And fsmRun.State <> 3 Then c6k.Write "COMEXC1" & Chr(13)   'Enable cont. Com ex when enabling MC mode
     
@@ -857,6 +857,11 @@ End If
 '-- If any of the axes require Continuous Motion outside of non-run axes
 If runMc Then
 
+    'Clear Axis Velocities
+    For j = 1 To 6
+        myJoy.joyMcAxisVel(j) = 0
+    Next j
+
     'For each joysick axis
     For i = 0 To 2
         'If the axis is in mcJog mode
@@ -886,9 +891,13 @@ If runMc Then
                     End If
             End Select
             
-            'Clear Axis Velocities
+            'Check for Direction Change
             For j = 1 To 6
-                myJoy.joyMcAxisVel(j) = 0
+                'If any axis assigned to the current joystick axis is moving, then
+                If (myJoy.outSt(j) = myJoy.inSt(i)) And (fsinfo.AxisStatus(j) And 1) Then
+                    'If motion is + and command is - or motion is - and command is + then there is a mid-motion direction change
+                    If ((fsinfo.AxisStatus(j) And 2) And mcStart <> 2) Or (Not (fsinfo.AxisStatus(j) And 2) And mcStart <> 1) Then mcStart = 0
+                End If
             Next j
             
             'Set Axis Velocities
@@ -912,17 +921,36 @@ If runMc Then
         
     Next i
         
-    'Build Velocity String
+    Dim mcVelocityStr As String
+    Dim mcDirectionStr As String
+        
+    'Build Velocity & Direction Strings
     For i = 1 To 6
         If i = 1 Then
-            mcVelocityStr = CStr(myJoy.joyMcAxisVel(i))
+            If myJoy.joyMcAxisVel(i) > 0 Then
+                mcDirectionStr = "+"
+            ElseIf myJoy.joyMcAxisVel(i) < 0 Then
+                mcDirectionStr = "-"
+            Else
+                mcDirectionStr = ""
+            End If
+            
+            mcVelocityStr = CStr(Abs(myJoy.joyMcAxisVel(i)))
         Else
-            mcVelocityStr = mcVelocityStr & "," & CStr(myJoy.joyMcAxisVel(i))
+            If myJoy.joyMcAxisVel(i) > 0 Then
+                mcDirectionStr = mcDirectionStr & ",+"
+            ElseIf myJoy.joyMcAxisVel(i) < 0 Then
+                mcDirectionStr = mcDirectionStr & ",-"
+            Else
+                mcDirectionStr = mcDirectionStr & ","
+            End If
+            
+            mcVelocityStr = mcVelocityStr & "," & CStr(Abs(myJoy.joyMcAxisVel(i)))
         End If
     Next i
     
     'Update MC Joy Velocities
-    c6k.Write "V" & mcVelocityStr & "GO" & myJoy.joyMcStr & Chr(13)
+    c6k.Write "D" & mcDirectionStr & ":V" & mcVelocityStr & ":GO" & myJoy.joyMcStr & Chr(13)
 
 End If
 

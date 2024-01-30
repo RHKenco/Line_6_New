@@ -3,8 +3,8 @@ Begin VB.Form frmMaintenance
    BackColor       =   &H00C00000&
    Caption         =   "Maintainance"
    ClientHeight    =   5775
-   ClientLeft      =   225
-   ClientTop       =   855
+   ClientLeft      =   165
+   ClientTop       =   810
    ClientWidth     =   10740
    LinkTopic       =   "Form6"
    ScaleHeight     =   5775
@@ -32,6 +32,23 @@ Begin VB.Form frmMaintenance
       TabIndex        =   54
       Top             =   600
       Width           =   5535
+      Begin VB.CommandButton Button_Axis_Status 
+         Caption         =   "Axis Status"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   3255
+         Left            =   4200
+         TabIndex        =   88
+         Top             =   600
+         Width           =   1095
+      End
       Begin VB.CommandButton Button_Move_Axis 
          Caption         =   "GoY"
          Height          =   255
@@ -1535,6 +1552,18 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
+Private Sub Button_Axis_Status_Click()
+    Dim tempStr As String
+    Dim i As Integer
+    tempStr = "Axis Status:" & Chr(13)
+    For i = 1 To 8
+        tempStr = tempStr & i & ": " & fsinfo.AxisStatus(i) & Chr(13)
+    Next i
+    
+    MsgBox tempStr
+    
+End Sub
+
 Private Sub Button_Move_Axis_Click(Index As Integer)
 
 Const MoveVelocities = "1,1,1,1,1,1"
@@ -1569,6 +1598,8 @@ Next i
 c6k.Write ("MC0:V" & MoveVelocities & ":D" & tempD & ":GO" & tempGO & Chr(13))
 
 End Sub
+
+
 
 
 

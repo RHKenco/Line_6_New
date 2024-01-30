@@ -943,6 +943,9 @@ Begin VB.Form frmLine6
    End
    Begin VB.Menu Topbar_Test_Dropdown 
       Caption         =   "Test"
+      Begin VB.Menu topbar_test_0 
+         Caption         =   "c6k Check Input Functions"
+      End
       Begin VB.Menu topbar_test_1 
          Caption         =   "Simple Move Motors"
       End
@@ -1220,7 +1223,11 @@ End Sub
 '-- Main FSM Timer - Operates the non-UI elements of the program ------------------------------------
 Private Sub Timer_FSM_Timer()
 
+'Run FSM
 Call fsmMain.Run
+
+'Update DRO if it is visible
+If frmLine6.Frame_Motors.Visible Then Call c6kOps.updDro
 
 End Sub
 
@@ -1287,6 +1294,10 @@ End Sub
 
 Private Sub Topbar_Show_Terminal_Click()
     frm6kCmd.Show
+End Sub
+
+Private Sub topbar_test_0_Click()
+    c6k.Write "1INFNC" & Chr(13)
 End Sub
 
 Private Sub topbar_test_1_Click()
