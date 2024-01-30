@@ -616,8 +616,19 @@ btnState (btnEstop)
 fsmMain.State = 1
 fsmRun.State = 0
 
-'Call not-finished on WO
-Call woMgr.notfinishWO
+'Call not-finished on WO if start has been called
+If woMgr.isWOstarted Then Call woMgr.notfinishWO
+
+End Sub
+
+Public Sub progError(errMsg As String)
+
+'Stop everything
+Call activeEstop
+'Reset button state
+If woMgr.isWOactive Then btnState (btnActive) Else btnState (btnInactive)
+'Set status message
+Call statusMsg(msgProgramError, errMsg)
 
 End Sub
 

@@ -20,6 +20,7 @@ Public Const msgNotFinished As Integer = 14
 Public Const msgFinished As Integer = 15
 Public Const msgTimeout As Integer = 16
 Public Const msgEstopPressed As Integer = 17
+Public Const msgProgramError As Integer = 18
 
 Public Sub statusMsg(newStatus As Integer, Optional displayStr As String)
 
@@ -82,7 +83,14 @@ Select Case newStatus
         
     Case msgEstopPressed
         tempLabel = "E-Stop Pressed - Thuroughly check the machine;" & Chr(13) & "If faults cleared, press Start to Resume"
-
+    
+    Case msgProgramError
+        If displayStr = "" Then
+            tempLabel = "Unspecified Program Error"
+        Else
+            tempLabel = displayStr
+        End If
+        
     Case Else
         MsgBox "Error in Status Message Display - Case: " & newStatus
 End Select

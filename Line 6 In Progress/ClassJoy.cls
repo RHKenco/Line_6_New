@@ -303,7 +303,17 @@ c6k.Write ("!JOG" & currentJogAxes & Chr$(13))
 If currentMcAxes <> "" Then c6k.Write ("!MC" & currentMcAxes & Chr$(13))
 
 'Disable inputs
-c6k.Write ("1INFNC1-A:1INFNC2-A:1INFNC3-A:1INFNC4-A:1INFNC5-A:1INFNC6-A")
+c6k.Write ("1INFNC1-A:1INFNC2-A:1INFNC3-A:1INFNC4-A:1INFNC5-A:1INFNC6-A" & Chr$(13))
+
+'Lower active flag and clear joystick string
+myJoy.active = False
+myJoy.stateStr = ""
+
+End Sub
+
+Public Sub eStopJoy()
+'Stop all axes, Disable all jog, disable all input functions
+c6k.Write ("!S:!@JOG0:1INFNC1-A:1INFNC2-A:1INFNC3-A:1INFNC4-A:1INFNC5-A:1INFNC6-A" & Chr$(13))
 
 'Lower active flag and clear joystick string
 myJoy.active = False
@@ -386,7 +396,7 @@ If myJoy.stateBtnUpd Or Not myJoy.active Then
                 Case 0, 4  ' No Keys Pressed or Toggle Only
                     Select Case passType
                         Case passBlade
-                            Call setJoyInputs(aY, aX, aZ)
+                            Call setJoyInputs(aX, aY, aZ)
                         Case passAugEdg
                             Call setJoyInputs(aYR, aX, aZ) 'Axis 2 should be aY, changed for test
                         Case passAugFac
@@ -556,7 +566,7 @@ For i = 0 To 2
         
         '-- X - Axis -----------------------------------------------------------------------------------------------X
         Case aX
-            c6k.Write "1INFNC" & tempJoyInputA & "-" & driveX & "K:1INFNC" & tempJoyInputB & "-" & driveX & "J" & Chr$(13)    'Set jog inputs in 6k
+            c6k.Write "1INFNC" & tempJoyInputA & "-" & driveX & "J:1INFNC" & tempJoyInputB & "-" & driveX & "K" & Chr$(13)    'Set jog inputs in 6k
             myJoy.outSt(driveX) = driveJog      'Set axis in Joystick object to drive mode
             myJoy.inSt(i) = driveJog            'Set joystick direction in joystick object to drive mode
         Case aXb
@@ -644,13 +654,14 @@ Private Sub jogOn()
 '-- Set c6k Jog State if necessary
 If myJoy.inSt(0) = driveJog Or myJoy.inSt(1) = driveJog Or myJoy.inSt(2) = driveJog Then
     Dim tempJog As String
+    Dim tempErr As Integer
     Dim i As Integer
     'For all values in joyJogState (except index 0, which is unused)
     For i = 1 To 6
         If i <> 4 Then  'For all i except 4 (Osc)
         
             Select Case myJoy.outSt(i)
-                Case 0, driveMcJog, driveMcRun, driveBoostLR, driveBoostFB, driveBoostUD         ' If jogState is not 1
+                Case 0, driveMcJogLR, driveMcJogFB, driveMcJogUD, driveMcRun, driveBoostLR, driveBoostFB, driveBoostUD         ' If jogState is not 1
                     'First loop through, set initial variable value, else append character
                     If i = 1 Then
                         tempJog = "X"
@@ -658,7 +669,7 @@ If myJoy.inSt(0) = driveJog Or myJoy.inSt(1) = driveJog Or myJoy.inSt(2) = drive
                         tempJog = tempJog & "X"
                     End If
                     
-                Case driveJog          'If drive is in jog mode, make it active
+                Case driveJog         'If drive is in jog mode, make it active
                     If i = 1 Then
                         tempJog = "1"
                     Else
@@ -666,6 +677,7 @@ If myJoy.inSt(0) = driveJog Or myJoy.inSt(1) = driveJog Or myJoy.inSt(2) = drive
                     End If
                     
                 Case Else
+                    tempErr = 1
                     GoTo JogError
             End Select
         Else    ' If i = 4 (Oscillator Axis)
@@ -682,7 +694,12 @@ If myJoy.inSt(0) = driveJog Or myJoy.inSt(1) = driveJog Or myJoy.inSt(2) = drive
 End If
 
 '-- Set c6k Mc State if necessary
-If myJoy.inSt(0) = driveMcJog Or myJoy.inSt(1) = driveMcJog Or myJoy.inSt(2) = driveMcJog Then
+Dim check1 As Boolean
+For i = 0 To 2
+    If myJoy.inSt(i) = driveMcJogLR Or myJoy.inSt(i) = driveMcJogFB Or myJoy.inSt(i) = driveMcJogUD Then check1 = True
+Next i
+
+If check1 Then
     
     If myJoy.joyMcStr = "" And fsmRun.State <> 2 And fsmRun.State <> 3 Then c6k.Write "COMEXC1" & Chr(13)   'Enable cont. Com ex when enabling MC mode
     
@@ -713,6 +730,7 @@ If myJoy.inSt(0) = driveMcJog Or myJoy.inSt(1) = driveMcJog Or myJoy.inSt(2) = d
                     End If
                     
                 Case Else
+                    tempErr = 2
                     GoTo JogError
             End Select
         Else    ' If i = 4 (Oscillator Axis)
@@ -743,9 +761,22 @@ End If
 
 Exit Sub
 
+'********* ERROR HANDLER ****************************************************
 JogError:
 
-MsgBox ("Error Jog Setting Conversion:" & Chr(13) & "Index: " & i & ", State: " & myJoy.outSt(i))
+Dim ErrStr As String
+
+'Build Error Message
+ErrStr = "Error in Jog Enable Routine:" & Chr(13)
+
+If tempErr = 1 Then ErrStr = ErrStr & "Jog" Else ErrStr = ErrStr & "Mc Jog"
+ErrStr = ErrStr & " failed at Index " & i & " with Case " & myJoy.outSt(i)
+
+'Display Error Msg in msgbox
+MsgBox (ErrStr)
+
+'Reset Program
+Call c6kOps.progError(ErrStr)
 
 End Sub
 
@@ -780,7 +811,7 @@ End If
 For i = 0 To 2
 
     If myJoy.inSt(i) = driveMcRun Then runSc = True
-    If myJoy.inSt(i) = driveMcJog Then runMc = True
+    If myJoy.inSt(i) = driveMcJogLR Or myJoy.inSt(i) = driveMcJogFB Or myJoy.inSt(i) = driveMcJogUD Then runMc = True
     If myJoy.inSt(i) = driveBoostLR Or myJoy.inSt(i) = driveBoostFB Or myJoy.inSt(i) = driveBoostUD Then runBst = True
 
 Next i
@@ -857,7 +888,7 @@ If runMc Then
             
             'Clear Axis Velocities
             For j = 1 To 6
-                myJoy.joyMcAxisVel(i) = 0
+                myJoy.joyMcAxisVel(j) = 0
             Next j
             
             'Set Axis Velocities

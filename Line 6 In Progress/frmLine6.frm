@@ -934,8 +934,8 @@ Begin VB.Form frmLine6
       Begin VB.Menu Topbar_Maint_Open 
          Caption         =   "Open Maintenance Form"
       End
-      Begin VB.Menu Topbar_Show_FastStatus 
-         Caption         =   "Show FastStatus"
+      Begin VB.Menu Topbar_Show_Terminal 
+         Caption         =   "Show Terminal"
       End
       Begin VB.Menu Topbar_Show_DRO 
          Caption         =   "Show DRO"
@@ -1285,8 +1285,8 @@ Private Sub Topbar_Show_DRO_Click()
     End If
 End Sub
 
-Private Sub Topbar_Show_FastStatus_Click()
-    frmFastStatus.Show
+Private Sub Topbar_Show_Terminal_Click()
+    frm6kCmd.Show
 End Sub
 
 Private Sub topbar_test_1_Click()
