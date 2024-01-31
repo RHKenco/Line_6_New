@@ -23,59 +23,73 @@ Attribute VB_Exposed = False
 
 '-- Class Constants & Variables ---------------------------------------------------------------------------------------
 
-'Drive States
-Private Const driveJog As Integer = 1
-Private Const driveMcRun As Integer = 2
-Private Const driveMcJogLR As Integer = 3
-Private Const driveMcJogFB As Integer = 4
-Private Const driveMcJogUD As Integer = 5
-Private Const driveBoostLR As Integer = 6
-Private Const driveBoostFB As Integer = 7
-Private Const driveBoostUD As Integer = 8
+'Motion state attached to either a joystick axis or a drive axis
+Private Enum motionAttach
+    driveJog
+    driveMcRun
+    driveMcJog
+End Enum
 
 'Drive Axes
-Private Const aX As Integer = 1
-Private Const aXstr As String = "X"
-Private Const aXb As Integer = 2
-Private Const aXbstr As String = "Xb"
+Private Enum motionAxes
+    arS = (2 ^ (1 - 1))
+    arSstr = "Run Speed"
+    
+    axisJog = (2 ^ (2 - 1))
+    axisMc = (2 ^ (3 - 1))
+    axisBst = (2 ^ (4 - 1))
+    
+    aX = (2 ^ (5 - 1))
+    aXj = axisJog And aX
+    aXc = axisMc And aX
+    aXstr = "X"
+    aXb = axisBst And aX
+    aXbstr = "Xb"
+    
+    aY = (2 ^ (6 - 1))
+    aYj = axisJog And aY
+    aYc = axisMc And aY
+    aYstr = "Y"
+    aYb = axisBst And aY
+    aYbstr = "Yb"
 
-Private Const aY As Integer = 3
-Private Const aYstr As String = "Y"
-Private Const aYb As Integer = 4
-Private Const aYbstr As String = "Yb"
+    aZ = (2 ^ (7 - 1))
+    aZj = axisJog And aZ
+    aZc = axisMc And aZ
+    aZstr = "Z"
+    aZb = axisBst And aZ
+    aZbstr = "Zb"
 
-Private Const aZ As Integer = 5
-Private Const aZstr As String = "Z"
-Private Const aZb As Integer = 6
-Private Const aZbstr As String = "Zb"
+    aZa = (2 ^ (8 - 1))
+    aZa = axisJog And aZa
+    aZac = axisMc And aZa
+    aZastr = "Za"
+    aZab = axisBst And aZa
+    aZabstr = "Zab"
 
-Private Const aZa As Integer = 7
-Private Const aZastr As String = "Za"
-Private Const aZab As Integer = 8
-Private Const aZabstr As String = "Zab"
+    aR = (2 ^ (9 - 1))
+    aR = axisJog And aR
+    aRc = axisMc And aR
+    aRstr = "R"
+    aRb = axisBst And aR
+    aRbstr = "Rb"
 
-Private Const aR As Integer = 9
-Private Const aRstr As String = "R"
-Private Const aRb As Integer = 10
-Private Const aRbstr As String = "Rb"
+    aYR = aYc Or aRc
+    aYRstr = "YR"
+    aYRb = aYb Or aRb
+    aYRbstr = "YRb"
 
-Private Const aYR As Integer = 11
-Private Const aYRstr As String = "YR"
-Private Const aYRb As Integer = 12
-Private Const aYRbstr As String = "YRb"
+    aZp = aYc Or aZc
+    aZpstr = "Z'"
+    aZpb = aYb Or aZb
+    aZpbstr = "Z'b"
 
-Private Const aZp As Integer = 13
-Private Const aZpstr As String = "Z'"
-Private Const aZpb As Integer = 14
-Private Const aZpbstr As String = "Z'b"
+    aZpR = aYc Or aZc Or aRc
+    aZpRstr = "Z'R"
+    aZpRb = aYb Or aZb Or aRb
+    aZpRbstr = "Z'Rb"
+End Enum
 
-Private Const aZpR As Integer = 15
-Private Const aZpRstr As String = "Z'R"
-Private Const aZpRb As Integer = 16
-Private Const aZpRbstr As String = "Z'Rb"
-
-Private Const arS As Integer = 18
-Private Const arSstr As String = "Run Speed"
 
 'Joystick Jog Velocity
 Private Const cJoyJogVel As Single = 5#
@@ -136,27 +150,27 @@ End Function
 Private Function getStr(axisIn As Integer) As String
 
 Select Case axisIn
-    Case aX
+    Case aX, aXc
         getStr = aXstr
     Case aXb
         getStr = aXbstr
 
-    Case aY
+    Case aY, aYc
         getStr = aYstr
     Case aYb
         getStr = aYbstr
 
-    Case aZ
+    Case aZ, aZc
         getStr = aZstr
     Case aZb
         getStr = aZbstr
 
-    Case aZa
+    Case aZa, aZac
         getStr = aZastr
     Case aZab
         getStr = aZabstr
 
-    Case aR
+    Case aR, aRc
         getStr = aRstr
     Case aRb
         getStr = aRbstr
@@ -396,21 +410,21 @@ If myJoy.stateBtnUpd Or Not myJoy.active Then
                 Case 0, 4  ' No Keys Pressed or Toggle Only
                     Select Case passType
                         Case passBlade
-                            Call setJoyInputs(aX, aY, aZ)
+                            Call initJoyAxes(aXj, aYj, aZj)
                         Case passAugEdg
-                            Call setJoyInputs(aYR, aX, aZ) 'Axis 2 should be aY, changed for test
+                            Call initJoyAxes(aYR, aYc, aZj) 'Axis 2 should be aY, changed for test
                         Case passAugFac
-                            Call setJoyInputs(aX, aZpR, aZp)
+                            Call initJoyAxes(aXj, aZpR, aZp)
                     End Select
                     
                 Case 1, 5 ' Select Key Pressed - Machine Coordinate Mode
                     Select Case passType
                         Case passBlade
-                            Call setJoyInputs(aX, aY, aZa)
+                            Call initJoyAxes(aXj, aYj, aZaj)
                         Case passAugEdg
-                            Call setJoyInputs(aX, aY, aZa)
+                            Call initJoyAxes(aXj, aYj, aZaj)
                         Case passAugFac
-                            Call setJoyInputs(aX, aY, aZa)
+                            Call initJoyAxes(aXj, aYj, aZaj)
                     End Select
                 
                 Case 2, 3, 6, 7 ' Release pressed in any combination
@@ -428,18 +442,18 @@ If myJoy.stateBtnUpd Or Not myJoy.active Then
                 Case 4      'Toggle Only
                     Select Case passType
                         Case passBlade
-                            Call setJoyInputs(aX, aY, aZ)
+                            Call initJoyAxes(aXj, aYj, aZj)
                         Case passAugEdg
-                            Call setJoyInputs(aYR, aY, aZ)
+                            Call initJoyAxes(aYR, aYj, aZj)
                         Case passAugFac
-                            Call setJoyInputs(aZpR, aX, aZp)
+                            Call initJoyAxes(aZpR, aXj, aZp)
                     End Select
                 Case 5      'Select Pressed
                     Select Case passType
                         Case passBlade
-                            Call setJoyInputs(aX, aY, aZa)
+                            Call initJoyAxes(aXj, aYj, aZaj)
                         Case passAugEdg, passAugFac
-                            Call setJoyInputs(aY, aR, aZa)
+                            Call initJoyAxes(aYj, aRj, aZaj)
                     End Select
                 Case 6, 7  ' Release Pressed - Advance Program
                     GoTo ReleaseJoystick
@@ -453,19 +467,21 @@ If myJoy.stateBtnUpd Or Not myJoy.active Then
             Select Case buttons
                 Case 0    'No buttons Pressed - Horizontal axis will adjust run speed
                     Select Case passType
-                        Case passBlade, passAugEdg
-                            Call setJoyInputs(arS, aY, aZ)
+                        Case passBlade
+                            Call initJoyAxes(arS, aYj, aZj)
+                        Case passAugEdg
+                            Call initJoyAxes(arS, aYb, aZj)
                         Case passAugFac
-                            Call setJoyInputs(arS, aX, aZ)
+                            Call initJoyAxes(arS, aXj, aZj)
                     End Select
                 Case 1      'Select Pressed - Horizontal axis will nudge run axis
                     Select Case passType
                         Case passBlade
-                            Call setJoyInputs(aXb, aY, aZa)
+                            Call initJoyAxes(aXb, aYj, aZaj)
                         Case passAugEdg
-                            Call setJoyInputs(aYRb, aX, aZa)
+                            Call initJoyAxes(aYRb, aXj, aZaj)
                         Case passAugFac
-                            Call setJoyInputs(aZpRb, aY, aZpb)
+                            Call initJoyAxes(aZpRb, aYc, aZpb)
                     End Select
     
                 Case 4, 5, 6, 7 'Toggle flipped
@@ -504,12 +520,54 @@ ReleaseJoystick:
 End Function
 
 
-Private Sub setJoyInputs(joyLR As Integer, joyFB As Integer, joyUD As Integer)
+Private Sub initJoyAxes(joyLR As Long, joyFB As Long, joyUD As Long)
 
-'Ensure no overlap
+'Ensure no identical axes
 If joyLR = joyFB Or joyLR = joyUD Or joyFB = joyUD Then
     MsgBox "Cannot assign multiple joystick directions to the same axis!"
     Exit Sub
+End If
+
+Dim i As Integer
+Dim j As Integer
+
+'Load axes into joystick object
+myJoy.inSt(0) = joyLR
+myJoy.inSt(1) = joyFB
+myJoy.inSt(2) = joyUD
+
+'Resolve conflicts between jog axes and McJog axes
+If (joyLR And joyFB And joyLR) Then   'Since each axis definition is a binary with bits set based on the axes they move, this will ony be true if an MC axis is conflicting
+    Dim tmpSt As Long
+    'For each joystick axis
+    For i = 0 To 2
+        'Determine if the axis is in jog mode
+        tmpSt = myJoy.inSt(i)
+        If tmpSt And axisJog Then
+            'If it is, determine if it conflicts with any axes
+            For j = 0 To 2
+                If tempSt <> myJoy.inSt(j) Then
+                    'If it does conflict, then determine which jog axis is conflicting and convert it to a McJog axis
+                    If Not ((tempSt Xor myJoy.inSt(j)) And tempSt) Then
+                        Select Case tempSt
+                            Case aXj
+                                tempSt = aXc
+                            Case aYj
+                                tempSt = aYc
+                            Case aZj
+                                tempSt = aZc
+                            Case aZaj
+                                tempSt = aZac
+                            Case aRj
+                                tempSt = aRc
+                        End Select
+                        myJoy.inSt(i) = tempSt
+                    End If
+                End If
+            Next j
+        End If
+    Next i
+
 End If
 
 Call jogOff
@@ -521,126 +579,109 @@ myJoy.stateStr = getStr(joyLR) & " - " & getStr(joyFB) & " - " & getStr(joyUD)
 c6k.Write ("1INFNC1-A:1INFNC2-A:1INFNC3-A:1INFNC4-A:1INFNC5-A:1INFNC6-A")
 
 'Clear outSt array to ensure no carry-over
-Dim i As Integer
 For i = 1 To 6
     myJoy.outSt(i) = 0
 Next i
 
+'Clear joystick flags
+myJoy.joyJogOn = False
+myJoy.joyMcJogOn = False
+myJoy.joyBstOn = False
+myJoy.joySpdOn = False
+
 Dim tempJoyAxis As Integer 'Temp variable containing value of axis
 Dim tempJoyInputA As String 'Temp variable containing input value for Jog
 Dim tempJoyInputB As String 'As Above
-Dim tempMcJogJoy As Integer
-Dim tempMcBstJoy As Integer 'MC Boost joyAxis
-
 
 'For Each Axis
 For i = 0 To 2
 
+    tempJoyAxis = myJoy.inSt(i)
     '-- Set temps for axis
     Select Case i
         Case 0
-            tempJoyAxis = joyLR
             tempJoyInputA = "1"
             tempJoyInputB = "2"
-            tempMcJogJoy = driveMcJogLR
-            tempMcBstJoy = driveBoostLR
         Case 1
-            tempJoyAxis = joyFB
             tempJoyInputA = "3"
             tempJoyInputB = "4"
-            tempMcJogJoy = driveMcJogFB
-            tempMcBstJoy = driveBoostFB
         Case 2
-            tempJoyAxis = joyUD
             tempJoyInputA = "5"
             tempJoyInputB = "6"
-            tempMcJogJoy = driveMcJogUD
-            tempMcBstJoy = driveBoostUD
     End Select
+            
+    'Set joystick flags
+    If tempJoyAxis And axisJog Then myJoy.joyJogOn = True
+    If tempJoyAxis And axisMc Then myJoy.joyMcJogOn = True
+    If tempJoyAxis And axisBst Then myJoy.joyBstOn = True
+    
             
     '-- Determine axis and set accordingly
     Select Case tempJoyAxis
         '-- Run Speed Adjustment ----------------------------------------------------------------------------------rS
         Case arS
-            myJoy.inSt(i) = 3
-        
+            myJoy.joySpdOn = True
+            
         '-- X - Axis -----------------------------------------------------------------------------------------------X
-        Case aX
+        Case aXj
+            
             c6k.Write "1INFNC" & tempJoyInputA & "-" & driveX & "J:1INFNC" & tempJoyInputB & "-" & driveX & "K" & Chr$(13)    'Set jog inputs in 6k
-            myJoy.outSt(driveX) = driveJog      'Set axis in Joystick object to drive mode
-            myJoy.inSt(i) = driveJog            'Set joystick direction in joystick object to drive mode
+            myJoy.outSt(driveX) = driveJog       'Set axis in Joystick object to drive mode
+        Case aXc
+            myJoy.outSt(driveX) = driveMcJog
         Case aXb
-            myJoy.outSt(driveX) = tempMcBstJoy
-            myJoy.inSt(i) = tempMcBstJoy
     
         '-- Y - Axis -----------------------------------------------------------------------------------------------Y
-        Case aY
+        Case aYj
             c6k.Write "1INFNC" & tempJoyInputA & "-" & driveY & "K:1INFNC" & tempJoyInputB & "-" & driveY & "J" & Chr$(13)    'Set jog inputs in 6k
             myJoy.outSt(driveY) = driveJog      'Set axis in Joystick object to drive mode
-            myJoy.inSt(i) = driveJog            'Set joystick direction in joystick object to drive mode
+        Case aYc
+            myJoy.outSt(driveY) = driveMcJog
         Case aYb
-            myJoy.outSt(driveY) = tempMcBstJoy
-            myJoy.inSt(i) = tempMcBstJoy
 
         '-- Z - Axis Fuctions --------------------------------------------------------------------------------------Z
-        Case aZ
+        Case aZj
             c6k.Write "1INFNC" & tempJoyInputA & "-" & driveZ & "K:1INFNC" & tempJoyInputB & "-" & driveZ & "J" & Chr$(13)    'Set jog inputs in 6k
             myJoy.outSt(driveZ) = driveJog      'Set axis in Joystick object to drive mode
-            myJoy.inSt(i) = driveJog            'Set joystick direction in joystick object to drive mode
+        Case aZc
+            myJoy.outSt(driveZ) = driveMcJog
         Case aZb
-            myJoy.outSt(driveZ) = tempMcBstJoy
-            myJoy.inSt(i) = tempMcBstJoy
     
         '-- Za - Axis Fuctions ------------------------------------------------------------------------------------Za
-        Case aZa
+        Case aZaj
             c6k.Write "1INFNC" & tempJoyInputA & "-" & driveZa & "K:1INFNC" & tempJoyInputB & "-" & driveZa & "J" & Chr$(13)    'Set jog inputs in 6k
             myJoy.outSt(driveZa) = driveJog      'Set axis in Joystick object to drive mode
-            myJoy.inSt(i) = driveJog            'Set joystick direction in joystick object to drive mode
+        Case aZac
+            myJoy.outSt(driveZa) = driveMcJog
         Case aZab
-            myJoy.outSt(driveZa) = tempMcBstJoy
-            myJoy.inSt(i) = tempMcBstJoy
     
         '-- R - Axis Fuctions --------------------------------------------------------------------------------------R
-        Case aR
+        Case aRj
             c6k.Write "1INFNC" & tempJoyInputA & "-" & driveR & "K:1INFNC" & tempJoyInputB & "-" & driveR & "J" & Chr$(13)    'Set jog inputs in 6k
             myJoy.outSt(driveR) = driveJog      'Set axis in Joystick object to drive mode
-            myJoy.inSt(i) = driveJog            'Set joystick direction in joystick object to drive mode
+        Case aRc
+            myJoy.outSt(driveR) = driveMcJog
         Case aRb
-            myJoy.outSt(driveR) = tempMcBstJoy
-            myJoy.inSt(i) = tempMcBstJoy
-    
     
         '-- YR - Axis Fuctions ------------------------------------------------------------------------------------YR
         Case aYR
-            myJoy.outSt(driveR) = tempMcJogJoy    'Set axes in Joystick object to continuous jog mode
-            myJoy.outSt(driveY) = tempMcJogJoy
-            myJoy.inSt(i) = tempMcJogJoy          'Set joystick direction in joystick object to drive mode
+            myJoy.outSt(driveR) = driveMcJog    'Set axes in Joystick object to continuous jog mode
+            myJoy.outSt(driveY) = driveMcJog
         Case aYRb
-            myJoy.outSt(driveR) = tempMcBstJoy
-            myJoy.outSt(driveY) = tempMcBstJoy
-            myJoy.inSt(i) = tempMcBstJoy
     
         '-- Z' - Axis Fuctions ------------------------------------------------------------------------------------Z'
         Case aZp
-            myJoy.outSt(driveY) = tempMcJogJoy    'Set axes in Joystick object to continuous jog mode
-            myJoy.outSt(driveZ) = tempMcJogJoy
-            myJoy.inSt(i) = tempMcJogJoy          'Set joystick direction in joystick object to drive mode
+            myJoy.outSt(driveY) = driveMcJog    'Set axes in Joystick object to continuous jog mode
+            myJoy.outSt(driveZ) = driveMcJog
         Case aZpb
-            myJoy.outSt(driveY) = tempMcBstJoy
-            myJoy.outSt(driveZ) = tempMcBstJoy
-            myJoy.inSt(i) = tempMcBstJoy
+
 
         '-- Z'R - Axis Fuctions ----------------------------------------------------------------------------------Z'R
         Case aZpR
-            myJoy.outSt(driveY) = tempMcJogJoy    'Set axes in Joystick object to continuous jog mode
-            myJoy.outSt(driveZ) = tempMcJogJoy
-            myJoy.outSt(driveR) = tempMcJogJoy
-            myJoy.inSt(i) = tempMcJogJoy          'Set joystick direction in joystick object to drive mode
+            myJoy.outSt(driveY) = driveMcJog    'Set axes in Joystick object to continuous jog mode
+            myJoy.outSt(driveZ) = driveMcJog
+            myJoy.outSt(driveR) = driveMcJog
         Case aZpRb
-            myJoy.outSt(driveY) = tempMcBstJoy
-            myJoy.outSt(driveZ) = tempMcBstJoy
-            myJoy.outSt(driveR) = tempMcBstJoy
-            myJoy.inSt(i) = tempMcBstJoy
     End Select
     
 Next i
@@ -652,7 +693,7 @@ End Sub
 Private Sub jogOn()
 
 '-- Set c6k Jog State if necessary
-If myJoy.inSt(0) = driveJog Or myJoy.inSt(1) = driveJog Or myJoy.inSt(2) = driveJog Then
+If myJoy.joyJogOn Then
     Dim tempJog As String
     Dim tempErr As Integer
     Dim i As Integer
@@ -661,7 +702,7 @@ If myJoy.inSt(0) = driveJog Or myJoy.inSt(1) = driveJog Or myJoy.inSt(2) = drive
         If i <> 4 Then  'For all i except 4 (Osc)
         
             Select Case myJoy.outSt(i)
-                Case 0, driveMcJogLR, driveMcJogFB, driveMcJogUD, driveMcRun, driveBoostLR, driveBoostFB, driveBoostUD         ' If jogState is not 1
+                Case 0, driveMcJog, driveMcRun         ' If jogState is not 1
                     'First loop through, set initial variable value, else append character
                     If i = 1 Then
                         tempJog = "X"
@@ -694,12 +735,7 @@ If myJoy.inSt(0) = driveJog Or myJoy.inSt(1) = driveJog Or myJoy.inSt(2) = drive
 End If
 
 '-- Set c6k Mc State if necessary
-Dim Check1 As Boolean
-For i = 0 To 2
-    If myJoy.inSt(i) = driveMcJogLR Or myJoy.inSt(i) = driveMcJogFB Or myJoy.inSt(i) = driveMcJogUD Then Check1 = True
-Next i
-
-If Check1 Then
+If myJoy.joyMcJogOn Then
     
     If myJoy.joyMcStr = "" And fsmRun.State <> 2 And fsmRun.State <> 3 Then c6k.Write "COMEXC1" & Chr(13)   'Enable cont. Com ex when enabling MC mode
     
@@ -710,7 +746,7 @@ If Check1 Then
         If i <> 4 Then  'For all i except 4 (Osc)
         
             Select Case myJoy.outSt(i)
-                Case 0, driveJog, driveMcRun, driveBoostLR, driveBoostFB, driveBoostUD         ' If jogState is not 1
+                Case 0, driveJog, driveMcRun         ' If jogState is not 1
                     'First loop through, set initial variable value, else append character
                     If i = 1 Then
                         tempMc = "X"
@@ -720,7 +756,7 @@ If Check1 Then
                         tempMcVel = tempMcVel & ","
                     End If
                     
-                Case driveMcJogLR, driveMcJogFB, driveMcJogUD          'If drive is in jog mode, make it active
+                Case driveMcJog          'If drive is in jog mode, make it active
                     If i = 1 Then
                         tempMc = "1"
                         tempMcVel = "*,"
@@ -739,7 +775,7 @@ If Check1 Then
         End If
     Next i
     
-    'Disable Previous Jog Jog mode
+    'Disable Previous MC Jog mode
     If myJoy.joyMcStr <> "" Then c6k.Write ("MC" & Replace(myJoy.joyMcStr, "1", "0") & Chr(13))
     'Enable Current MC Jog Mode
     c6k.Write ("MC" & tempMc & Chr(13))
@@ -801,27 +837,16 @@ Dim runMc As Boolean
 Dim runSc As Boolean
 Dim runBst As Boolean
 
-
 '-- If no joystick inputs require continuous motion, exit
-If myJoy.inSt(0) = driveJog And myJoy.inSt(1) = driveJog And myJoy.inSt(2) = driveJog Then
-        Exit Sub
-End If
+If myJoy.joyJogOn And Not myJoy.joyMcJogOn And Not myJoy.joyBstOn Then Exit Sub
 
-'-- Determine what other functions need to run
-For i = 0 To 2
-
-    If myJoy.inSt(i) = driveMcRun Then runSc = True
-    If myJoy.inSt(i) = driveMcJogLR Or myJoy.inSt(i) = driveMcJogFB Or myJoy.inSt(i) = driveMcJogUD Then runMc = True
-    If myJoy.inSt(i) = driveBoostLR Or myJoy.inSt(i) = driveBoostFB Or myJoy.inSt(i) = driveBoostUD Then runBst = True
-
-Next i
 
 '-- If any of the axes are set to speed control, call for speed to be adjusted
-If runSc Then
+If myJoy.joySpdOn Then
     Dim changeSpeed As Integer
 
     For i = 0 To 2  'For each joystick direction
-        If myJoy.inSt(i) = driveMcRun Then
+        If myJoy.inSt(i) = arS Then
             Select Case i
                 Case 0
                     If myJoy.stateNow(joyRight) Then
@@ -854,7 +879,7 @@ If runSc Then
     
 End If
 
-'-- If any of the axes require Continuous Motion outside of non-run axes
+'-- If any of the axes require MC Jog motion
 If runMc Then
 
     'Clear Axis Velocities
@@ -865,49 +890,72 @@ If runMc Then
     'For each joysick axis
     For i = 0 To 2
         'If the axis is in mcJog mode
-        If myJoy.inSt(i) = driveMcJogLR Or myJoy.inSt(i) = driveMcJogFB Or myJoy.inSt(i) = driveMcJogUD Then
+        If myJoy.inSt(i) And axisMc Then
         
-            Dim mcStart As Integer
+            Dim mcJoyDir As Integer
             
             'Determine what direction the joystick is in (1- Neg, 0- Centered, 2- Pos)
             Select Case i
                 Case 0
                     If myJoy.stateNow(joyLeft) Then
-                        mcStart = 1
+                        mcJoyDir = 1
                     ElseIf myJoy.stateNow(joyRight) Then
-                        mcStart = 2
+                        mcJoyDir = 2
                     End If
                 Case 1
                     If myJoy.stateNow(joyFront) Then
-                        mcStart = 1
+                        mcJoyDir = 1
                     ElseIf myJoy.stateNow(joyBack) Then
-                        mcStart = 2
+                        mcJoyDir = 2
                     End If
                 Case 2
                     If myJoy.stateNow(joyUp) Then
-                        mcStart = 1
+                        mcJoyDir = 1
                     ElseIf myJoy.stateNow(joyDown) Then
-                        mcStart = 2
+                        mcJoyDir = 2
                     End If
             End Select
             
-            'Check for Direction Change
+            'Check each axis for Direction Change.
             For j = 1 To 6
-                'If any axis assigned to the current joystick axis is moving, then
-                If (myJoy.outSt(j) = myJoy.inSt(i)) And (fsinfo.AxisStatus(j) And 1) Then
-                    'If motion is + and command is - or motion is - and command is + then there is a mid-motion direction change
-                    If ((fsinfo.AxisStatus(j) And 2) And mcStart <> 2) Or (Not (fsinfo.AxisStatus(j) And 2) And mcStart <> 1) Then mcStart = 0
-                End If
+                If j = 4 Then GoTo CheckNextAxis
+                Select Case j
+                    Case driveX
+                        If Not (myJoy.inSt(i) And aX) Then GoTo CheckNextAxis
+                    Case driveY
+                        If Not (myJoy.inSt(i) And aY) Then GoTo CheckNextAxis
+                    Case driveZ
+                        If Not (myJoy.inSt(i) And aZ) Then GoTo CheckNextAxis
+                    Case driveZa
+                        If Not (myJoy.inSt(i) And aZa) Then GoTo CheckNextAxis
+                    Case driveR
+                        If Not (myJoy.inSt(i) And aR) Then GoTo CheckNextAxis
+                End Select
+            
+                'If motion is + and command is - or motion is - and command is + then there is a mid-motion direction change
+                If ((fsinfo.AxisStatus(j) And 2) And mcJoyDir <> 2) Or (Not (fsinfo.AxisStatus(j) And 2) And mcJoyDir <> 1) Then mcJoyDir = 0
+CheckNextAxis:
             Next j
             
             'Set Axis Velocities
             For j = 1 To 6
-                'With the exception of the Osc. Axis
-                If j <> 4 Then
+                If j = 4 Then GoTo VelSetNextAxis
+                Select Case j
+                    Case driveX
+                        If Not (myJoy.inSt(i) And aX) Then GoTo VelSetNextAxis
+                    Case driveY
+                        If Not (myJoy.inSt(i) And aY) Then GoTo VelSetNextAxis
+                    Case driveZ
+                        If Not (myJoy.inSt(i) And aZ) Then GoTo VelSetNextAxis
+                    Case driveZa
+                        If Not (myJoy.inSt(i) And aZa) Then GoTo VelSetNextAxis
+                    Case driveR
+                        If Not (myJoy.inSt(i) And aR) Then GoTo VelSetNextAxis
+                End Select
                     'For each drive axis, if the drive output state is equal to the joy input state the drive is assigned to the current axis, Therefore:
                     If myJoy.outSt(j) = myJoy.inSt(i) Then
                         'The velocity of the drive axis should be set based on the joystick position
-                        Select Case mcStart
+                        Select Case mcJoyDir
                             Case 1
                                 myJoy.joyMcAxisVel(j) = myJoy.joyMcAxisVel(j) + cJoyJogVel
                             Case 2
@@ -915,6 +963,7 @@ If runMc Then
                         End Select
                     End If
                 End If
+VelSetNextAxis:
             Next j
 
         End If

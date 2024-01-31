@@ -170,12 +170,14 @@ Public Const joyPause As Integer = 3
 Public Const joyRun As Integer = 4
 
 'Drive Indicies
-Public Const driveX As Integer = 1
-Public Const driveY As Integer = 6
-Public Const driveZ As Integer = 2
-Public Const driveZa As Integer = 3
-Public Const driveO As Integer = 4
-Public Const driveR As Integer = 5
+Public Enum driveAxes
+    driveX = 1
+    driveZ = 2
+    driveZa = 3
+    driveO = 4
+    driveR = 5
+    driveY = 6
+End Enum
 
 Type joystickState      'Structure to store joystick state
 
@@ -196,13 +198,18 @@ Type joystickState      'Structure to store joystick state
     stateJoyUpd As Boolean  'Bool to indicate if the joystick input state has changed
     stateBtnUpd As Boolean  'Bool to indicate if the button input state has changed
     
-    inSt(2) As Integer     'Array to store current function of joystick direction
-    outSt(6) As Integer    'Array of integers to store joystick output options
+    inSt(2) As Long         'Array to store current function of joystick direction
+    outSt(6) As Long        'Array of integers to store joystick output options
     
     joyJogStr As String     'String to contain jog state the joystick is currently using
     joyMcStr As String      'String to contain MC state the joystick is currently using
     joyMcDelStr As String   'String for MC direction & velocity, dilleniated with ','
     joyMcAxisVel(6) As Single 'String for Velocity of MC Jog Axes
+    
+    joyJogOn    As Boolean  'Booleans for the functions that need to be run based on joy inputs
+    joyMcJogOn  As Boolean
+    joyBstOn    As Boolean
+    joySpdOn    As Boolean
     
 End Type
 
