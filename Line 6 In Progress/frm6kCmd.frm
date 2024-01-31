@@ -116,54 +116,52 @@ End Sub
 Private Sub Terminal_Textbox_KeyPress(Index As Integer, KeyAscii As Integer)
 'this routine processes the terminal's key presses
 On Error GoTo Terminal_Textboxkeypress_error
+
     
-    If Index <> 0 Then
+Dim temp%
+Static buffer$      'local command buffer
+
+'Reset the cursor position
+'Terminal_Textbox(1).SelStart = Len(Text1.Text)
+
+
+'perform action based on value of key being pressed
+Select Case KeyAscii
+    'backspace
+    Case 8
+        If Len(buffer) > 0 Then buffer = Left$(buffer, Len(buffer) - 1) 'erase one char from buffer
     
-        Dim temp%
-        Static buffer$      'local command buffer
- 
-        'Reset the cursor position
-        Terminal_Textbox(1).SelStart = Len(Text1.Text)
+    'CR or colon - 6000 command delimeter
+    Case 13, Asc(":")
         
+        prevCmd(lastCmd) = buffer
+        Terminal_Textbox(0).SelText = " >    " & buffer & Chr(13) & Chr(13)
         
-        'perform action based on value of key being pressed
-        Select Case KeyAscii
-            'backspace
-            Case 8
-                If Len(buffer) > 0 Then buffer = Left$(buffer, Len(buffer) - 1) 'erase one char from buffer
+        buffer = buffer & Chr$(13)      'append the CR
+        Terminal_Timer.Enabled = False          'disable response polling to avoid simultaneous read/write
+        temp = c6k.Write(buffer)        'send commands to 6k
+        Terminal_Timer.Enabled = True           'enable response polling
             
-            'CR or colon - 6000 command delimeter
-            Case 13, Asc(":")
-                
-                prevCmd(lastCmd) = buffer
-                Terminal_Textbox(0).SelText = " >    " & buffer
-                
-                buffer = buffer & Chr$(13)      'append the CR
-                Terminal_Timer.Enabled = False          'disable response polling to avoid simultaneous read/write
-                temp = c6k.Write(buffer)        'send commands to 6k
-                Terminal_Timer.Enabled = True           'enable response polling
-                    
-                buffer = ""                         'empty the command local buffer
-            
-            
-            'Any Normal Input, load into buffer
-            Case Else
-                If KeyAscii > 31 And KeyAscii < 127 Then
-            
-                    If KeyAscii > 96 And KeyAscii < 123 Then KeyAscii = KeyAscii - 32
-                    buffer = buffer & Chr$(KeyAscii)    'append char to the local command buffer
-                End If
-        End Select
-        
-        'Reset terminal to match the buffer
-        Terminal_Textbox(1).Text = " >    " & buffer
-        
-        'Reset the cursor position
-        Terminal_Textbox(1).SelStart = Len(Text1.Text)
-        
-        Exit Sub
+        buffer = ""                         'empty the command local buffer
     
-    End If
+    
+    'Any Normal Input, load into buffer
+    Case Else
+        If KeyAscii > 31 And KeyAscii < 127 Then
+    
+            If KeyAscii > 96 And KeyAscii < 123 Then KeyAscii = KeyAscii - 32
+            buffer = buffer & Chr$(KeyAscii)    'append char to the local command buffer
+        End If
+End Select
+
+'Reset terminal to match the buffer
+Terminal_Textbox(1).Text = " >    " & buffer
+
+'Reset the cursor position
+'Terminal_Textbox(1).SelStart = Len(Text1.Text)
+
+Exit Sub
+
     
 Terminal_Textboxkeypress_error:
     'Unload Me
