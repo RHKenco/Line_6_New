@@ -1,4 +1,4 @@
-terminal = 146, 165, 1840, 1063, 
+terminal = 33, 24, 1506, 745, 
 frmFastStatus = 232, 84, 1785, 925, C, 175, 175, 1493, 838, C
 Maintenance1 = 312, 312, 2006, 1210, C, 611, 134, 1335, 833, C
 frmMain = 19, 105, 1014, 1003, , 45, 504, 1739, 1402, C
@@ -12,9 +12,9 @@ frmAugerSetup = 156, 156, 1850, 1054, C, 210, 128, 487, 642, C
 ClassC6K_Operations = 163, 40, 1381, 853, 
 FSM_Line6 = 130, 130, 1824, 1028, 
 FSM_Line6_Run = 104, 104, 1798, 1002, C
-ClassWO_Manager = 78, 78, 1772, 976, C
+ClassWO_Manager = 78, 78, 1772, 976, 
 Button_State = 52, 52, 1746, 950, C
 Status_Messages = 0, 0, 1055, 1100, 
-ClassJoy = 176, 12, 1529, 795, 
+ClassJoy = 117, 18, 1456, 887, 
 c6k_IO_Definitions = 1055, 0, 2110, 1314, C
 frm6kCmd = 59, -19, 1394, 879, , 414, 119, 1284, 532, C

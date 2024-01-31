@@ -199,6 +199,7 @@ Type joystickState      'Structure to store joystick state
     stateBtnUpd As Boolean  'Bool to indicate if the button input state has changed
     
     inSt(2) As Long         'Array to store current function of joystick direction
+    inInv(2) As Boolean     'Array to store inversion state of joystick axis
     outSt(6) As Long        'Array of integers to store joystick output options
     
     joyJogStr As String     'String to contain jog state the joystick is currently using
