@@ -643,7 +643,7 @@ Dim temp2 As String
 Dim i As Integer
 For i = 1 To 6
     temp1 = Val(fsinfo.MotorPos(i))
-    temp2 = Format((temp / posCal(i)), "0.000")
+    temp2 = Format((temp1 / posCal(i)), "0.000")
     frmMaintenance.Text_Pop_DRO(i - 1).Text = temp2
     frmLine6.Text_Pop_DRO(i - 1).Text = temp2
     

@@ -1179,7 +1179,7 @@ Private Sub FL6_End_Program()
     c6k.Write "!S:!JOG00000000:1OUTALL9,16,0:1OUTALL25,32,0:DRIVE0,0,0,0,0,0,0,0"
     
     'Reset c6k Controller to avoid retained settings & commands in next boot. Will disconnect ethernet
-    c6k.Write ("RESET")
+    'c6k.Write ("RESET")
     
     Var_Label_WO_Active.Caption = "Unloading all forms, Please Wait"
     Var_Label_WO_Active.Refresh

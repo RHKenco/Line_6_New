@@ -422,9 +422,9 @@ If myJoy.stateBtnUpd Or Not myJoy.active Then
                         Case passBlade
                             Call initJoyAxes(aXj, False, aYj, False, aZaj, False)
                         Case passAugEdg
-                            Call initJoyAxes(aXj, False, aYj, False, aZaj, False)
+                            Call initJoyAxes(aXj, False, aYj, True, aZaj, False)
                         Case passAugFac
-                            Call initJoyAxes(aXj, False, aYj, False, aZaj, False)
+                            Call initJoyAxes(aXj, False, aYj, True, aZaj, False)
                     End Select
                 
                 Case 2, 3, 6, 7 ' Release pressed in any combination

@@ -3,8 +3,8 @@ Begin VB.Form frmMaintenance
    BackColor       =   &H00C00000&
    Caption         =   "Maintainance"
    ClientHeight    =   5775
-   ClientLeft      =   165
-   ClientTop       =   810
+   ClientLeft      =   225
+   ClientTop       =   855
    ClientWidth     =   10740
    LinkTopic       =   "Form6"
    ScaleHeight     =   5775
@@ -32,6 +32,30 @@ Begin VB.Form frmMaintenance
       TabIndex        =   54
       Top             =   600
       Width           =   5535
+      Begin VB.OptionButton Option_DistVel 
+         BackColor       =   &H00C00000&
+         Caption         =   "sec"
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   1
+         Left            =   2880
+         TabIndex        =   90
+         Top             =   240
+         Width           =   615
+      End
+      Begin VB.OptionButton Option_DistVel 
+         BackColor       =   &H00C00000&
+         Caption         =   "in"
+         ForeColor       =   &H8000000E&
+         Height          =   255
+         Index           =   0
+         Left            =   2160
+         MaskColor       =   &H8000000E&
+         TabIndex        =   89
+         Top             =   240
+         Value           =   -1  'True
+         Width           =   615
+      End
       Begin VB.CommandButton Button_Axis_Status 
          Caption         =   "Axis Status"
          BeginProperty Font 
@@ -1571,6 +1595,7 @@ Const MoveVelocities = "1,1,1,1,1,1"
 'Generate string of values for 6k with desired distance & GO command in correct position
 Dim tempD As String
 Dim tempGO As String
+Dim i As Long
 
 For i = 0 To 5
 
@@ -1594,8 +1619,16 @@ For i = 0 To 5
 
 Next i
 
-'Instruct 6k
-c6k.Write ("MC0:V" & MoveVelocities & ":D" & tempD & ":GO" & tempGO & Chr(13))
+If Option_DistVel(0).value Then
+    'Instruct 6k
+    c6k.Write ("MC0:V" & MoveVelocities & ":D" & tempD & ":GO" & tempGO & Chr(13))
+Else
+    c6k.Write ("MC1:V" & MoveVelocities & ":GO" & tempGO & Chr(13))
+    For i = 0 To 250000000
+    Next i
+    c6k.Write ("!S" & tempGO & Chr(13))
+    
+End If
 
 End Sub
 
@@ -1692,6 +1725,27 @@ Next i
 
 End Sub
 
+
+Private Sub Option_DistVel_Click(Index As Integer)
+
+If Index = 0 Then
+    If Option_DistVel(0).value = True Then
+        Option_DistVel(1).value = False
+    Else
+        Option_DistVel(1).value = True
+    End If
+Else
+    If Option_DistVel(1).value = True Then
+        Option_DistVel(0).value = False
+    Else
+        Option_DistVel(0).value = True
+    End If
+End If
+
+Option_DistVel(0).Refresh
+Option_DistVel(1).Refresh
+
+End Sub
 
 Private Sub Text_Pop_DRO_Change(Index As Integer)
 
