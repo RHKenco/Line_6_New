@@ -1621,9 +1621,9 @@ Next i
 
 If Option_DistVel(0).value Then
     'Instruct 6k
-    c6k.Write ("MC0:V" & MoveVelocities & ":D" & tempD & ":GO" & tempGO & Chr(13))
+    c6k.Write ("@MC0:@V1:D" & tempD & ":GO" & tempGO & Chr(13))
 Else
-    c6k.Write ("MC1:V" & MoveVelocities & ":GO" & tempGO & Chr(13))
+    c6k.Write ("@MC1:@V1:GO" & tempGO & Chr(13))
     For i = 0 To 250000000
     Next i
     c6k.Write ("!S" & tempGO & Chr(13))

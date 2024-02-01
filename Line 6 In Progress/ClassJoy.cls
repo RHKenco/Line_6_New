@@ -39,37 +39,49 @@ Private Enum motionAxes
     axisBst = (2 ^ (4 - 1))
     
     aX = (2 ^ (5 - 1))
+    aXi = aX Or (2 ^ (6 - 1))
     aXj = axisJog Or aX
     aXc = axisMc Or aX
+    aXci = axisMc Or aXi
     aXb = axisBst Or aX
     
-    aY = (2 ^ (6 - 1))
+    aY = (2 ^ (7 - 1))
+    aYi = aY Or (2 ^ (8 - 1))
     aYj = axisJog Or aY
     aYc = axisMc Or aY
+    aYci = axisMc Or aYi
     aYb = axisBst Or aY
 
-    aZ = (2 ^ (7 - 1))
+    aZ = (2 ^ (9 - 1))
+    aZi = aZ Or (2 ^ (10 - 1))
     aZj = axisJog Or aZ
     aZc = axisMc Or aZ
+    aZci = axisMc Or aZi
     aZb = axisBst Or aZ
 
-    aZa = (2 ^ (8 - 1))
+    aZa = (2 ^ (11 - 1))
+    aZai = aZa Or (2 ^ (12 - 1))
     aZaj = axisJog Or aZa
     aZac = axisMc Or aZa
+    aZaci = axisMc Or aZai
     aZab = axisBst Or aZa
 
-    aR = (2 ^ (9 - 1))
+    aR = (2 ^ (13 - 1))
+    aRi = aR Or (2 ^ (14 - 1))
     aRj = axisJog Or aR
     aRc = axisMc Or aR
+    aRci = axisMc Or aRi
     aRb = axisBst Or aR
 
     aYR = aYc Or aRc
+    aYRi = aYc Or aRci
     aYRb = aYb Or aRb
 
     aZp = aYc Or aZc
     aZpb = aYb Or aZb
 
     aZpR = aYc Or aZc Or aRc
+    aZpRi = aYc Or aZc Or aRci
     aZpRb = aYb Or aZb Or aRb
 End Enum
 
@@ -437,23 +449,35 @@ If myJoy.stateBtnUpd Or Not myJoy.active Then
                 
             End Select
             
-        Case joyPause
+        Case joyPause  '------------------------------------------------------------------------- PAUSE -------------------
             Select Case buttons     'Toggle must be flipped for this case to occur, therefore only case 4-7
                 Case 4      'Toggle Only
                     Select Case passType
                         Case passBlade
                             Call initJoyAxes(aXj, False, aYj, False, aZj, False)
                         Case passAugEdg
-                            Call initJoyAxes(aYR, False, aYj, False, aZj, False)
+                            If c6kOps.getAugerDir = "Right" Then
+                                Call initJoyAxes(aYR, False, aYj, False, aZj, False)
+                            Else
+                                Call initJoyAxes(aYRi, False, aYj, False, aZj, False)
+                            End If
                         Case passAugFac
-                            Call initJoyAxes(aZpR, True, aXj, False, aZp, True)
+                            If c6kOps.getAugerDir = "Right" Then
+                                Call initJoyAxes(aZpR, True, aXj, False, aZp, True)
+                            Else
+                                Call initJoyAxes(aZpRi, True, aXj, False, aZp, True)
+                            End If
                     End Select
                 Case 5      'Select Pressed
                     Select Case passType
                         Case passBlade
                             Call initJoyAxes(aXj, False, aYj, False, aZaj, False)
                         Case passAugEdg, passAugFac
-                            Call initJoyAxes(aYj, False, aRj, False, aZaj, False)
+                            If c6kOps.getAugerDir = "Right" Then
+                                Call initJoyAxes(aYj, False, aRj, False, aZaj, False)
+                            Else
+                                Call initJoyAxes(aYj, False, aRj, True, aZaj, False)
+                            End If
                     End Select
                 Case 6, 7  ' Release Pressed - Advance Program
                     GoTo ReleaseJoystick
@@ -463,7 +487,7 @@ If myJoy.stateBtnUpd Or Not myJoy.active Then
                     GoTo joyErrorHand
             End Select
         
-        Case joyRun
+        Case joyRun '---------------------------------------------------------------------------- RUN ---------------------
             Select Case buttons
                 Case 0    'No buttons Pressed - Horizontal axis will adjust run speed
                     Select Case passType
@@ -479,7 +503,7 @@ If myJoy.stateBtnUpd Or Not myJoy.active Then
                         Case passBlade
                             Call initJoyAxes(aXb, False, aYj, False, aZaj, False)
                         Case passAugEdg
-                            Call initJoyAxes(aYRb, False, aXj, False, aZaj, False)
+                                Call initJoyAxes(aYRb, False, aXj, False, aZaj, False)
                         Case passAugFac
                             Call initJoyAxes(aZpRb, False, aYc, False, aZpb, False)
                     End Select
@@ -693,20 +717,20 @@ For i = 0 To 2
         Case aRb
     
         '-- YR - Axis Fuctions ------------------------------------------------------------------------------------YR
-        Case aYR
+        Case aYR, aYRi
             myJoy.outSt(driveR) = driveMcJog    'Set axes in Joystick object to continuous jog mode
             myJoy.outSt(driveY) = driveMcJog
         Case aYRb
     
         '-- Z' - Axis Fuctions ------------------------------------------------------------------------------------Z'
-        Case aZp
+        Case aZp, aZpi
             myJoy.outSt(driveY) = driveMcJog    'Set axes in Joystick object to continuous jog mode
             myJoy.outSt(driveZ) = driveMcJog
         Case aZpb
 
 
         '-- Z'R - Axis Fuctions ----------------------------------------------------------------------------------Z'R
-        Case aZpR
+        Case aZpR, aZpRi
             myJoy.outSt(driveY) = driveMcJog    'Set axes in Joystick object to continuous jog mode
             myJoy.outSt(driveZ) = driveMcJog
             myJoy.outSt(driveR) = driveMcJog
@@ -945,6 +969,9 @@ If myJoy.joyMcJogOn Then
         If myJoy.inSt(i) And axisMc Then
         
             Dim mcJoyDir As Integer
+            Dim axisIsInverted As Boolean
+            Dim tempSpeedMult As Single
+            tempSpeedMult = 1
             
             'Determine what direction the joystick is in (1- Neg, 0- Centered, 2- Pos)
             mcJoyDir = checkJoyAxisDir(i)
@@ -955,16 +982,26 @@ If myJoy.joyMcJogOn Then
                 Select Case j
                     Case driveX
                         If Not CBool(myJoy.inSt(i) And aX) Then GoTo VelSetNextAxis
+                        If CBool(myJoy.inSt(i) And aXi) Then axisIsInverted = True
                     Case driveY
                         If Not CBool(myJoy.inSt(i) And aY) Then GoTo VelSetNextAxis
+                        If CBool(myJoy.inSt(i) And aYi) Then axisIsInverted = True
+                        If passType = passAugEdg Then tempSpeedMult = augerPitch / (PI * augerDiam)
+                        If passType = passAugFac Then tempSpeedMult = Sin(augerAngle) * augerPitch / (PI * augerDiam)
                     Case driveZ
                         If Not CBool(myJoy.inSt(i) And aZ) Then GoTo VelSetNextAxis
+                        If CBool(myJoy.inSt(i) And aZi) Then axisIsInverted = True
+                        If passType = passAugFac Then tempSpeedMult = Cos(augerAngle) * augerPitch / (PI * augerDiam)
                     Case driveZa
                         If Not CBool(myJoy.inSt(i) And aZa) Then GoTo VelSetNextAxis
+                        If CBool(myJoy.inSt(i) And aZai) Then axisIsInverted = True
                     Case driveR
                         If Not CBool(myJoy.inSt(i) And aR) Then GoTo VelSetNextAxis
+                        If CBool(myJoy.inSt(i) And aRi) Then axisIsInverted = True
+                        tempSpeedMult = 60
+                        If passType = passAugEdg Or passType = passAugFac Then tempSpeedMult = 360 / (PI * augerDiam)
                 End Select
-
+                
                 If mcJoyDir <> 0 Then 'If a motion is commanded,
                     'The velocity commanded to the motor is not zero, or is not at constant speed,
                     If (fsinfo.MotorVel(j) <> 0) Or (CBool(fsinfo.AxisStatus(j) And (2 ^ (4 - 1)))) Then
@@ -976,15 +1013,19 @@ If myJoy.joyMcJogOn Then
                     End If
                 End If
                 
-                'The velocity of the drive axis should be set based on the joystick position
-                Select Case mcJoyDir
-                    Case 1
-                        myJoy.joyMcAxisVel(j) = myJoy.joyMcAxisVel(j) + cJoyJogVel
-                    Case 2
-                        myJoy.joyMcAxisVel(j) = myJoy.joyMcAxisVel(j) - cJoyJogVel
-                End Select
-
+                Dim tempVel As Single
                 
+                If mcJoyDir Then
+                    'The velocity of the drive axis should be set based on the joystick position
+                    Select Case mcJoyDir
+                        Case 1
+                            If Not axisIsInverted Then tempVel = cJoyJogVel Else temVel = -cJoyJogVel
+                        Case 2
+                            If Not axisIsInverted Then tempVel = -cJoyJogVel Else temVel = cJoyJogVel
+                    End Select
+                    
+                    myJoy.joyMcAxisVel(j) = myJoy.joyMcAxisVel(j) + (tempVel * tempSpeedMult)
+                End If
 VelSetNextAxis:
             Next j
 

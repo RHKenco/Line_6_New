@@ -37,6 +37,7 @@ Private Const revCalZa = 255102 'counts/in
 Private Const revCalO = 7987 'counts/in
 Private Const revCalR = 2166 'counts/degree
                                 
+                                
 '-- Critical input booleans and related variables
 Private setE_Stop As Boolean    'Local E-stop variable
 
@@ -805,9 +806,8 @@ Select Case passType
     Case passAugEdg
     
         'Adjust base speed for pass type
-        currentRotSpeed = currentPassSpeed / (PI * augerDiam)   'Rotational speed necessary for pass speed (linVel = (rotVel * (diam/2)) * (1rot/2PI rad)) in ROTATIONS/SEC
-        currentPassSpeed = currentRotSpeed * augerPitch         'Linear speed to keep pace with the auger edge (linVel = rot/s * in/rot) in INCHES/SEC
-        currentRotSpeed = currentRotSpeed * 360     'Convert to degrees per second
+        currentRotSpeed = 360 * currentPassSpeed / (PI * augerDiam)   'Rotational speed necessary for pass speed (linVel = (rotVel * (diam/2)) * (1rot/2PI rad)) in ROTATIONS/SEC
+        currentPassSpeed = currentRotSpeed * augerPitch / 360        'Linear speed to keep pace with the auger edge (linVel = rot/s * in/rot) in INCHES/SEC
     
         'Check for speed boost
         If Joy.getUserSpeedBoost(driveY) = 1 Then tempSpeed1 = currentPassSpeed * (1 + Joy.getUserSpeedBoostMod)
@@ -837,14 +837,12 @@ Select Case passType
             Exit Sub
         End If
             
-        currentRotSpeed = currentPassSpeed / (PI * currentDiam)   'Rotational speed necessary for pass speed (linVel = (rotVel * (diam/2)) * (1rot/2PI rad)) in ROTATIONS/SEC
+        currentRotSpeed = 360 * currentPassSpeed / (PI * currentDiam)   'Rotational speed necessary for pass speed (linVel = (rotVel * (diam/2)) * (1rot/2PI rad)) in DEGREES/SEC
     
         Dim currentSpeedY As String
         Dim currentSpeedZ As String
-        currentSpeedY = augerPitch * Sin(augerAngle) * currentRotSpeed
-        currentSpeedZ = augerPitch * Cos(augerAngle) * currentRotSpeed
-        
-        currentRotSpeed = currentRotSpeed * 360     'DEGREES/SEC
+        currentSpeedY = augerPitch * Sin(augerAngle) * currentRotSpeed / 360
+        currentSpeedZ = augerPitch * Cos(augerAngle) * currentRotSpeed / 360
         
         'Check for speed boost
         If Joy.getUserSpeedBoost(driveY) = 1 Then tempSpeed1 = currentSpeedY * (1 + Joy.getUserSpeedBoostMod)
