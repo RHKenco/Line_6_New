@@ -31,7 +31,7 @@ If (currentMsg = newStatus) And (currentStr = displayStr) Then Exit Sub
 
 ' If input is "Active" without discrimination for auger setup, adjust state accordingly
 If newStatus = msgActive Then
-    If Not c6kOps.getAugerSet() Then
+    If Not Auger.getActive() Then
         newStatus = msgActiveBlade
     Else
         If frmLine6.Option_Auger_Direction(0) Then newStatus = msgActiveAugFace Else newStatus = msgActiveAugEdge

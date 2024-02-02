@@ -109,7 +109,7 @@ Select Case stateInner
         If Joy.runJoy(joyFree) Then Exit Sub
         'If joystick inactivates and toggle is flipped, return to previous innerState
         If Joy.getJoyToggle Then
-            stateInner = 1
+            stateInner = 0
             Exit Sub
         End If
         stateInner = 2

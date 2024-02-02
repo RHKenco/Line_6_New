@@ -24,7 +24,7 @@ Public Sub btnState(btn_state As Integer)
     
     ' Check if auger or blade
     If btn_state = btnActive Then
-        If c6kOps.getAugerSet() Then btn_state = btnActiveAuger Else btn_state = btnActiveBlade
+        If Auger.getActive() Then btn_state = btnActiveAuger Else btn_state = btnActiveBlade
     End If
     
     Call btnSt_Button_WO_Enter_Clear(btn_state)

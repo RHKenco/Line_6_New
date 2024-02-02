@@ -628,9 +628,9 @@ Select Case passType
     Case passAugEdg
     
         Dim tempSetPos As Double
-        tempSetPos = (augerDiam / 2) - 1  'Strike position will be 1" from radial edge of auger
+        tempSetPos = (Auger.getDiam / 2) - 1  'Strike position will be 1" from radial edge of auger
         
-        If augerCoil = "Right" Then tempSetPos = -tempSetPos    'Facing Line6, a Right-Handed Auger will be impregnated on the Left Side such that the strike location will be -
+        If Auger.getHand = augerRight Then tempSetPos = -tempSetPos    'Facing Line6, a Right-Handed Auger will be impregnated on the Left Side such that the strike location will be -
             
         c6k.Write "PSET" & Format(tempSetPos, "0.000") & ",X,X,X,0,0" & Chr$(13)     'Set Y-R to 0 and X to 1" from radial edge. This will be used in speed calcs
     
@@ -764,8 +764,8 @@ Select Case passType
     Case passAugEdg
     
         'Adjust base speed for pass type
-        currentRotSpeed = currentPassSpeed * Auger.getRotSpdMlt
-        currentPassSpeed = currentRotSpeed * Auger.getEdgVelMlt
+        currentRotSpeed = currentPassSpeed * Auger.getRotSpdMult
+        currentPassSpeed = currentRotSpeed * Auger.getEdgVelMult
     
         'Check for speed boost
         If Joy.getUserSpeedBoost(driveY) = 1 Then tempSpeed1 = currentPassSpeed * (1 + Joy.getUserSpeedBoostMod)
@@ -795,7 +795,7 @@ Select Case passType
             Exit Sub
         End If
             
-        currentRotSpeed = currentPassSpeed * Auger.getRotSpdMlt
+        currentRotSpeed = currentPassSpeed * Auger.getRotSpdMult
     
         Dim currentSpeedY As String
         Dim currentSpeedZ As String

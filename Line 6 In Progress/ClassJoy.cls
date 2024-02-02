@@ -20,6 +20,7 @@ Attribute VB_Exposed = False
 '|====================================================================================================================|
 
 
+Option Explicit
 
 '-- Class Constants & Variables ---------------------------------------------------------------------------------------
 
@@ -104,8 +105,8 @@ Private Const aZpRstr = "Z'R"
 Private Const aZpRbstr = "Z'Rb"
 
 'Joystick Jog Velocity
-Private Const cJoyJogVel As Single = 0.1
-Private Const cJoyJogVelStr As String = "0.1,0.1,0.1,0.1,10,0.1"
+Private Const cJoyJogVel As Single = 1
+Private Const cJoyJogVelStr As String = "1,1,1,1,10,1"
 
 'Internal Variables & Defaults
 Private Const inDebCount As Integer = 5     'Time in FSM cycles of input debounce
@@ -456,13 +457,13 @@ If myJoy.stateBtnUpd Or Not myJoy.Active Then
                         Case passBlade
                             Call initJoyAxes(aXj, False, aYj, False, aZj, False)
                         Case passAugEdg
-                            If c6kOps.getAugerDir = "Right" Then
+                            If Auger.getHand = augerRight Then
                                 Call initJoyAxes(aYR, False, aYj, False, aZj, False)
                             Else
                                 Call initJoyAxes(aYRi, False, aYj, False, aZj, False)
                             End If
                         Case passAugFac
-                            If c6kOps.getAugerDir = "Right" Then
+                            If Auger.getHand = augerRight Then
                                 Call initJoyAxes(aZpR, True, aXj, False, aZp, True)
                             Else
                                 Call initJoyAxes(aZpRi, True, aXj, False, aZp, True)
@@ -473,7 +474,7 @@ If myJoy.stateBtnUpd Or Not myJoy.Active Then
                         Case passBlade
                             Call initJoyAxes(aXj, False, aYj, False, aZaj, False)
                         Case passAugEdg, passAugFac
-                            If c6kOps.getAugerDir = "Right" Then
+                            If Auger.getHand = augerRight Then
                                 Call initJoyAxes(aYj, False, aRj, False, aZaj, False)
                             Else
                                 Call initJoyAxes(aYj, False, aRj, True, aZaj, False)
@@ -723,7 +724,7 @@ For i = 0 To 2
         Case aYRb
     
         '-- Z' - Axis Fuctions ------------------------------------------------------------------------------------Z'
-        Case aZp, aZpi
+        Case aZp
             myJoy.outSt(driveY) = driveMcJog    'Set axes in Joystick object to continuous jog mode
             myJoy.outSt(driveZ) = driveMcJog
         Case aZpb
@@ -893,6 +894,9 @@ Private Function checkJoyAxisDir(i As Integer)
 
 Dim currentJoyDir
 
+Dim dirA As Integer
+Dim dirB As Integer
+
 If myJoy.inInv(i) Then
     dirA = 2
     dirB = 1
@@ -928,9 +932,13 @@ End Function
 Private Sub runJoyInputs()
 
 Dim i As Integer
+Dim j As Integer
 
 Dim dirA As Integer
 Dim dirB As Integer
+
+Dim passType As Integer
+passType = c6kOps.getPassType
 
 '-- If no joystick inputs require continuous motion, exit
 If myJoy.joyJogOn And Not myJoy.joyMcJogOn And Not myJoy.joyBstOn Then Exit Sub
@@ -971,13 +979,14 @@ If myJoy.joyMcJogOn Then
             Dim mcJoyDir As Integer
             Dim axisIsInverted As Boolean
             Dim tempSpeedMult As Single
-            tempSpeedMult = 1
+            
             
             'Determine what direction the joystick is in (1- Neg, 0- Centered, 2- Pos)
             mcJoyDir = checkJoyAxisDir(i)
             
             'Set Axis Velocities
             For j = 1 To 6
+                tempSpeedMult = 1
                 If j = 4 Then GoTo VelSetNextAxis
                 Select Case j
                     Case driveX
@@ -986,7 +995,7 @@ If myJoy.joyMcJogOn Then
                     Case driveY
                         If Not CBool(myJoy.inSt(i) And aY) Then GoTo VelSetNextAxis
                         If CBool(myJoy.inSt(i) And aYi) Then axisIsInverted = True
-                        If passType = passAugEdg Then tempSpeedMult = Auger.getEdgVelMlt
+                        If passType = passAugEdg Then tempSpeedMult = Auger.getEdgVelMult
                         If passType = passAugFac Then tempSpeedMult = Auger.getyMult
                     Case driveZ
                         If Not CBool(myJoy.inSt(i) And aZ) Then GoTo VelSetNextAxis
@@ -999,7 +1008,7 @@ If myJoy.joyMcJogOn Then
                         If Not CBool(myJoy.inSt(i) And aR) Then GoTo VelSetNextAxis
                         If CBool(myJoy.inSt(i) And aRi) Then axisIsInverted = True
                         tempSpeedMult = 60
-                        If passType = passAugEdg Or passType = passAugFac Then tempSpeedMult = Auger.getRotSpdMlt
+                        If passType = passAugEdg Or passType = passAugFac Then tempSpeedMult = Auger.getRotSpdMult
                 End Select
                 
                 If mcJoyDir <> 0 Then 'If a motion is commanded,
@@ -1019,11 +1028,11 @@ If myJoy.joyMcJogOn Then
                     'The velocity of the drive axis should be set based on the joystick position
                     Select Case mcJoyDir
                         Case 1
-                            'If Not axisIsInverted Then tempVel = cJoyJogVel Else tempVel = -cJoyJogVel
-                            tempVel = cJoyJogVel
+                            If Not axisIsInverted Then tempVel = cJoyJogVel Else tempVel = -cJoyJogVel
+                            'tempVel = cJoyJogVel
                         Case 2
-                            'If Not axisIsInverted Then tempVel = -cJoyJogVel Else tempVel = cJoyJogVel
-                            tempVel = -cJoyJogVel
+                            If Not axisIsInverted Then tempVel = -cJoyJogVel Else tempVel = cJoyJogVel
+                            'tempVel = -cJoyJogVel
                     End Select
                     
                     

@@ -12,16 +12,16 @@ Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 
-
-
-Public Sub initAuger()
+Option Explicit
 
 Private myAuger As augerParam
 
+Public Sub initAuger()
+
     'Set all multipliers to 1
-    myAuger.rotSpdMlt = 1
-    myAuger.edgVelMlt = 1
-    myAuger.fldVelMlt = 1
+    myAuger.rotSpdMult = 1
+    myAuger.edgVelMult = 1
+    myAuger.fldVelMult = 1
     myAuger.yMult = 1
     myAuger.zMult = 1
 
@@ -29,6 +29,8 @@ End Sub
 
 
 Public Function setAugerParam(augerPitchIn As String, augerDiamIn As String, augerCoilDirection As String) As String
+
+myAuger.Active = True
 
 'Store auger pitch, diameter, and hand
 myAuger.Pitch = augerPitchIn
@@ -39,33 +41,31 @@ If augerCoilDirection = "Right" Then myAuger.Hand = augerRight Else myAuger.Hand
 myAuger.Angle = Atn(augerPitchIn / (augerDiamIn * PI))
 myAuger.AngleDeg = (myAuger.Angle * 180 / PI)
 
-myAuger.Enabled = True
-
 'Compute mult factors for pass velocities
-myAuger.rotSpdMlt = 360 / (PI * myAuger.Diameter)
-myAuger.edgVelMlt = myAuger.Pitch * myAuger.rotSpdMlt / 360
+myAuger.rotSpdMult = 360 / (PI * myAuger.Diameter)
+myAuger.edgVelMult = myAuger.Pitch * myAuger.rotSpdMult / 360
 
-myAuger.fldVelMlt = 360 / PI
+myAuger.fldVelMult = 360 / PI
 myAuger.yMult = myAuger.Pitch * myAuger.rotSpdMult * Sin(myAuger.Angle) / 360
 myAuger.zMult = myAuger.Pitch * myAuger.rotSpdMult * Cos(myAuger.Angle) / 360
 
 'Return auger angle
-setAugerParam = roundToString(myAuger.AngleDeg, 2)
+setAugerParam = Format(myAuger.AngleDeg, "0.00")
 
 End Function
 
 
 Public Sub clearAugerParam()
 
-    myAuger.Enabled = False
+    myAuger.Active = False
     myAuger.Pitch = 0
     myAuger.Diameter = 0
     myAuger.Hand = 0
     myAuger.Angle = 0
     myAuger.AngleDeg = 0
-    myAuger.rotSpdMlt = 1
-    myAuger.edgVelMlt = 1
-    myAuger.fldVelMlt = 1
+    myAuger.rotSpdMult = 1
+    myAuger.edgVelMult = 1
+    myAuger.fldVelMult = 1
     myAuger.yMult = 1
     myAuger.zMult = 1
 
@@ -73,7 +73,7 @@ Public Sub clearAugerParam()
 End Sub
 
 Public Function getActive() As Boolean
-    If myAuger.Active Then getSet = myAuger.Enabled Else MsgBox "Auger not setup!"
+    getActive = myAuger.Active
 End Function
 
 Public Function getPitch() As Double
@@ -96,23 +96,23 @@ Public Function getAngleDeg() As Double
     If myAuger.Active Then getAngleDeg = myAuger.AngleDeg Else MsgBox "Auger not setup!"
 End Function
 
-Public Function getRotSpdMlt() As Double
-    getRotSpdMlt = myAuger.rotSpdMlt
+Public Function getRotSpdMult() As Double
+    getRotSpdMult = myAuger.rotSpdMult
 End Function
 
-Public Function getEdgVelMlt() As Double
-    getRotSpdMlt = myAuger.edgVelMlt
+Public Function getEdgVelMult() As Double
+    getEdgVelMult = myAuger.edgVelMult
 End Function
 
-Public Function getFldVelMlt() As Double
-    getRotSpdMlt = myAuger.fldVelMlt
+Public Function getFldVelMult() As Double
+    getFldVelMult = myAuger.fldVelMult
 End Function
 
 Public Function getyMult() As Double
-    getRotSpdMlt = myAuger.yMult
+    getyMult = myAuger.yMult
 End Function
 
 Public Function getzMult() As Double
-    getRotSpdMlt = myAuger.rotSpdMlt
+    getzMult = myAuger.rotSpdMult
 End Function
 
