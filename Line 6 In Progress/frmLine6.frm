@@ -3,8 +3,8 @@ Begin VB.Form frmLine6
    BackColor       =   &H00C00000&
    Caption         =   "Line 6"
    ClientHeight    =   6660
-   ClientLeft      =   8295
-   ClientTop       =   6840
+   ClientLeft      =   4680
+   ClientTop       =   1710
    ClientWidth     =   19410
    LinkTopic       =   "Form6"
    ScaleHeight     =   6660
@@ -1032,8 +1032,16 @@ Private Sub Button_WO_Enter_Clear_Click()
 
 If Not woMgr.isWOactive() Then
     Call woMgr.loadWO
+    
+    '-- Start Airblade & Exhaust Fan
+    Call c6kOps.setOutput(outAirblade, True)
+    Call c6kOps.setOutput(outExhaust, True)
 Else
-   Call woMgr.clearWO
+    If Not woMgr.clearWO Then Exit Sub
+    
+    '-- Stop Airblade & Exhaust Fan
+    Call c6kOps.setOutput(outAirblade, False)
+    Call c6kOps.setOutput(outExhaust, False)
 End If
 
 Text_Enter_Pass_Width.SetFocus
@@ -1149,10 +1157,6 @@ Call c6kOps.bootDrives
 
 '-- Check for previously active WO
 Call woMgr.chkActiveWO
-
-'-- Start Airblade & Exhaust Fan
-Call c6kOps.setOutput(outAirblade, True)
-Call c6kOps.setOutput(outExhaust, True)
 
 '-- Enable FSM
 Timer_FSM.Enabled = True

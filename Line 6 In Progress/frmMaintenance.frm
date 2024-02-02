@@ -3,13 +3,12 @@ Begin VB.Form frmMaintenance
    BackColor       =   &H00C00000&
    Caption         =   "Maintainance"
    ClientHeight    =   5775
-   ClientLeft      =   225
-   ClientTop       =   855
+   ClientLeft      =   1065
+   ClientTop       =   9480
    ClientWidth     =   10740
    LinkTopic       =   "Form6"
    ScaleHeight     =   5775
    ScaleWidth      =   10740
-   StartUpPosition =   3  'Windows Default
    Begin VB.Timer Timer_c6kRead 
       Interval        =   50
       Left            =   120

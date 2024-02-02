@@ -104,8 +104,8 @@ Private Const aZpRstr = "Z'R"
 Private Const aZpRbstr = "Z'Rb"
 
 'Joystick Jog Velocity
-Private Const cJoyJogVel As Single = 1#
-Private Const cJoyJogVelStr As String = "1,1,1,1,1,1"
+Private Const cJoyJogVel As Single = 0.1
+Private Const cJoyJogVelStr As String = "0.1,0.1,0.1,0.1,10,0.1"
 
 'Internal Variables & Defaults
 Private Const inDebCount As Integer = 5     'Time in FSM cycles of input debounce
@@ -309,10 +309,10 @@ End Function
 Private Sub initJoy()
 
 'Immediately (!) disable jog mode for all axes
-c6k.Write ("!JOG000000" & Chr$(13))
+c6k.Write ("!JOG000X00" & Chr$(13))
 
 'Set motion parameters for Joystick Motion
-c6k.Write ("JOG000000:JOGA4,4,4,4,144,4:JOGAD10,10,10,10,360,10:JOGVH10,10,10,10,360,10:JOGVL5,5,5,5,36,5:V10,10,10,10,360,10" & Chr$(13))
+c6k.Write ("JOG000X00:JOGA4,4,4,4,144,4:JOGAD10,10,10,10,30,10:JOGVH10,2,2,0.2,30,10:JOGVL5,1,1,0.1,15,5:" & Chr$(13))
 
 End Sub
 
@@ -1019,10 +1019,14 @@ If myJoy.joyMcJogOn Then
                     'The velocity of the drive axis should be set based on the joystick position
                     Select Case mcJoyDir
                         Case 1
-                            If Not axisIsInverted Then tempVel = cJoyJogVel Else temVel = -cJoyJogVel
+                            'If Not axisIsInverted Then tempVel = cJoyJogVel Else tempVel = -cJoyJogVel
+                            tempVel = cJoyJogVel
                         Case 2
-                            If Not axisIsInverted Then tempVel = -cJoyJogVel Else temVel = cJoyJogVel
+                            'If Not axisIsInverted Then tempVel = -cJoyJogVel Else tempVel = cJoyJogVel
+                            tempVel = -cJoyJogVel
                     End Select
+                    
+                    
                     
                     myJoy.joyMcAxisVel(j) = myJoy.joyMcAxisVel(j) + (tempVel * tempSpeedMult)
                 End If

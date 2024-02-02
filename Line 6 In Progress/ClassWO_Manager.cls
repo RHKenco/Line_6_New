@@ -154,7 +154,21 @@ End If
 
 End Sub
 
-Public Sub clearWO()
+Public Function clearWO() As Boolean
+
+    'If WO still has temp file, ask before clearing WO
+    If woTempData <> "" And Dir(woTempData) <> "" Then
+        If Not MsgBox("Current WO Not Finished - Clear anyway?" & Chr(13) & "Data will be retained", vbYesNo, "Clear WO?") Then
+            clearWO = False
+            Exit Function
+        End If
+    End If
+    
+    clearWO = True
+        
+    'Kill WO main temp file (if it exists)
+    If Dir(woTempMain) <> "" Then Kill woTempMain
+
     '-- Clear All Fields and Reset Button to Enter ------------------------------------------------
     frmLine6.Text_Enter_WO.Text = frmLine6.Text_Enter_WO.Tag
     frmLine6.Text_Enter_WO.Locked = False
@@ -188,12 +202,7 @@ Public Sub clearWO()
     
     frmLine6.Refresh
     
-    'Kill WO main temp file (if it exists)
-    If Dir(woTempMain) <> "" Then Kill woTempMain
-    'If WO still has temp file
-    If woTempData <> "" And Dir(woTempData) <> "" Then Call MsgBox("Current WO Not Finished - Clear anyway?" & Chr(13) & "Data will be retained", vbYesNo, "Clear WO?")
-    
-End Sub
+End Function
 
 ' -- chkActiveWO - Function to be called when loading program to check for a temporary file containing the currently active work order. ------------------------------------------------
 '                - Allows for work-order to be maintained if program is shut down improperly

@@ -2,13 +2,12 @@ VERSION 5.00
 Begin VB.Form frm6kCmd 
    Caption         =   "Terminal"
    ClientHeight    =   4665
-   ClientLeft      =   60
-   ClientTop       =   405
+   ClientLeft      =   12390
+   ClientTop       =   9180
    ClientWidth     =   12435
    LinkTopic       =   "Form1"
    ScaleHeight     =   4665
    ScaleWidth      =   12435
-   StartUpPosition =   3  'Windows Default
    Begin VB.TextBox Terminal_Textbox 
       BackColor       =   &H00800000&
       BeginProperty Font 

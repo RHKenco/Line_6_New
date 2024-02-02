@@ -2,14 +2,13 @@ VERSION 5.00
 Begin VB.Form frmAugerSetup 
    BackColor       =   &H00C00000&
    Caption         =   "Auger Setup"
-   ClientHeight    =   6105
-   ClientLeft      =   60
-   ClientTop       =   405
+   ClientHeight    =   6855
+   ClientLeft      =   1065
+   ClientTop       =   1410
    ClientWidth     =   3030
    LinkTopic       =   "Form6"
-   ScaleHeight     =   6105
+   ScaleHeight     =   6855
    ScaleWidth      =   3030
-   StartUpPosition =   3  'Windows Default
    Begin VB.TextBox Text_Pop_Auger_Angle 
       Alignment       =   2  'Center
       BackColor       =   &H00FFFFFF&

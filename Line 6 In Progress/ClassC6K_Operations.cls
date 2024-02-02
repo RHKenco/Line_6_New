@@ -22,20 +22,20 @@ Private FSinputState As Long        'Variable to store FastStatus input Data
 Private FSoutputState As Long       'Variable to store FastStatus output Data
 
 Private posCal(6) As Long                'Array to store position calibration data. These following constant values will be stored upon initialization,
-Private Const posCalX = 26550 'counts/in        '26550      '       and will convert positional data from counts to appropriate units for each axis
-Private Const posCalY = 38462 'counts/in        '62500
-Private Const posCalZ = 253971 'counts/in       '39683
-Private Const posCalZa = 255102 'counts/in      '510204
+Private Const posCalX = 26495 'counts/in        '26550      '       and will convert positional data from counts to appropriate units for each axis
+Private Const posCalY = 39790 'counts/in        '62500
+Private Const posCalZ = 249807 'counts/in       '39683
+Private Const posCalZa = 249896 'counts/in      '510204
 Private Const posCalO = 7987 'counts/in         '62500
-Private Const posCalR = 2166 'counts/degree     '62500
+Private Const posCalR = 5009 'counts/degree     '62500
 
 Private revCal(6) As Long                'Array to store revolution calibration data. These following constant values will be stored upon initialization,
-Private Const revCalX = 26550 'counts/in         '25000      '       and will convert motor revolutions to appropriate units for each axis. Current numbers are simple conversion to revolutions
-Private Const revCalY = 38426 'counts/in
-Private Const revCalZ = 253971 'counts/in
-Private Const revCalZa = 255102 'counts/in
-Private Const revCalO = 7987 'counts/in
-Private Const revCalR = 2166 'counts/degree
+Private Const revCalX = 26495 'counts/in         '25000      '       and will convert motor revolutions to appropriate units for each axis. Current numbers are simple conversion to revolutions
+Private Const revCalY = 39790 'counts/in        '62500
+Private Const revCalZ = 249807 'counts/in       '39683
+Private Const revCalZa = 249896 'counts/in      '510204
+Private Const revCalO = 7987 'counts/in         '62500
+Private Const revCalR = 5009 'counts/degree     '62500
                                 
                                 
 '-- Critical input booleans and related variables
@@ -380,13 +380,16 @@ c6k.Write ("DRIVE0,0,0,0,0,0,0,0:CMDDIR000000:DRFEN00000000" & Chr$(13))
 
 'Set Up Axis Defititions - Sets drives to Stepper mode, Sets Drive Resolution to 250000, Sets Distance Scales, Sets Acceleration Scale for All Axes,
 '  Sets Velocity Scale for All Axes, Enables Scale Factors, Disables End-of-Travel Limit Input Checking, Sets Hard Limit Deceleration to 100
-c6k.Write "AXSDEF00000000:@DRES250000:SCLD" & tempPosCal & ":@SCLA" & tempRevCal & ":@SCLV" & tempRevCal & ":SCALE1:LH0,0,0,0,0,0,0,0:LHAD100,100,100,100,100,100,100,100:" + Chr$(13)
+c6k.Write "AXSDEF00000000:@DRES250000:SCLD" & tempPosCal & ":@SCLA" & tempRevCal & ":SCLV" & tempRevCal & ":SCALE1:LH0,0,0,0,0,0,0,0:LHAD100,100,100,100,100,100,100,100:" + Chr$(13)
 
 'Set Up Encoders - Set Encodor Polarity, Set Encoder Resolution, Set to Capture Encoder Position rather than Commanded Position
-c6k.Write ("ENCPOL11011111:ERES4000,4000,4000,4000,4000,4000,4000,4000:ENCCNT11111111:" & Chr$(13))
+'c6k.Write ("ENCPOL11011111:ERES4000,4000,4000,4000,4000,4000,4000,4000:ENCCNT11111111:" & Chr$(13))
 
 'Enabling Drives
 c6k.Write ("DRIVE1,1,1,1,1,1,1,0" & Chr$(13))
+
+'Set base velocity and acceleration - will be overwritten as necessary
+c6k.Write "V10,10,10,10,30,10:A10,10,10,5,30,10:AD10,10,10,5,30,10:"
 
 ' Enable all inputs on block 1, Set up E-stop pin, Immediate Disable Jog Outputs
 c6k.Write "1INEN:1INFNC20-D:!JOG0000000" & Chr$(13)
