@@ -261,7 +261,7 @@ End Function
 
 Public Sub setPassType()
 
-If augerSet = False Then
+If Not Auger.getActive Then
     passType = passBlade
 Else
     If frmLine6.Option_Auger_Direction(0).value = True Then

@@ -182,7 +182,7 @@ End Enum
 
 Type joystickState      'Structure to store joystick state
 
-    active As Boolean       'Active boolean - true when joystick is doing stuff
+    Active As Boolean       'Active boolean - true when joystick is doing stuff
     
     stateStr As String      'State String - To display currently active axes
     
@@ -216,7 +216,7 @@ Type joystickState      'Structure to store joystick state
 End Type
 
 Type augerParam
-    active As Boolean           'Auger active / inactive boolean
+    Active As Boolean           'Auger active / inactive boolean
     
     Pitch As Single             'Auger Pitch in IN
     Diameter As Single          'Auger Diameter in IN

@@ -152,7 +152,7 @@ End Function
 
 '-- Simple Read-Only Return Functions:
 Public Function getJoyActive() As Boolean
-    getJoyActive = myJoy.active
+    getJoyActive = myJoy.Active
 End Function
 
 Public Function getJoyStr() As String
@@ -332,7 +332,7 @@ If currentMcAxes <> "" Then c6k.Write ("!MC" & currentMcAxes & Chr$(13))
 c6k.Write ("1INFNC1-A:1INFNC2-A:1INFNC3-A:1INFNC4-A:1INFNC5-A:1INFNC6-A" & Chr$(13))
 
 'Lower active flag and clear joystick string
-myJoy.active = False
+myJoy.Active = False
 myJoy.stateStr = ""
 
 End Sub
@@ -342,7 +342,7 @@ Public Sub eStopJoy()
 c6k.Write ("!S:!@JOG0:1INFNC1-A:1INFNC2-A:1INFNC3-A:1INFNC4-A:1INFNC5-A:1INFNC6-A" & Chr$(13))
 
 'Lower active flag and clear joystick string
-myJoy.active = False
+myJoy.Active = False
 myJoy.stateStr = ""
 
 End Sub
@@ -392,7 +392,7 @@ End Function
 '           - runMode - Run mode of the pass - see runJoy for details (same input)
 Private Function joyModeSet(runMode As Integer) As Boolean
 
-If myJoy.stateBtnUpd Or Not myJoy.active Then
+If myJoy.stateBtnUpd Or Not myJoy.Active Then
 
     '-- Develop buttons integer - see below
     Dim buttons As Integer
@@ -526,7 +526,7 @@ End If
     
 'Call jogOn
 joyModeSet = True
-myJoy.active = True
+myJoy.Active = True
 
 Exit Function
 
@@ -538,7 +538,7 @@ ReleaseJoystick:
     'Return False to indicate that user input should end joystick mode
     Call jogOff
     joyModeSet = False
-    myJoy.active = False
+    myJoy.Active = False
 
 
 End Function
