@@ -52,12 +52,6 @@ Private passWidth As Single     'Pass Width variable
 
 Private passType As Integer
 
-Private augerSet As Boolean         'Auger Active Bool
-Private augerPitch As Double        'Auger Pitch, Diameter, & Angle
-Private augerDiam As Double
-Private augerAngle As Double
-Private augerCoil As String
-
 '-- Pass Speed Calculation Variables & Constants
 Private passSpeed(3) As Single      'Array to store pass speeds at different pass witdths
 Private Const passSpeed0 As Single = 0.125      ' - Defaults
@@ -244,45 +238,6 @@ End If
 Call Joy.resetSpeedMult
 
 End Sub
-
-Public Function setAugerParam(augerPitchIn As String, augerDiamIn As String, augerCoilDirection As String) As String
-
-'Compute Auger Angle from Pitch and Diameter
-augerAngle = Atn(augerPitchIn / (augerDiamIn * PI))
-
-'Store Auger Pitch & Diameter
-augerPitch = CDbl(augerPitchIn)
-augerDiam = CDbl(augerDiamIn)
-
-'Store Auger Coil Direction
-If augerCoilDirection = "Right" Or augerCoilDirection = "Left" Then
-    augerCoil = augerCoilDirection
-Else
-    MsgBox ("Invalid Auger Coil Direction")
-End If
-
-augerSet = True
-
-'Return auger angle
-setAugerParam = roundToString((augerAngle * 180 / PI), 2)
-
-End Function
-
-Public Sub clearAugerParam()
-    augerAngle = 0
-    augerPitch = 0
-    
-    augerSet = False
-    
-End Sub
-
-Public Function getAugerDir() As String
-    If augerSet Then getAugerDir = augerCoil Else MsgBox "Auger not setup!"
-End Function
-
-Public Function getAugerSet() As Boolean
-    getAugerSet = augerSet
-End Function
 
 '============================================================ c6k Generic =================================================================================================
 
@@ -809,8 +764,8 @@ Select Case passType
     Case passAugEdg
     
         'Adjust base speed for pass type
-        currentRotSpeed = 360 * currentPassSpeed / (PI * augerDiam)   'Rotational speed necessary for pass speed (linVel = (rotVel * (diam/2)) * (1rot/2PI rad)) in ROTATIONS/SEC
-        currentPassSpeed = currentRotSpeed * augerPitch / 360        'Linear speed to keep pace with the auger edge (linVel = rot/s * in/rot) in INCHES/SEC
+        currentRotSpeed = currentPassSpeed * Auger.getRotSpdMlt
+        currentPassSpeed = currentRotSpeed * Auger.getEdgVelMlt
     
         'Check for speed boost
         If Joy.getUserSpeedBoost(driveY) = 1 Then tempSpeed1 = currentPassSpeed * (1 + Joy.getUserSpeedBoostMod)
@@ -833,19 +788,19 @@ Select Case passType
         Dim currentDiam As Single
             
         currentDiam = 1 * Val(fsinfo.MotorPos(1))
-        If augerCoil = "Right" Then currentDiam = -currentDiam
+        If Auger.getHand = augerRight Then currentDiam = -currentDiam
             
         If currentDiam = 0 Then
             MsgBox "No Diameter Input in Pass Speed Calculation!"
             Exit Sub
         End If
             
-        currentRotSpeed = 360 * currentPassSpeed / (PI * currentDiam)   'Rotational speed necessary for pass speed (linVel = (rotVel * (diam/2)) * (1rot/2PI rad)) in DEGREES/SEC
+        currentRotSpeed = currentPassSpeed * Auger.getRotSpdMlt
     
         Dim currentSpeedY As String
         Dim currentSpeedZ As String
-        currentSpeedY = augerPitch * Sin(augerAngle) * currentRotSpeed / 360
-        currentSpeedZ = augerPitch * Cos(augerAngle) * currentRotSpeed / 360
+        currentSpeedY = currentPassSpeed * Auger.getyMult
+        currentSpeedZ = currentPassSpeed * Auger.getzMult
         
         'Check for speed boost
         If Joy.getUserSpeedBoost(driveY) = 1 Then tempSpeed1 = currentSpeedY * (1 + Joy.getUserSpeedBoostMod)

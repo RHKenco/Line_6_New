@@ -986,12 +986,12 @@ If myJoy.joyMcJogOn Then
                     Case driveY
                         If Not CBool(myJoy.inSt(i) And aY) Then GoTo VelSetNextAxis
                         If CBool(myJoy.inSt(i) And aYi) Then axisIsInverted = True
-                        If passType = passAugEdg Then tempSpeedMult = augerPitch / (PI * augerDiam)
-                        If passType = passAugFac Then tempSpeedMult = Sin(augerAngle) * augerPitch / (PI * augerDiam)
+                        If passType = passAugEdg Then tempSpeedMult = Auger.getEdgVelMlt
+                        If passType = passAugFac Then tempSpeedMult = Auger.getyMult
                     Case driveZ
                         If Not CBool(myJoy.inSt(i) And aZ) Then GoTo VelSetNextAxis
                         If CBool(myJoy.inSt(i) And aZi) Then axisIsInverted = True
-                        If passType = passAugFac Then tempSpeedMult = Cos(augerAngle) * augerPitch / (PI * augerDiam)
+                        If passType = passAugFac Then tempSpeedMult = Auger.getzMult
                     Case driveZa
                         If Not CBool(myJoy.inSt(i) And aZa) Then GoTo VelSetNextAxis
                         If CBool(myJoy.inSt(i) And aZai) Then axisIsInverted = True
@@ -999,7 +999,7 @@ If myJoy.joyMcJogOn Then
                         If Not CBool(myJoy.inSt(i) And aR) Then GoTo VelSetNextAxis
                         If CBool(myJoy.inSt(i) And aRi) Then axisIsInverted = True
                         tempSpeedMult = 60
-                        If passType = passAugEdg Or passType = passAugFac Then tempSpeedMult = 360 / (PI * augerDiam)
+                        If passType = passAugEdg Or passType = passAugFac Then tempSpeedMult = Auger.getRotSpdMlt
                 End Select
                 
                 If mcJoyDir <> 0 Then 'If a motion is commanded,

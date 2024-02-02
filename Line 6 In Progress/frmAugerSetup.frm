@@ -286,7 +286,7 @@ End If
 'Set Auger Parameters
 Dim tempAngle As String
 
-tempAngle = c6kOps.setAugerParam(Text_Enter_Auger_Pitch.Text, Text_Enter_Auger_Dia.Text, tempDirection)
+tempAngle = Auger.setAugerParam(Text_Enter_Auger_Pitch.Text, Text_Enter_Auger_Dia.Text, tempDirection)
 
 Text_Pop_Auger_Angle.Text = tempAngle
 Label_Auger_Ready.Visible = True

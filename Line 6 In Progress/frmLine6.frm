@@ -974,7 +974,7 @@ Attribute VB_Exposed = False
 Private Sub Button_Clear_Auger_Click()
 
 ' Clear Auger Parameters
-Call c6kOps.clearAugerParam
+Call Auger.clearAugerParam
 
 ' Reset Pass Type
 Call c6kOps.setPassType
@@ -1151,6 +1151,7 @@ Call btnState(btnInactive)
 '--
 Call c6kOps.Enable
 Call Joy.createJoystick
+Call Auger.initAuger
 
 '-- Run motor setup subroutine
 Call c6kOps.bootDrives

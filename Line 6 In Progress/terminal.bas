@@ -157,6 +157,7 @@ Public fsmMain As New FSM_Line6
 Public fsmRun As New FSM_Line6_Run
 Public woMgr As New ClassWO_Manager
 Public Joy As New ClassJoy
+Public Auger As New ClassAuger
 
 'Oft-Used Labels
 Public Const passBlade As Integer = 1
@@ -213,6 +214,32 @@ Type joystickState      'Structure to store joystick state
     joySpdOn    As Boolean
     
 End Type
+
+Type augerParam
+    active As Boolean           'Auger active / inactive boolean
+    
+    Pitch As Single             'Auger Pitch in IN
+    Diameter As Single          'Auger Diameter in IN
+    
+    Angle As Single             'Auger Face Angle in RADIANS
+    AngleDeg As Single          'Auger Face Angle in DEGREES
+    
+    Hand As augerHand           'Auger Hand Direction (Right Hand or Left Hand
+    
+    rotSpdMult As Double        'Multiplier applied to rotational Velocity for Auger Edge   in DEG/IN
+    edgVelMult As Double        'Multiplier applied to Linear Velocity for Auger Edge       in IN/IN
+    
+    fldVelMult As Double        'Linear Multiplier with Diameter removed, to allow for varying speed with diameter position
+    yMult As Double             'Y and Z multipliers for Z' Axis
+    zMult As Double
+    
+    
+End Type
+
+Enum augerHand
+    augerRight = 1
+    augerLeft
+End Enum
 
 'Type motionState        'Structure to store motion state being sent to 6k
     
