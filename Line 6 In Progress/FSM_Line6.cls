@@ -45,7 +45,6 @@ Public State As Integer
 
 
 
-
 Public Sub Run()
 
 Select Case State
@@ -79,6 +78,12 @@ If Not c6kOps.chkE_Stop Then
 '-- Run Joystick if active
     If Joy.getJoyActive Then
     
+        '-- Start Airblade & Exhaust Fan
+        If Not CBool(c6kOps.getOutputState And outExhaust) Then
+            Call c6kOps.setOutput(outAirblade, True)
+            Call c6kOps.setOutput(outExhaust, True)
+        End If
+    
         'Run JoyRun function, and if it returns true,
         If Joy.runJoy(joyFree) Then
     
@@ -96,6 +101,12 @@ If Not c6kOps.chkE_Stop Then
     'frmLine6.Var_Label_Joystick_Status.Caption = c6kOps.getInputState
     'frmLine6.Var_Label_Joystick_Status.Visible = True
         
+    Else
+        If CBool(c6kOps.getOutputState And outExhaust) Then
+            '-- Stop Airblade & Exhaust Fan
+            Call c6kOps.setOutput(outAirblade, False)
+            Call c6kOps.setOutput(outExhaust, False)
+        End If
     End If
     
     

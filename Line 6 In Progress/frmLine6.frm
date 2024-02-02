@@ -971,6 +971,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Private Sub Button_Clear_Auger_Click()
 
 ' Clear Auger Parameters
@@ -981,7 +982,12 @@ Call c6kOps.setPassType
 
 'Re-show set button
 Button_Set_Auger.Visible = True
+Button_Set_Auger.Enabled = True
 Button_Set_Auger.Refresh
+
+'Close auger set form
+frmAugerSetup.Label_Auger_Ready.Visible = False
+frmAugerSetup.Unload
 
 Call statusMsg(msgActive)
 
@@ -1032,16 +1038,8 @@ Private Sub Button_WO_Enter_Clear_Click()
 
 If Not woMgr.isWOactive() Then
     Call woMgr.loadWO
-    
-    '-- Start Airblade & Exhaust Fan
-    Call c6kOps.setOutput(outAirblade, True)
-    Call c6kOps.setOutput(outExhaust, True)
 Else
     If Not woMgr.clearWO Then Exit Sub
-    
-    '-- Stop Airblade & Exhaust Fan
-    Call c6kOps.setOutput(outAirblade, False)
-    Call c6kOps.setOutput(outExhaust, False)
 End If
 
 Text_Enter_Pass_Width.SetFocus

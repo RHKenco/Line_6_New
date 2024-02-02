@@ -88,12 +88,14 @@ Private Sub runState1() 'Set Torch & Strike Arc State - Set torch for initial pa
 
 Select Case stateInner
     Case 0  'Verify that the pause switch is thrown
+    
+        Call Joy.getJoyInputs(c6kOps.getInputState)
+        
         If Joy.getJoyToggle Then
             stateInner = 1
         Else
             'Set status message
             Call statusMsg(msgToggle)
-            Call Joy.getJoyInputs(c6kOps.getInputState)
             
             'If release is pressed, exit pass
             If Joy.getJoyRelease Then
@@ -108,7 +110,7 @@ Select Case stateInner
         'Wait until joystick is inactive
         If Joy.runJoy(joyFree) Then Exit Sub
         'If joystick inactivates and toggle is flipped, return to previous innerState
-        If Joy.getJoyToggle Then
+        If Not Joy.getJoyToggle Then
             stateInner = 0
             Exit Sub
         End If

@@ -223,7 +223,6 @@ Public Function getJoyInputs(c6kInput As Long, Optional returnIndex As Integer) 
 
     'Clear prior update flags
     myJoy.stateJoyUpd = False
-    myJoy.stateBtnUpd = False
 
     'For each input,
     Dim i As Integer

@@ -380,6 +380,17 @@ c6k.Write ("HOMBAC111011:HOMEDG111111:HOMDF000100:HOM,,,0,,:" & Chr$(13))
 'Wait until homing motion has stopped, then move back to standby position
 c6k.Write ("WAIT(6AS=XXX1X):T.1:D,,,-1,,:GO0001000:VAR1=0" & Chr$(13))
 
+'Delay while waiting for oscillator
+Dim i As Integer
+Call updFastStatus
+Do While Not CBool(fsinfo.AxisStatus(4) And 1)
+    If i = 50000 Then
+        Call updFastStatus
+        i = 0
+    End If
+    i = i + 1
+Loop
+
 End Sub
 
 '============================================================ c6k General Input =========================================================================================
