@@ -158,7 +158,9 @@ Public Function clearWO() As Boolean
 
     'If WO still has temp file, ask before clearing WO
     If woTempData <> "" And Dir(woTempData) <> "" Then
-        If Not MsgBox("Current WO Not Finished - Clear anyway?" & Chr(13) & "Data will be retained", vbYesNo, "Clear WO?") Then
+        Dim temp As Boolean
+        temp = MsgBox("Current WO Not Finished - Clear anyway?" & Chr(13) & "Data will be retained", vbYesNo, "Clear WO?")
+        If Not temp Then
             clearWO = False
             Exit Function
         End If
@@ -195,7 +197,7 @@ Public Function clearWO() As Boolean
     woActive = False
     
     'Clear Auger Data
-    Call c6kOps.clearAugerParam
+    Call Auger.clearAugerParam
     
     'Update Buttons
     btnState (btnInactive)

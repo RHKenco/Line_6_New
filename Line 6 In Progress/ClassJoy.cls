@@ -223,6 +223,7 @@ Public Function getJoyInputs(c6kInput As Long, Optional returnIndex As Integer) 
 
     'Clear prior update flags
     myJoy.stateJoyUpd = False
+    myJoy.stateBtnUpd = False
 
     'For each input,
     Dim i As Integer
@@ -742,7 +743,7 @@ For i = 0 To 2
     
 Next i
 
-c6k.Write ("1INFNC" & Chr(13))
+'c6k.Write ("1INFNC" & Chr(13))
 
 Call jogOn
 
@@ -940,7 +941,7 @@ Dim passType As Integer
 passType = c6kOps.getPassType
 
 '-- If no joystick inputs require continuous motion, exit
-If myJoy.joyJogOn And Not myJoy.joyMcJogOn And Not myJoy.joyBstOn Then Exit Sub
+If myJoy.joyJogOn And Not myJoy.joySpdOn And Not myJoy.joyMcJogOn And Not myJoy.joyBstOn Then Exit Sub
 
 
 '-- If any of the axes are set to speed control, call for speed to be adjusted

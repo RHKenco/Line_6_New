@@ -159,6 +159,8 @@ If Not Joy.runJoy(joyPause) Then      'If the joystick is released, figure out w
     'If the switch is on, then release was pressed - Switch to Return state
     State = 4
     Call c6kOps.RunPass("Stop")
+    Call c6kOps.setOutput(outWeldCt, False)
+    Call c6kOps.setOutput(outArgon, False)
     Call c6kOps.setOutput(outTcFeed, False)
     stateInner = 0
     Exit Sub
@@ -241,6 +243,8 @@ Select Case stateInner
             'Reset inner State & Set Main FSM state to pass complete
             stateInner = 0
             fsmMain.State = 4
+            
+            Call c6kOps.setOutput(outH2O, False)
         End If
     Case 2
         Call c6kOps.returnPass

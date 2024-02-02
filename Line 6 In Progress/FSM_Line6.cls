@@ -74,15 +74,14 @@ Call c6kOps.updFastStatus
 '-- Check for E-Stop
 If Not c6kOps.chkE_Stop Then
 
+'-- Start Airblade & Exhaust Fan
+If Not CBool(c6kOps.getOutputState And outExhaust) Then
+    Call c6kOps.setOutput(outAirblade, True)
+    Call c6kOps.setOutput(outExhaust, True)
+End If
 
 '-- Run Joystick if active
     If Joy.getJoyActive Then
-    
-        '-- Start Airblade & Exhaust Fan
-        If Not CBool(c6kOps.getOutputState And outExhaust) Then
-            Call c6kOps.setOutput(outAirblade, True)
-            Call c6kOps.setOutput(outExhaust, True)
-        End If
     
         'Run JoyRun function, and if it returns true,
         If Joy.runJoy(joyFree) Then

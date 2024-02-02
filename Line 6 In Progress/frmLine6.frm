@@ -987,7 +987,7 @@ Button_Set_Auger.Refresh
 
 'Close auger set form
 frmAugerSetup.Label_Auger_Ready.Visible = False
-frmAugerSetup.Unload
+frmAugerSetup.Hide
 
 Call statusMsg(msgActive)
 

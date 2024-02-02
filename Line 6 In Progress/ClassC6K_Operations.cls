@@ -372,19 +372,19 @@ Public Sub homeOsc()
 ' Set osc limit switch pin (pin 18) to be the home limit for the oscilator axis (drive #4)
 c6k.Write ("1INFNC18-4T:" & Chr$(13))
 'Set motion parameters for osc axis and give go command to move the drive away from home
-c6k.Write ("A4.10:AD4.10:V4.4:D4.-.3:GO000100:" & Chr$(13))
+c6k.Write ("A,,,10,,:AD,,,10,,:V,,,5,,:D,,,-0.3,,:GO000100:" & Chr$(13))
 'set home motion parameters
-c6k.Write ("HOMA4.1:HOMAD4.50:@HOMZ0:HOMV4.1:HOMVF4.1:" & Chr$(13))
+c6k.Write ("HOMA,,,1,,:HOMAD,,,10,,:@HOMZ0:HOMV,,,5,,:HOMVF,,,0.5,,:" & Chr$(13))
 'Adtl motion parameters, call home function
 c6k.Write ("HOMBAC111011:HOMEDG111111:HOMDF000100:HOM,,,0,,:" & Chr$(13))
 'Wait until homing motion has stopped, then move back to standby position
-c6k.Write ("WAIT(6AS=XXX1X):T.1:D,,,-1,,:GO0001000:VAR1=0" & Chr$(13))
+c6k.Write ("WAIT(6AS=XXX1X):T.1:D,,,-1,,:GO0001000:PSET,,,0,," & Chr$(13))
 
 'Delay while waiting for oscillator
-Dim i As Integer
+Dim i As Long
 Call updFastStatus
-Do While Not CBool(fsinfo.AxisStatus(4) And 1)
-    If i = 50000 Then
+Do While Not CBool(fsinfo.AxisStatus(4) And (2 ^ (5 - 1)))
+    If i = 500000 Then
         Call updFastStatus
         i = 0
     End If
@@ -654,7 +654,7 @@ Call setOutput(outArgon, True)
 Call setOutput(outAirblade, True)
 
 'Close contacts and Move main z-axis up by 0.9"
-c6k.Write "A,10:AD,3:V,13:D,0.9:GO01:1OUT.16-1:WAIT(MOV=b000000)" & Chr$(13)
+c6k.Write "A,10:AD,3:V,5:D,0.9:GO01:1OUT.16-1:WAIT(MOV=b000000)" & Chr$(13)
 
 End Sub
 
@@ -663,7 +663,7 @@ Public Sub initOsc()
     Dim tempPassWidth As Single
     tempPassWidth = passWidth - 0.875
     'Set Osc. Velocity
-    c6k.Write ("V,,," & Str$(baseOscSpeed) & ",," & Chr(13))
+    c6k.Write ("COMEXCX,X,X,0:V,,," & Str$(baseOscSpeed) & ",," & Chr(13))
     
     'Create oscillator program to check if motion has stopped and toggle direction
     c6k.Write ("VAR1=0:DEL OSCRUN:DEF OSCRUN" & Chr(13))
@@ -682,7 +682,7 @@ End Sub
 
 Public Sub returnOsc()
     'Set var3 to be negative the commanded position to return it to 0
-    c6k.Write ("VAR3=-4PC:D,,,,VAR3,,:GOXXX1XX" & Chr(13))
+    c6k.Write ("V,,,3,,:VAR3=4PC:VAR3=-1*VAR3:D,,,,(VAR3),,:GOXXX1XX" & Chr(13))
 End Sub
 
 Public Sub RunPass(passRunState As String)
@@ -727,7 +727,7 @@ End Select
 End Sub
 
 Public Sub returnPass()
-    c6k.Write ("MC000X00:D,6,,,,:GOX1XXXX:WAIT(MOVX0XXXX):VAR4=-1PC:VAR5=-5PC:VAR6=-6PC:DVAR4,,,,,VAR5,VAR6:GO1XXX11" & Chr(13))
+    c6k.Write ("MC000X00:V1,1,1,X,1,1:D,3,,,,:GOX1XXXX:WAIT(MOVX0XXXX):VAR4=1PC:VAR4=-1*VAR4:VAR5=5PC:VAR5=-1*VAR5:VAR6=6PC:VAR6=-1*VAR6:D(VAR4),,,,,(VAR5),(VAR6):GO1XXX11:WAIT(MOV0XXX00):D,-3,,,,:GOX1XXXX:WAIT(MOVX0XXXX)" & Chr(13))
 End Sub
 
 Private Sub setPassVel(passType As Integer)
