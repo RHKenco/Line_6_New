@@ -341,13 +341,16 @@ c6k.Write "AXSDEF00000000:@DRES250000:SCLD" & tempPosCal & ":@SCLA" & tempRevCal
 'c6k.Write ("ENCPOL11011111:ERES4000,4000,4000,4000,4000,4000,4000,4000:ENCCNT11111111:" & Chr$(13))
 
 'Enabling Drives
-c6k.Write ("DRIVE1,1,1,1,1,1,1,0" & Chr$(13))
+c6k.Write ("DRIVE1,1,1,1,1,1,0,0:")
 
 'Set base velocity and acceleration - will be overwritten as necessary
-c6k.Write "V10,10,10,10,30,10:A10,10,10,5,30,10:AD10,10,10,5,30,10:"
+c6k.Write "@V0:A10,10,10,5,30,10:AD10,10,10,5,30,10:"
+
+'Set Position to Absolute mode
+c6k.Write "MA111111:"
 
 ' Enable all inputs on block 1, Set up E-stop pin, Immediate Disable Jog Outputs
-c6k.Write "1INEN:1INFNC20-D:!JOG0000000" & Chr$(13)
+c6k.Write "1INEN:1INFNC20-D:!JOG0000000:"
 
 End Sub
 
@@ -356,7 +359,7 @@ Public Sub testDrives()
 
     c6k.Write "JOG000000:PSET0,0,0,0,0,0" & Chr$(13)
     c6k.Write ("D1,1,1,1,1,1:GO111111:WAIT(MOV=b0000)" & Chr$(13))
-    c6k.Write ("T2:D-1,-1,-1,-1,-1,-1:GO111111:WAIT(MOV=b0000)" & Chr$(13))
+    c6k.Write ("T2:D0,0,0,0,0,0:GO111111:WAIT(MOV=b0000)" & Chr$(13))
 
 End Sub
 
@@ -378,7 +381,7 @@ c6k.Write ("HOMA,,,1,,:HOMAD,,,10,,:@HOMZ0:HOMV,,,5,,:HOMVF,,,0.5,,:" & Chr$(13)
 'Adtl motion parameters, call home function
 c6k.Write ("HOMBAC111011:HOMEDG111111:HOMDF000100:HOM,,,0,,:" & Chr$(13))
 'Wait until homing motion has stopped, then move back to standby position
-c6k.Write ("WAIT(6AS=XXX1X):T.1:D,,,-1,,:GO0001000:PSET,,,0,," & Chr$(13))
+c6k.Write ("WAIT(6AS=XXX1X):T.1:D,,,-1.25,,:GO0001000:PSET,,,0,," & Chr$(13))
 
 'Delay while waiting for oscillator
 Dim i As Long
@@ -682,7 +685,7 @@ End Sub
 
 Public Sub returnOsc()
     'Set var3 to be negative the commanded position to return it to 0
-    c6k.Write ("V,,,3,,:VAR3=4PC:VAR3=-1*VAR3:D,,,,(VAR3),,:GOXXX1XX" & Chr(13))
+    c6k.Write ("V,,,3,,:D,,,,0,,:GOXXX1XX" & Chr(13))
 End Sub
 
 Public Sub RunPass(passRunState As String)
@@ -727,7 +730,7 @@ End Select
 End Sub
 
 Public Sub returnPass()
-    c6k.Write ("MC000X00:V1,1,1,X,1,1:D,3,,,,:GOX1XXXX:WAIT(MOVX0XXXX):VAR4=1PC:VAR4=-1*VAR4:VAR5=5PC:VAR5=-1*VAR5:VAR6=6PC:VAR6=-1*VAR6:D(VAR4),,,,,(VAR5),(VAR6):GO1XXX11:WAIT(MOV0XXX00):D,-3,,,,:GOX1XXXX:WAIT(MOVX0XXXX)" & Chr(13))
+    c6k.Write ("MC000X00:V1,1,1,X,1,1:D,3,,,,:GOX1XXXX:WAIT(MOVX0XXXX):D0,,,,,0,0:GO1XXX11:WAIT(MOV0XXX00):D,0,,,,:GOX1XXXX:WAIT(MOVX0XXXX)" & Chr(13))
 End Sub
 
 Private Sub setPassVel(passType As Integer)

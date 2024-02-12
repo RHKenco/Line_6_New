@@ -232,8 +232,7 @@ Type augerParam
     fldVelMult As Double        'Linear Multiplier with Diameter removed, to allow for varying speed with diameter position
     yMult As Double             'Y and Z multipliers for Z' Axis
     zMult As Double
-    
-    
+     
 End Type
 
 Enum augerHand
