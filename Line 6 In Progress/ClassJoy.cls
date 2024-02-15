@@ -796,7 +796,7 @@ End If
 '-- Set c6k Mc State if necessary
 If myJoy.joyMcJogOn Then
     
-    If myJoy.joyMcStr = "" And fsmRun.State <> 2 And fsmRun.State <> 3 Then c6k.Write "COMEXC1" & Chr(13)   'Enable cont. Com ex when enabling MC mode
+    If myJoy.joyMcStr = "" And fsmRun.state <> 2 And fsmRun.state <> 3 Then c6k.Write "COMEXC1" & Chr(13)   'Enable cont. Com ex when enabling MC mode
     
     Dim tempMc As String
     Dim tempMcVel As String
@@ -851,7 +851,7 @@ ElseIf myJoy.joyMcStr <> "" Then
     c6k.Write ("V" & Replace(myJoy.joyMcDelStr, "*", "0") & Chr(13))
     myJoy.joyMcStr = ""
     myJoy.joyMcDelStr = ""
-    If fsmRun.State <> 2 And fsmRun.State <> 3 Then c6k.Write "COMEXC0" & Chr(13)   'Disable con com ex first loop after MC disabled
+    If fsmRun.state <> 2 And fsmRun.state <> 3 Then c6k.Write "COMEXC0" & Chr(13)   'Disable con com ex first loop after MC disabled
 End If
 
 Exit Sub
