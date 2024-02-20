@@ -24,16 +24,16 @@ Private FSoutputState As Long       'Variable to store FastStatus output Data
 Private posCal(6) As Long                'Array to store position calibration data. These following constant values will be stored upon initialization,
 Private Const posCalX = 26495 'counts/in        '26550      '       and will convert positional data from counts to appropriate units for each axis
 Private Const posCalY = 39790 'counts/in        '62500
-Private Const posCalZ = 249807 'counts/in       '39683
-Private Const posCalZa = 249896 'counts/in      '510204
+Private Const posCalZ = 2498070 'counts/in       '39683
+Private Const posCalZa = 2498960 'counts/in      '510204
 Private Const posCalO = 7987 'counts/in         '62500
 Private Const posCalR = 5009 'counts/degree     '62500
 
 Private revCal(6) As Long                'Array to store revolution calibration data. These following constant values will be stored upon initialization,
 Private Const revCalX = 26495 'counts/in         '25000      '       and will convert motor revolutions to appropriate units for each axis. Current numbers are simple conversion to revolutions
 Private Const revCalY = 39790 'counts/in        '62500
-Private Const revCalZ = 249807 'counts/in       '39683
-Private Const revCalZa = 249896 'counts/in      '510204
+Private Const revCalZ = 2498070 'counts/in       '39683
+Private Const revCalZa = 2498960 'counts/in      '510204
 Private Const revCalO = 7987 'counts/in         '62500
 Private Const revCalR = 5009 'counts/degree     '62500
                                 
@@ -586,8 +586,8 @@ Call stopAllOut
 btnState (btnEstop)
 
 'Reset FSMs to return to WO Active State
-fsmMain.State = 1
-fsmRun.State = 0
+fsmMain.state = 1
+fsmRun.state = 0
 
 'Call not-finished on WO if start has been called
 If woMgr.isWOstarted Then Call woMgr.notfinishWO

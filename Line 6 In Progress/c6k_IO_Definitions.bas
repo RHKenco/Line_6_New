@@ -1,4 +1,6 @@
-Attribute VB_Name = "c6k_IO_Definitions"
+Attribute VB_Name = "c6k_Definitions"
+'-- I/O Definitions -------------------------------------------------------------------------------------------------------------------
+
 'Line 6 Compumotor I/O Chart:
 '       - 1  - Input  - JoyLeft
 '       - 2  - Input  - JoyRight
@@ -36,18 +38,6 @@ Attribute VB_Name = "c6k_IO_Definitions"
 '       - 31 - UNUSED
 '       - 32 - UNUSED
 
-'Line 6 c6k Drives:
-'       - 1 - X-Axis
-'       - 2 - Z-Axis
-'       - 3 - Z-Alt Axis
-'       - 4 - Oscillator
-'       - 5 - Auger Rotation
-'       - 6 - Y-Axis - 2 controllers ganged
-'       - 7 - Unused?
-'       - 8 - Unused
-
-'-- Definitions -------------------------------------------------------------------------------------------------------------------
-
 'Joystick Inputs
 Public Const bJoyLeft As Long = Input1
 Public Const joyLeft As Integer = 0
@@ -82,4 +72,31 @@ Public Const outExhaust As Integer = 13
 Public Const outTcFeed As Integer = 14
 Public Const outH2O As Integer = 15
 Public Const outWeldCt As Integer = 16
+
+
+'-- Drive Definitions -------------------------------------------------------------------------------------------------------------------
+
+'Line 6 c6k Drives:
+'       - 1 - X-Axis
+'       - 2 - Z-Axis
+'       - 3 - Z-Alt Axis
+'       - 4 - Oscillator
+'       - 5 - UNUSED
+'       - 6 - Y-Axis - 2 controllers ganged
+'       - 7 - Auger Rotation
+'       - 8 - UNUSED
+
+Public Enum iDriveAxis          'Stores the integer Definitions of the 8 c6k Axes
+    driveX = 1
+    driveZ
+    driveZa
+    driveO
+    driveU1         'Unused Drive # 5
+    driveY
+    driveR
+    driveU2         'Unused Drive # 8
+End Enum
+
+
+
 

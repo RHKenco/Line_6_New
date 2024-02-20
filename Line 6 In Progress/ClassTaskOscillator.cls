@@ -16,8 +16,8 @@ Attribute VB_Exposed = False
 Private Const c6k_bOscTaskOn = "VARB1.5"
 Private Const c6k_bOscOn = "VARB1.6"
 Private Const c6k_bOscHold = "VARB1.8"
-Private Const c6k_sOscVel = "VAR6"
-Private Const c6k_sPassWd = "VAR7"
+Private Const c6k_sOscVel = "VAR15"
+Private Const c6k_sPassWd = "VAR16"
 
 'Oscillator States used in the oscOps command
 Enum OscStates
@@ -36,11 +36,11 @@ Public Sub initOsc()
         'Set Parameters for Homing Oscillator
         c6k.Write "1INFNC18-4T:A,,,10,,:AD,,,10,,:V,,,4,,:HOMA,,1,,:HOMAD,,,10,,:HOMV,,,5,,:HOMVF,,,0.5,,:HOMBAC.4 = b1:HOMEDG.4 = b1:HOMDF.4 = b1:"
         'Back up Osc before homing
-        c6k.Write "D,,,-0.3,,:GO.4 = b1:WAIT(MOV.4 = b0):"
+        c6k.Write "D,,,-0.3,,:GOxxx1xxx = b1:WAIT(MOV = bxxx0xxx):"
         'Home oscillator
-        c6k.Write "HOM.4 = b1:WAIT(MOV.4 = b0):T0.1:"
+        c6k.Write "HOMxxx1xxx:WAIT(MOV = bxxx0xxx):T0.1:"
         'Back up osc to center and set 0
-        c6k.Write "D,,,-1.5,,:GO.4 = b1:WAIT(MOV.4 = b0):PSET,,,0,,:"
+        c6k.Write "D,,,-1.5,,:GOxxx1xxx:WAIT(MOV = bxxx0xxx):PSET,,,0,,:"
         'Set hardware travel limits
         c6k.Write "LH,,,3,,:1INFNC18-4R:1INFNC17-4S:1INLVL.17 = b1:"
         'Clear busy flag
@@ -56,11 +56,11 @@ Public Sub initOsc()
                 'If both the OscOn and OscRunning bits are set
                 c6k.Write "IF(VARB1.6 = b1 & VARB1.7 = b1):"
                     'Wait until motion has stopped, then reverse oscilator and resume motion
-                    c6k.Write "WAIT(MOV.4 = b0):VAR8 = -1*VAR8:D,,,VAR8,,:GO.4 = b1:"
+                    c6k.Write "WAIT(MOV = bxxx0xxx):VAR16 = -1*VAR16:D,,,VAR16,,:GOxxx1xxx:"
                 'If the Osc On bit is not set (stopping osc) or the OscRunning bit is not set (first loop)
                 c6k.Write "ELSE:"
                     'Stop the oscillator, then go to oscillation inside edge (closest to operator) and wait for hold bit to drop
-                    c6k.Write "!S.4 = b0:WAIT(MOV.4 = b0):D,,,VAR7,,:GO.4 = b1:WAIT(VARB1.8 = b0):V,,,VAR6,,:VAR7 = -1*VAR8:VARB1.7 = ~(VARB1.7):"
+                    c6k.Write "!S.4 = b0:WAIT(MOV = bxxx0xxx):D,,,VAR15,,:GOxxx1xxx:WAIT(VARB1.8 = b0):V,,,VAR6,,:VAR15 = -1*VAR16:VARB1.7 = ~(VARB1.7):"
                 c6k.Write "NIF:"
             'Delay 5ms between each loop
             c6k.Write "NIF:T0.005:"
@@ -112,3 +112,4 @@ End Sub
 Public Sub stopOsc()
     Call c6kVarSet(c6k_bOscTaskOn, "b0")
 End Sub
+
