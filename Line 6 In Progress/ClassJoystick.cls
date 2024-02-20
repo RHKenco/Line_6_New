@@ -87,11 +87,14 @@ Public Enum joyAxisState
     joyNeg
 End Enum
 
+Enabled As Boolean      'Enabled Boolean - true when the user activates the joystick
 Active As Boolean       'Active boolean - true when joystick is doing stuff
 
-State As String      'State String - To display currently active axes
+lastInputs As Long      'Long to store the inputs previously seen by the joystick routine
 
-AxisFnc(2) As Long   'Axis Function Array - contains data pairing joystick axes with c6k drives
+state As String         'State String - To display currently active axes
+
+AxisFnc(2) As Long      'Axis Function Array - contains data pairing joystick axes with c6k drives
 
 AxisState(2) As Integer 'Axis State Array - See enum joyAxisState for options
 
@@ -103,7 +106,7 @@ Public Function getActive() As Boolean
 End Function
 
 Public Function getState() As String
-    getState = State
+    getState = state
 End Function
 
 Private Function getStr(axisIn As Long) As String
@@ -139,7 +142,50 @@ Private Function getStr(axisIn As Long) As String
 
 End Function
 
-Public Sub updateJoy()
+Public Sub runJoy()
+
+    If Enabled Or Active Then
+        If Enabled And Not Active Then
+            'Set Up Joystick
+        ElseIf Active And Not Enabled Then
+            'Shut Down Joystick
+        End If
+        
+        
+        'If Enabled And Active Then do the rest of the subroutine'
+        
+        'Get Current Inputs on the Joystick
+        Dim currentInputs As Long
+        currentInputs = fsinfo.ProgIn(1) Xor bjoyAll
+        
+        'Only run the selection algorithm if the inputs have changed
+        If currentInputs <> lastInputs Then
+            
+            '-- Develop buttons integer - see below
+            Dim buttons As Integer
+            If myJoy.stateNow(joySelect) Then buttons = buttons Or (2 ^ (1 - 1))
+            If myJoy.stateNow(joyRelease) Then buttons = buttons Or (2 ^ (2 - 1))
+            If myJoy.stateNow(joyToggle) Then buttons = buttons Or (2 ^ (3 - 1))
+            
+            'Single integer to describe the state of the buttons on the joystick. The integer is set as below:
+                '        Sel  Rel  Tog
+                '   0  -  0    0    0
+                '   1  -  1    0    0
+                '   2  -  0    1    0
+                '   3  -  1    1    0
+                '   4  -  0    0    1
+                '   5  -  1    0    1
+                '   6  -  0    1    1
+                '   7  -  1    1    1
+                
+                
+                
+                
+                
+            
+        End If
+
+    End If
 
 End Sub
 

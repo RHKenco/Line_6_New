@@ -39,40 +39,43 @@ Attribute VB_Name = "c6k_Definitions"
 '       - 32 - UNUSED
 
 'Joystick Inputs
-Public Const bJoyLeft As Long = Input1
-Public Const joyLeft As Integer = 0
-Public Const bJoyRight As Long = Input2
-Public Const joyRight As Integer = 1
-Public Const bJoyFront As Long = Input3
-Public Const joyFront As Integer = 2
-Public Const bJoyBack As Long = Input4
-Public Const joyBack As Integer = 3
-Public Const bJoyUp As Long = Input5
-Public Const joyUp As Integer = 4
-Public Const bJoyDown As Long = Input6
-Public Const joyDown As Integer = 5
-
-Public Const bJoySelect As Long = Input22
-Public Const joySelect As Integer = 6
-Public Const bJoyRelease As Long = Input23
-Public Const joyRelease As Integer = 7
-Public Const bJoyToggle As Long = Input24
-Public Const joyToggle As Integer = 8
-
-'Misc Inputs
-Public Const bInOscEOT As Long = Input17
-Public Const bInOscHom As Long = Input18
-Public Const bInH2O As Long = Input19
-Public Const bInEstop As Long = Input20
-
-'Outputs
-Public Const outAirblade As Integer = 9
-Public Const outArgon As Integer = 12
-Public Const outExhaust As Integer = 13
-Public Const outTcFeed As Integer = 14
-Public Const outH2O As Integer = 15
-Public Const outWeldCt As Integer = 16
-
+Public Enum c6kIO
+    bJoyLeft = Input1
+    joyLeft = 0
+    bJoyRight = Input2
+    joyRight = 1
+    bJoyFront = Input3
+    joyFront = 2
+    bJoyBack = Input4
+    joyBack = 3
+    bJoyUp = Input5
+    joyUp = 4
+    bJoyDown = Input6
+    joyDown = 5
+    
+    bjoyAll = bJoyLeft And bJoyRight And bJoyFront And bJoyBack And bJoyUp And bJoyDown
+    
+    bJoySelect = Input22
+    joySelect = 6
+    bJoyRelease = Input23
+    joyRelease = 7
+    bJoyToggle = Input24
+    joyToggle = 8
+    
+    'Misc Inputs
+    bInOscEOT = Input17
+    bInOscHom = Input18
+    bInH2O = Input19
+    bInEstop = Input20
+    
+    'Outputs
+    outAirblade = 9
+    outArgon = 12
+    outExhaust = 13
+    outTcFeed = 14
+    outH2O = 15
+    outWeldCt = 16
+End Enum
 
 '-- Drive Definitions -------------------------------------------------------------------------------------------------------------------
 

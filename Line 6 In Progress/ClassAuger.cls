@@ -15,7 +15,8 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Public Enum augerFlight
-    augerRight = 1
+    augerNull = 0
+    augerRight
     augerLeft
 End Enum
 
@@ -54,7 +55,7 @@ Active = True
 'Store auger pitch, diameter, and Flight
 Pitch = augerPitchIn
 Diameter = augerDiamIn
-If augerFligthDirection = 1 Then
+If augerFlightDirection = 1 Then
     Flight = augerRight
 ElseIf augerFlightDirection = 2 Then
     Flight = augerLeft
