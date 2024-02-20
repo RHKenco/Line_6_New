@@ -170,16 +170,6 @@ Public Const joyFree As Integer = 2
 Public Const joyPause As Integer = 3
 Public Const joyRun As Integer = 4
 
-'Drive Indicies
-Public Enum driveAxes
-    driveX = 1
-    driveZ = 2
-    driveZa = 3
-    driveO = 4
-    driveR = 5
-    driveY = 6
-End Enum
-
 Type joystickState      'Structure to store joystick state
 
     Active As Boolean       'Active boolean - true when joystick is doing stuff
@@ -214,44 +204,6 @@ Type joystickState      'Structure to store joystick state
     joySpdOn    As Boolean
     
 End Type
-
-Type augerParam
-    Active As Boolean           'Auger active / inactive boolean
-    
-    Pitch As Single             'Auger Pitch in IN
-    Diameter As Single          'Auger Diameter in IN
-    
-    Angle As Single             'Auger Face Angle in RADIANS
-    AngleDeg As Single          'Auger Face Angle in DEGREES
-    
-    Hand As augerHand           'Auger Hand Direction (Right Hand or Left Hand
-    
-    rotSpdMult As Double        'Multiplier applied to rotational Velocity for Auger Edge   in DEG/IN
-    edgVelMult As Double        'Multiplier applied to Linear Velocity for Auger Edge       in IN/IN
-    
-    fldVelMult As Double        'Linear Multiplier with Diameter removed, to allow for varying speed with diameter position
-    yMult As Double             'Y and Z multipliers for Z' Axis
-    zMult As Double
-     
-End Type
-
-Enum augerHand
-    augerRight = 1
-    augerLeft
-End Enum
-
-'Type motionState        'Structure to store motion state being sent to 6k
-    
-
-'End Type
-
-Function roundToString(math As Double, places As Integer) As String
-
-'Convert to string with 2 decimal places by truncating input * 10 ^ places, then dividing by 10 ^ places
-roundToString = CStr(Fix(math * (10 ^ places)) / (10 ^ places))
-
-End Function
-
 
 
 Function BitText32(v As Long) As String

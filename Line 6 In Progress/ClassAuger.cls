@@ -14,105 +14,132 @@ Attribute VB_Exposed = False
 
 Option Explicit
 
-Private myAuger As augerParam
+Public Enum augerFlight
+    augerRight = 1
+    augerLeft
+End Enum
+
+Private Active As Boolean           'Auger active / inactive boolean
+    
+Private Pitch As Single             'Auger Pitch in IN
+Private Diameter As Single          'Auger Diameter in IN
+    
+Private Angle As Single             'Auger Face Angle in RADIANS
+    
+Private Flight As augerFlight           'Auger Flight Direction (Right Flight or Left Flight
+    
+Private rotationMult As Double        'Multiplier applied to rotational Velocity for Auger Edge   in DEG/IN
+Private edgeVelMult As Double        'Multiplier applied to Linear Velocity for Auger Edge       in IN/IN
+    
+Private fieldVelMult As Double        'Linear Multiplier with Diameter removed, to allow for varying speed with diameter position
+Private yMult As Double             'Y and Z multipliers for Z' Axis
+Private zMult As Double
 
 Public Sub initAuger()
 
     'Set all multipliers to 1
-    myAuger.rotSpdMult = 1
-    myAuger.edgVelMult = 1
-    myAuger.fldVelMult = 1
-    myAuger.yMult = 1
-    myAuger.zMult = 1
+    rotationMult = 1
+    edgeVelMult = 1
+    fieldVelMult = 1
+    yMult = 1
+    zMult = 1
 
 End Sub
 
 
-Public Function setAugerParam(augerPitchIn As String, augerDiamIn As String, augerCoilDirection As String) As String
+Public Function setAugerParam(augerPitchIn As String, augerDiamIn As String, augerFlightDirection As Integer) As String
 
-myAuger.Active = True
+Active = True
 
-'Store auger pitch, diameter, and hand
-myAuger.Pitch = augerPitchIn
-myAuger.Diameter = augerDiamIn
-If augerCoilDirection = "Right" Then myAuger.Hand = augerRight Else myAuger.Hand = augerLeft
+'Store auger pitch, diameter, and Flight
+Pitch = augerPitchIn
+Diameter = augerDiamIn
+If augerFligthDirection = 1 Then
+    Flight = augerRight
+ElseIf augerFlightDirection = 2 Then
+    Flight = augerLeft
+Else
+    GoTo AugerError
+End If
 
 'Compute Auger Angle from Pitch and Diameter
-myAuger.Angle = Atn(augerPitchIn / (augerDiamIn * PI))
-myAuger.AngleDeg = (myAuger.Angle * 180 / PI)
+Angle = Atn(augerPitchIn / (augerDiamIn * PI))
+angleDeg = (Angle * 180 / PI)
 
 'Compute mult factors for pass velocities
-myAuger.rotSpdMult = 360 / (PI * myAuger.Diameter)
-myAuger.edgVelMult = myAuger.Pitch * myAuger.rotSpdMult / 360
+rotationMult = 360 / (PI * Diameter)
+edgeVelMult = Pitch * rotationMult / 360
 
-myAuger.fldVelMult = 360 / PI
-myAuger.yMult = myAuger.Pitch * myAuger.rotSpdMult * Sin(myAuger.Angle) / 360
-myAuger.zMult = myAuger.Pitch * myAuger.rotSpdMult * Cos(myAuger.Angle) / 360
+fieldVelMult = 360 / PI
+yMult = Pitch * rotationMult * Sin(Angle) / 360
+zMult = Pitch * rotationMult * Cos(Angle) / 360
 
 'Return auger angle
-setAugerParam = Format(myAuger.AngleDeg, "0.00")
+setAugerParam = Format(angleDeg, "0.00")
+
+AugerError:
+Call clearAugerParam
+MsgBox "Error in Auger Parameter Setup. Auger has been cleared!"
 
 End Function
 
 
 Public Sub clearAugerParam()
 
-    myAuger.Active = False
-    myAuger.Pitch = 0
-    myAuger.Diameter = 0
-    myAuger.Hand = 0
-    myAuger.Angle = 0
-    myAuger.AngleDeg = 0
-    myAuger.rotSpdMult = 1
-    myAuger.edgVelMult = 1
-    myAuger.fldVelMult = 1
-    myAuger.yMult = 1
-    myAuger.zMult = 1
+    Active = False
+    Pitch = 0
+    Diameter = 0
+    Flight = 0
+    Angle = 0
+    angleDeg = 0
+    rotationMult = 1
+    edgeVelMult = 1
+    fieldVelMult = 1
+    yMult = 1
+    zMult = 1
 
     
 End Sub
 
 Public Function getActive() As Boolean
-    getActive = myAuger.Active
+    getActive = Active
 End Function
 
 Public Function getPitch() As Double
-    If myAuger.Active Then getPitch = myAuger.Pitch Else MsgBox "Auger not setup!"
+    If Active Then getPitch = Pitch Else MsgBox "Auger not setup!"
 End Function
 
 Public Function getDiam() As Double
-    If myAuger.Active Then getDiam = myAuger.Diameter Else MsgBox "Auger not setup!"
+    If Active Then getDiam = Diameter Else MsgBox "Auger not setup!"
 End Function
 
-Public Function getHand() As Integer
-    If myAuger.Active Then getHand = myAuger.Hand Else MsgBox "Auger not setup!"
+Public Function getFlight() As Integer
+    If Active Then getFlight = Flight Else MsgBox "Auger not setup!"
 End Function
 
-Public Function getAngle() As Double
-    If myAuger.Active Then getAngle = myAuger.Angle Else MsgBox "Auger not setup!"
+Public Function getAngle(Optional angleDeg As Boolean) As Double
+    If Active Then getAngle = Angle Else MsgBox "Auger not setup!"
+    If angleDeg Then Angle = 180 * Angle / PI
 End Function
 
-Public Function getAngleDeg() As Double
-    If myAuger.Active Then getAngleDeg = myAuger.AngleDeg Else MsgBox "Auger not setup!"
+
+Public Function getRotationMult() As Double
+    getRotationMult = rotationMult
 End Function
 
-Public Function getRotSpdMult() As Double
-    getRotSpdMult = myAuger.rotSpdMult
+Public Function getEdgeVelMult() As Double
+    getEdgeVelMult = edgeVelMult
 End Function
 
-Public Function getEdgVelMult() As Double
-    getEdgVelMult = myAuger.edgVelMult
-End Function
-
-Public Function getFldVelMult() As Double
-    getFldVelMult = myAuger.fldVelMult
+Public Function getFieldVelMult() As Double
+    getFieldVelMult = fieldVelMult
 End Function
 
 Public Function getyMult() As Double
-    getyMult = myAuger.yMult
+    getyMult = yMult
 End Function
 
 Public Function getzMult() As Double
-    getzMult = myAuger.rotSpdMult
+    getzMult = zMult
 End Function
 

@@ -12,74 +12,6 @@ Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 
-Private Enum iMotionAxes
-    axisX = driveX
-    axisY = driveY
-    axisZ = driveZ
-    axisZa = driveZa
-    axisR = driveR
-    
-    axisrS = 9
-    
-    axisYR
-    axisZp
-    axisZpR
-End Enum
-
-Private Enum bMotionAxes                'Sets bits corresponding to the axes operated by the joystick
-    'The first byte of any axis status variable will correspond to the 8 axes on the 6k
-    aX = (2 ^ (driveX - 1))
-    aY = (2 ^ (driveY - 1))
-    aZ = (2 ^ (driveZ - 1))
-    aZa = (2 ^ (driveZa - 1))
-    aR = (2 ^ (driveR - 1))
-    aO = (2 ^ (driveO - 1))
-    
-    'The first bit of the second byte indicates if the axis is in speed-adjust mode
-    arS = (2 ^ (9 - 1))
-    
-    'The remainder of the second byte contains status information
-    aUNASSIGNED = (2 ^ (10 - 1))
-    aINVERTED = (2 ^ (11 - 1))
-    
-    
-    
-    'Multiple drive-axis virtual axes will contain all necessary drive axes
-    aYR = aYc Or aRc
-    aZp = aYc Or aZc
-    aZpR = aYc Or aZc Or aRc
-End Enum
-
-'Constants for strings associated with each axis
-Private Const arSstr = "Run Speed"
-Private Const aXstr = "X"
-Private Const aXbstr = "Xb"
-Private Const aYstr = "Y"
-Private Const aYbstr = "Yb"
-Private Const aZstr = "Z"
-Private Const aZbstr = "Zb"
-Private Const aZastr = "Za"
-Private Const aZabstr = "Zab"
-Private Const aRstr = "R"
-Private Const aRbstr = "Rb"
-Private Const aYRstr = "YR"
-Private Const aYRbstr = "YRb"
-Private Const aZpstr = "Z'"
-Private Const aZpbstr = "Z'b"
-Private Const aZpRstr = "Z'R"
-Private Const aZpRbstr = "Z'Rb"
-
-'Constants for Joystick Operation
-Private joyFlag As Integer      'Joystick Flag Register
-
-Private joyState$               'String describing joystick state
-
-Private joybAxisFnc(2) As Integer   'Array containing the current function assigned to each joystick axis
-
-Private passbAxisFnc As Integer     'Pass Function integer - See Enum "passType"
-
-Private newDriveSpeed(8) As Single  'Pass Axis Speed array - contains the current velocity of each axis.
-
 
 
 Private Sub setDriveVelocities()
@@ -90,40 +22,41 @@ Private Sub setDriveVelocities()
     For i = 0 To 2
         
         'If the joystick axis is active
-        If iJoyState(i)
+        If myJoy.AxisState(i) Then
             'Set the axis inversion flag based on the direction of the joystick
             Dim tempInv As Boolean
             If iJoyState(i) = 2 Then tempInv = True Else tempInv = False
             
             'For each axis, If the axis bit is set
-            If joybAxisFnc(i) And aX Then
+            If myJoy.AxisFnc(i) And aX Then
                 'If the individual axis's inversion flag is set, toggle the inversion bool
-                If joybAxisFnc(i) And aXi Then tempInv = Not tempInv
+                If myJoy.AxisFnc(i) And aXi Then tempInv = Not tempInv
                 'then add to the axis speed
-                Call setDriveSpeed(driveX, tempInv, getVel(driveX, joybAxisFnc(i)))
+                Call setDriveSpeed(driveX, tempInv, getVel(driveX, myJoy.AxisFnc(i)))
             End If
 
-            If joybAxisFnc(i) And aY Then
-                If joybAxisFnc(i) And aYi Then tempInv = Not tempInv
-                Call setDriveSpeed(driveY, tempInv, getVel(driveX, joybAxisFnc(i)))
+            If myJoy.AxisFnc(i) And aY Then
+                If myJoy.AxisFnc(i) And aYi Then tempInv = Not tempInv
+                Call setDriveSpeed(driveY, tempInv, getVel(driveX, myJoy.AxisFnc(i)))
             End If
 
-            If joybAxisFnc(i) And aZ Then
-                If joybAxisFnc(i) And aZi Then tempInv = Not tempInv
-                Call setDriveSpeed(driveZ, tempInv, getVel(driveX, joybAxisFnc(i)))
+            If myJoy.AxisFnc(i) And aZ Then
+                If myJoy.AxisFnc(i) And aZi Then tempInv = Not tempInv
+                Call setDriveSpeed(driveZ, tempInv, getVel(driveX, myJoy.AxisFnc(i)))
             End If
 
-            If joybAxisFnc(i) And aZa Then
-                If joybAxisFnc(i) And aZai Then tempInv = Not tempInv
-                Call setDriveSpeed(driveZa, tempInv, getVel(driveX, joybAxisFnc(i)))
+            If myJoy.AxisFnc(i) And aZa Then
+                If myJoy.AxisFnc(i) And aZai Then tempInv = Not tempInv
+                Call setDriveSpeed(driveZa, tempInv, getVel(driveX, myJoy.AxisFnc(i)))
             End If
 
-            If joybAxisFnc(i) And aR Then
-                If joybAxisFnc(i) And aRi Then tempInv = Not tempInv
-                Call setDriveSpeed(driveR, tempInv, getVel(driveX, joybAxisFnc(i)))
+            If myJoy.AxisFnc(i) And aR Then
+                If myJoy.AxisFnc(i) And aRi Then tempInv = Not tempInv
+                Call setDriveSpeed(driveR, tempInv, getVel(driveX, myJoy.AxisFnc(i)))
             End If
         End If
     Next i
+
 
     Call trimAxes
 
