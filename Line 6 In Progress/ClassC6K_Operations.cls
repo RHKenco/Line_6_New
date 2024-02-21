@@ -254,6 +254,11 @@ FSoutputState = fsinfo.ProgOut(1)
 
 End Sub
 
+Public Sub c6kVarSet(var As String, value As String)
+
+c6k.Write var & " = " & value & ":"
+
+End Sub
 
 Public Function getPassType() As Integer
     getPassType = passType

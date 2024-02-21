@@ -391,7 +391,7 @@ End Function
 '-- joyModeSet() - Sets joystick mode -------------------------------------------------------------------------------------------
 '       - Inputs:
 '           - runMode - Run mode of the pass - see runJoy for details (same input)
-Private Function joyModeSet(runMode As Integer) As Boolean
+Private Function joyModeSet(RunMode As Integer) As Boolean
 
 If myJoy.stateBtnUpd Or Not myJoy.Active Then
 
@@ -416,7 +416,7 @@ If myJoy.stateBtnUpd Or Not myJoy.Active Then
     passType = c6kOps.getPassType()
         
     '-- Set joystick mode based on run mode - Free, Pause, or Run
-    Select Case runMode
+    Select Case RunMode
         Case joyFree         'Standard X-Y-Z Mode. Used for Blades & Positioning
         
             Select Case buttons

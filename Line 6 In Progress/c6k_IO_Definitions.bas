@@ -53,7 +53,7 @@ Public Enum c6kIO
     bJoyDown = Input6
     joyDown = 5
     
-    bjoyAll = bJoyLeft And bJoyRight And bJoyFront And bJoyBack And bJoyUp And bJoyDown
+    bJoyAxes = bJoyLeft And bJoyRight And bJoyFront And bJoyBack And bJoyUp And bJoyDown
     
     bJoySelect = Input22
     joySelect = 6
@@ -61,6 +61,10 @@ Public Enum c6kIO
     joyRelease = 7
     bJoyToggle = Input24
     joyToggle = 8
+    
+    bJoyButtons = bJoySelect And bJoyRelease And bJoyToggle
+    
+    bJoyAll = bJoyAxes And bJoyButtons
     
     'Misc Inputs
     bInOscEOT = Input17

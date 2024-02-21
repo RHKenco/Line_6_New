@@ -13,8 +13,51 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 
 
+Enum passRunModes
+    passNone
+    passStrike
+    passRunning
+    passPaused
+    passEnd
+    passReset
 
-Private Sub setDriveVelocities()
+End Enum
+
+Public RunMode As Integer
+
+Private userSpeedMult As Single
+
+Private Sub getPassSpeed()
+
+    If RunMode = passRunning Then
+        Dim passType As Integer
+        passType = c6kOps.getPassType
+        
+        Select Case passType
+            Case passBlade
+                Call setDriveSpeed(driveX, False, (basePassSpeed * userSpeedMult))
+            Case passAugEdg
+                Call setDriveSpeed(driveY, False, (basePassSpeed * userSpeedMult * Auger.getEdgeVelMult))
+                Call setDriveSpeed(driveR, False, (basePassSpeed * userSpeedMult * Auger.getRotationMult))
+            Case passAugFac
+                Call setDriveSpeed(driveY, False, (basePassSpeed * userSpeedMult * Auger.getyMult))
+                Call setDriveSpeed(driveZ, False, (basePassSpeed * userSpeedMult * Auger.getzMult))
+                Call setDriveSpeed(driveR, False, (basePassSpeed * userSpeedMult * Auger.getRotationMult))
+        End Select
+    End If
+
+End Sub
+
+Public Sub setPassSpeed()
+
+    Call getPassSpeed
+    
+    Call runPassVel
+
+End Sub
+
+
+Public Sub setDriveVelocities()
 
     Call resetAxisSpeed
 
@@ -54,9 +97,32 @@ Private Sub setDriveVelocities()
                 If myJoy.AxisFnc(i) And aRi Then tempInv = Not tempInv
                 Call setDriveSpeed(driveR, tempInv, getVel(driveX, myJoy.AxisFnc(i)))
             End If
+            
+            'Check if the axis is in run speed mode
+            If iJoyState(i) And arS Then
+                If iJoyState(i) Then
+                    If iJoyState(i) = 1 Then
+                        userSpeedMult = userSpeedMult + speedMultInc
+                        If userSpeedMult > speedMultMax Then userSpeedMult = speedMultMax
+                    Else
+                        userSpeedMult = userSpeedMult - speedMultInc
+                        If userSpeedMult < speedMultMin Then userSpeedMult = speedMultMin
+                    End If
+                 End If
+            End If
+        
         End If
     Next i
+    
+    Call getPassSpeed
+    
+    Call runPassVel
 
+
+End Sub
+
+
+Private Sub runPassVel()
 
     Call trimAxes
 
@@ -66,6 +132,19 @@ Private Sub setDriveVelocities()
 
 End Sub
 
+Private Sub trimAxes()
+    If Abs(newDriveSpeed(1)) > xCalX Then If newDriveSpeed(1) > 0 Then newDriveSpeed(1) = xCalX Else newDriveSpeed(1) = -xCalX
+    If Abs(newDriveSpeed(2)) > xCalZ Then If newDriveSpeed(2) > 0 Then newDriveSpeed(2) = xCalZ Else newDriveSpeed(2) = -xCalZ
+    If Abs(newDriveSpeed(3)) > xCalZa Then If newDriveSpeed(3) > 0 Then newDriveSpeed(3) = xCalZa Else newDriveSpeed(3) = -xCalZa
+    If Abs(newDriveSpeed(6)) > xCalY Then If newDriveSpeed(6) > 0 Then newDriveSpeed(6) = xCalY Else newDriveSpeed(6) = -xCalY
+    If Abs(newDriveSpeed(7)) > xCalR Then If newDriveSpeed(7) > 0 Then newDriveSpeed(7) = xCalR Else newDriveSpeed(7) = -xCalR
+End Sub
+
+Private Sub set6kVelVars()
+    For i = 1 To 8
+        If i <> 4 Then Call c6kOps.c6kVarSet(("VAR" & i), Format(newDriveSpeed(i), "X0.000"))
+    Next i
+End Sub
 
 Private Function getVel(drive As Integer, joyAxisFnc As Integer)
 
@@ -140,54 +219,54 @@ Public Sub initDrives()
 c6k.Write "DEL SETVEL:DEF SETVEL:"
 
     'For Axis 1 - X-Axis, set velocity if program velocity does not equal the variable value
-    '   Note: - VAR1 is the VB6-Set Velocity; VAR8 is the Modified Velocity to deal with direction change
+    '   Note: - VAR1 is the VB6-Set Velocity; VAR9 is the Modified Velocity to deal with direction change
     c6k.Write "IF(1V<>VAR1):"
         'If the Set Direction and the Intended Velocity are in the same direction
         c6k.Write "IF(((1D > 0) & (VAR1 > 0)) | ((1D < 0) & (VAR1 < 0))):"
             'Simply set the new velocity
-            c6k.Write "IF(VAR1 < 0):VAR8 = -1*VAR1:ELSE:VAR8 = VAR1:NIF:"
+            c6k.Write "IF(VAR1 < 0):VAR9 = -1*VAR1:ELSE:VAR9 = VAR1:NIF:"
         'If they are not in the same direction
         c6k.Write "ELSE:"
             'If the velocity is not at zero
             c6k.Write "IF(1VEL <> 0):"
                 'Set the desired velocity to zero to avoid a direction switch error
-                c6k.Write "VAR8 = 0:"
+                c6k.Write "VAR9 = 0:"
             'If it has reached zero
             c6k.Write "ELSE:"
                 'Set the new direction and desired velocity accordingly
-                c6k.Write "IF(VAR1 > 0):D+,,,,,,:VAR8 = VAR1:ELSE:D-,,,,,,:VAR8 = -1*VAR1:NIF:"
+                c6k.Write "IF(VAR1 > 0):D+,,,,,,:VAR9 = VAR1:ELSE:D-,,,,,,:VAR9 = -1*VAR1:NIF:"
             c6k.Write "NIF:"
         c6k.Write "NIF:"
     c6k.Write "NIF:"
     
     'For Axis 6 - Y-Axis, set velocity if program velocity does not equal the variable value
-    '   Note: - VAR2 is the VB6-Set Velocity; VAR9 is the Modified Velocity to deal with direction change
-    c6k.Write "IF(6V<>VAR2):"
+    '   Note: - VAR6 is the VB6-Set Velocity; VAR14 is the Modified Velocity to deal with direction change
+    c6k.Write "IF(6V<>VAR6):"
         'If the Set Direction and the Intended Velocity are in the same direction
-        c6k.Write "IF(((6D > 0) & (VAR2 > 0)) | ((6D < 0) & (VAR2 < 0))):"
+        c6k.Write "IF(((6D > 0) & (VAR6 > 0)) | ((6D < 0) & (VAR6 < 0))):"
             'Simply set the new velocity
-            c6k.Write "IF(VAR2 < 0):VAR9 = -1*VAR2:ELSE:VAR9 = VAR2:NIF:"
+            c6k.Write "IF(VAR6 < 0):VAR14 = -1*VAR6:ELSE:VAR14 = VAR6:NIF:"
         'If they are not in the same direction
         c6k.Write "ELSE:"
             'If the velocity is not at zero
             c6k.Write "IF(6VEL <> 0):"
                 'Set the desired velocity to zero to avoid a direction switch error
-                c6k.Write "VAR9 = 0:"
+                c6k.Write "VAR14 = 0:"
             'If it has reached zero
             c6k.Write "ELSE:"
                 'Set the new direction and desired velocity accordingly
-                c6k.Write "IF(VAR2 > 0):D,,,,,+,:VAR9 = VAR2:ELSE:D,,,,,-,:VAR9 = -1*VAR2:NIF:"
+                c6k.Write "IF(VAR6 > 0):D,,,,,+,:VAR14 = VAR6:ELSE:D,,,,,-,:VAR14 = -1*VAR6:NIF:"
             c6k.Write "NIF:"
         c6k.Write "NIF:"
     c6k.Write "NIF:"
     
     'For Axis 2 - Z-Axis, set velocity if program velocity does not equal the variable value
-    '   Note: - VAR3 is the VB6-Set Velocity; VAR10 is the Modified Velocity to deal with direction change
-    c6k.Write "IF(2V<>VAR3):"
+    '   Note: - VAR2 is the VB6-Set Velocity; VAR10 is the Modified Velocity to deal with direction change
+    c6k.Write "IF(2V<>VAR2):"
         'If the Set Direction and the Intended Velocity are in the same direction
-        c6k.Write "IF(((2D > 0) & (VAR3 > 0)) | ((2D < 0) & (VAR3 < 0))):"
+        c6k.Write "IF(((2D > 0) & (VAR2 > 0)) | ((2D < 0) & (VAR2 < 0))):"
             'Simply set the new velocity
-            c6k.Write "IF(VAR3 < 0):VAR10 = -1*VAR3:ELSE:VAR10 = VAR3:NIF:"
+            c6k.Write "IF(VAR2 < 0):VAR10 = -1*VAR2:ELSE:VAR10 = VAR2:NIF:"
         'If they are not in the same direction
         c6k.Write "ELSE:"
             'If the velocity is not at zero
@@ -197,18 +276,18 @@ c6k.Write "DEL SETVEL:DEF SETVEL:"
             'If it has reached zero
             c6k.Write "ELSE:"
                 'Set the new direction and desired velocity accordingly
-                c6k.Write "IF(VAR3 > 0):D,+,,,,,:VAR10 = VAR3:ELSE:D,-,,,,,:VAR10 = -1*VAR3:NIF:"
+                c6k.Write "IF(VAR2 > 0):D,+,,,,,:VAR10 = VAR2:ELSE:D,-,,,,,:VAR10 = -1*VAR2:NIF:"
             c6k.Write "NIF:"
         c6k.Write "NIF:"
     c6k.Write "NIF:"
     
     'For Axis 3 - Za-Axis, set velocity if program velocity does not equal the variable value
-    '   Note: - VAR4 is the VB6-Set Velocity; VAR11 is the Modified Velocity to deal with direction change
-    c6k.Write "IF(3V<>VAR4):"
+    '   Note: - VAR3 is the VB6-Set Velocity; VAR11 is the Modified Velocity to deal with direction change
+    c6k.Write "IF(3V<>VAR3):"
         'If the Set Direction and the Intended Velocity are in the same direction
-        c6k.Write "IF(((3D > 0) & (VAR4 > 0)) | ((3D < 0) & (VAR4 < 0))):"
+        c6k.Write "IF(((3D > 0) & (VAR3 > 0)) | ((3D < 0) & (VAR3 < 0))):"
             'Simply set the new velocity
-            c6k.Write "IF(VAR4 < 0):VAR11 = -1*VAR4:ELSE:VAR11 = VAR4:NIF:"
+            c6k.Write "IF(VAR3 < 0):VAR11 = -1*VAR3:ELSE:VAR11 = VAR3:NIF:"
         'If they are not in the same direction
         c6k.Write "ELSE:"
             'If the velocity is not at zero
@@ -218,34 +297,34 @@ c6k.Write "DEL SETVEL:DEF SETVEL:"
             'If it has reached zero
             c6k.Write "ELSE:"
                 'Set the new direction and desired velocity accordingly
-                c6k.Write "IF(VAR4 > 0):D,,+,,,,:VAR11 = VAR4:ELSE:D,,-,,,,:VAR11 = -1*VAR4:NIF:"
+                c6k.Write "IF(VAR3 > 0):D,,+,,,,:VAR11 = VAR3:ELSE:D,,-,,,,:VAR11 = -1*VAR3:NIF:"
             c6k.Write "NIF:"
         c6k.Write "NIF:"
     c6k.Write "NIF:"
     
     'For Axis 7 - R-Axis, set velocity if program velocity does not equal the variable value
-    '   Note: - VAR5 is the VB6-Set Velocity; VAR50 is the Modified Velocity to deal with direction change
-    c6k.Write "IF(7V<>VAR5):"
+    '   Note: - VAR7 is the VB6-Set Velocity; VAR70 is the Modified Velocity to deal with direction change
+    c6k.Write "IF(7V<>VAR7):"
         'If the Set Direction and the Intended Velocity are in the same direction
-        c6k.Write "IF(((7D > 0) & (VAR5 > 0)) | ((7D < 0) & (VAR5 < 0))):"
+        c6k.Write "IF(((7D > 0) & (VAR7 > 0)) | ((7D < 0) & (VAR7 < 0))):"
             'Simply set the new velocity
-            c6k.Write "IF(VAR5 < 0):VAR12 = -1*VAR5:ELSE:VAR12 = VAR5:NIF:"
+            c6k.Write "IF(VAR7 < 0):VAR15 = -1*VAR7:ELSE:VAR15 = VAR7:NIF:"
         'If they are not in the same direction
         c6k.Write "ELSE:"
             'If the velocity is not at zero
             c6k.Write "IF(7VEL <> 0):"
                 'Set the desired velocity to zero to avoid a direction switch error
-                c6k.Write "VAR12 = 0:"
+                c6k.Write "VAR15 = 0:"
             'If it has reached zero
             c6k.Write "ELSE:"
                 'Set the new direction and desired velocity accordingly
-                c6k.Write "IF(VAR5 > 0):D,,,,,,+:VAR12 = VAR5:ELSE:D,,,,,,-:VAR12 = -1*VAR5:NIF:"
+                c6k.Write "IF(VAR7 > 0):D,,,,,,+:VAR15 = VAR7:ELSE:D,,,,,,-:VAR15 = -1*VAR7:NIF:"
             c6k.Write "NIF:"
         c6k.Write "NIF:"
     c6k.Write "NIF:"
     
     'Set velocity & Initiate Motion
-    c6k.Write "V(VAR8),(VAR10),(VAR11),,,(VAR9),(VAR12):GO111XX11:"
+    c6k.Write "V(VAR8),(VAR10),(VAR11),,,(VAR9),(VAR15):GO111XX11:"
 
 c6k.Write "END:"
 

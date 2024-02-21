@@ -158,6 +158,8 @@ Public fsmRun As New FSM_Line6_Run
 Public woMgr As New ClassWO_Manager
 Public Joy As New ClassJoy
 Public Auger As New ClassAuger
+Public Drives As New ClassTaskDrives
+Public Osc As New ClassTaskOscillator
 
 'Oft-Used Labels
 Public Const passBlade As Integer = 1

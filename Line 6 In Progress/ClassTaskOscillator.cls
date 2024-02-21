@@ -16,8 +16,8 @@ Attribute VB_Exposed = False
 Private Const c6k_bOscTaskOn = "VARB1.5"
 Private Const c6k_bOscOn = "VARB1.6"
 Private Const c6k_bOscHold = "VARB1.8"
-Private Const c6k_sOscVel = "VAR15"
-Private Const c6k_sPassWd = "VAR16"
+Private Const c6k_sOscVel = "VAR4"
+Private Const c6k_sPassWd = "VAR12"
 
 'Oscillator States used in the oscOps command
 Enum OscStates
@@ -56,14 +56,14 @@ Public Sub initOsc()
                 'If both the OscOn and OscRunning bits are set
                 c6k.Write "IF(VARB1.6 = b1 & VARB1.7 = b1):"
                     'Wait until motion has stopped, then reverse oscilator and resume motion
-                    c6k.Write "WAIT(MOV = bxxx0xxx):VAR16 = -1*VAR16:D,,,VAR16,,:GOxxx1xxx:"
+                    c6k.Write "WAIT(MOV = bxxx0xxx):VAR12 = -1*VAR12:D,,,VAR12,,:GOxxx1xxx:"
                 'If the Osc On bit is not set (stopping osc) or the OscRunning bit is not set (first loop)
                 c6k.Write "ELSE:"
                     'Stop the oscillator, then go to oscillation inside edge (closest to operator) and wait for hold bit to drop
-                    c6k.Write "!S.4 = b0:WAIT(MOV = bxxx0xxx):D,,,VAR15,,:GOxxx1xxx:WAIT(VARB1.8 = b0):V,,,VAR6,,:VAR15 = -1*VAR16:VARB1.7 = ~(VARB1.7):"
+                    c6k.Write "!S.4 = b0:WAIT(MOV = bxxx0xxx):V,,,VAR4,,:D,,,VAR12,,:GOxxx1xxx:WAIT(VARB1.8 = b0):VAR12 = -1*VAR12:VARB1.7 = ~(VARB1.7):"
                 c6k.Write "NIF:"
             'Delay 5ms between each loop
-            c6k.Write "NIF:T0.005:"
+            c6k.Write "NIF:" 'T0.005:" Commented out because I think this is blocking
         c6k.Write "NWHILE:"
     c6k.Write "END:"
             
@@ -73,11 +73,6 @@ Public Sub initOsc()
 
 End Sub
 
-Public Sub c6kVarSet(var As String, value As String)
-
-c6k.Write var & " = " & value & ":"
-
-End Sub
 
 Public Sub setOscVel()
 
@@ -86,8 +81,8 @@ Public Sub setOscVel()
     tempPassWidth = 0.5 * (passWidth - 0.875)
 
     'Set Oscillator pass width and speed
-    Call c6kVarSet(c6k_sPassWd, Format(tempPassWidth, "#0.000"))
-    Call c6kVarSet(c6k_sOscVel, Format(baseOscSpeed, "#0.000"))
+    Call c6kOps.c6kVarSet(c6k_sPassWd, Format(tempPassWidth, "#0.000"))
+    Call c6kOps.c6kVarSet(c6k_sOscVel, Format(baseOscSpeed, "#0.000"))
     
     'Enable Oscillator task
     Call c6kVarSet(c6k_bOscTaskOn, "b1")
@@ -98,18 +93,18 @@ End Sub
 Public Sub oscOps(state As Integer)
     Select Case state
         Case oscStart
-            Call c6kVarSet(c6k_bOscOn, "b1")
+            Call c6kOps.c6kVarSet(c6k_bOscOn, "b1")
         Case oscStop
-            Call c6kVarSet(c6k_bOscOn, "b0")
+            Call c6kOps.c6kVarSet(c6k_bOscOn, "b0")
         Case oscHoldOn
-            Call c6kVarSet(c6k_bOscHold, "b1")
-            Call c6kVarSet(c6k_bOscRun, "b0")
+            Call c6kOps.c6kVarSet(c6k_bOscHold, "b1")
+            Call c6kOps.c6kVarSet(c6k_bOscRun, "b0")
         Case oscHoldOff
-            Call c6kVarSet(c6k_bOscHold, "b0")
+            Call c6kOps.c6kVarSet(c6k_bOscHold, "b0")
     End Select
 End Sub
 
 Public Sub stopOsc()
-    Call c6kVarSet(c6k_bOscTaskOn, "b0")
+    Call c6kOps.c6kVarSet(c6k_bOscTaskOn, "b0")
 End Sub
 
