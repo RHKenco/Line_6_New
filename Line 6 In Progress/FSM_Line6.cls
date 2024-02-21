@@ -75,7 +75,7 @@ Call c6kOps.updFastStatus
 If Not c6kOps.chkE_Stop Then
 
 '-- Start Airblade & Exhaust Fan
-If Not CBool(c6kOps.getOutputState And outExhaust) Then
+If (Not CBool(c6kOps.getOutputState And outExhaust) And woMgr.isWOactive) Then
     Call c6kOps.setOutput(outAirblade, True)
     Call c6kOps.setOutput(outExhaust, True)
 End If
@@ -158,7 +158,7 @@ If frmLine6.Frame_Motors.Visible Then Call c6kOps.updDro
 
 End Sub
 
-Private Sub runState4() 'Run Pass State - Runs sub-FSM to operate the machine while running a pass
+Private Sub runState4() 'Reset State
 
 Call btnState(btnStarted)
 

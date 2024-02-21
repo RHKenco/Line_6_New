@@ -156,56 +156,11 @@ Public c6kOps As New ClassC6K_Operations
 Public fsmMain As New FSM_Line6
 Public fsmRun As New FSM_Line6_Run
 Public woMgr As New ClassWO_Manager
-Public Joy As New ClassJoy
+Public Joy As New ClassJoystick
 Public Auger As New ClassAuger
 Public Drives As New ClassTaskDrives
 Public Osc As New ClassTaskOscillator
 
-'Oft-Used Labels
-Public Const passBlade As Integer = 1
-Public Const passAugEdg As Integer = 2
-Public Const passAugFac As Integer = 3
-
-Public Const joyDisable As Integer = 0
-Public Const joyEnable As Integer = 1
-Public Const joyFree As Integer = 2
-Public Const joyPause As Integer = 3
-Public Const joyRun As Integer = 4
-
-Type joystickState      'Structure to store joystick state
-
-    Active As Boolean       'Active boolean - true when joystick is doing stuff
-    
-    stateStr As String      'State String - To display currently active axes
-    
-    axisLR As Integer       'Integers storing the current drive axis for each joystick axis
-    axisFB As Integer
-    axisUD As Integer
-    
-    inBin(8) As Long        'Input Binary - To allow binary comparisons to input values in loops
-    
-    inDeb(8) As Integer     'Input Debounce Counters
-    
-    stateNow(8) As Boolean  'Array of bools containing current input state
-    stateLast(8) As Boolean 'Array of bools containing the previous input state
-    stateJoyUpd As Boolean  'Bool to indicate if the joystick input state has changed
-    stateBtnUpd As Boolean  'Bool to indicate if the button input state has changed
-    
-    inSt(2) As Long         'Array to store current function of joystick direction
-    inInv(2) As Boolean     'Array to store inversion state of joystick axis
-    outSt(6) As Long        'Array of integers to store joystick output options
-    
-    joyJogStr As String     'String to contain jog state the joystick is currently using
-    joyMcStr As String      'String to contain MC state the joystick is currently using
-    joyMcDelStr As String   'String for MC direction & velocity, dilleniated with ','
-    joyMcAxisVel(6) As Single 'String for Velocity of MC Jog Axes
-    
-    joyJogOn    As Boolean  'Booleans for the functions that need to be run based on joy inputs
-    joyMcJogOn  As Boolean
-    joyBstOn    As Boolean
-    joySpdOn    As Boolean
-    
-End Type
 
 
 Function BitText32(v As Long) As String

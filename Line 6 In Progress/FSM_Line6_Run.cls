@@ -68,7 +68,9 @@ End Sub
 Private Sub runState0() 'Setup State - Runs any necessary FSM Setup code and moves immediately to state 1
 
 'Home Oscillator
-Call c6kOps.homeOsc
+Call Osc.initOsc
+Call Osc.oscOps(oscHoldOn)
+Call Osc.oscOps(oscStart)
 
 'Start Water Pump
 Call c6kOps.setOutput(outH2O, True)
@@ -119,6 +121,7 @@ Select Case stateInner
         Call c6kOps.setMachineHome
         Call c6kOps.strikeArc
         c6k.Write "COMEXC1" & Chr(13)    'Enable continuous Command Processing
+        Call Osc.oscOps(oscHoldOff)
         stateInner = 3
     Case 3  'Proceed to pause state
         'Set status message
@@ -222,7 +225,7 @@ Call Joy.getJoyInputs(c6kOps.getInputState)
 Select Case stateInner
     Case 0
         'Return Osc. to Home
-        Call c6kOps.returnOsc
+        Call Osc.oscOps(oscStop)
         
         'Update Status Message
         Call statusMsg(msgCompleted)
