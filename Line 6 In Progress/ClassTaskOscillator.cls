@@ -11,13 +11,17 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+'|====================================================================================================================|
+'|
+'|              ----- Oscillator Class -----
+'|
+'|
+'|
+'|====================================================================================================================|
 
-'Variables sent to the 6k for Oscillator Task
-Private Const c6k_bOscTaskOn = "VARB1.5"
-Private Const c6k_bOscOn = "VARB1.6"
-Private Const c6k_bOscHold = "VARB1.8"
-Private Const c6k_sOscVel = "VAR4"
-Private Const c6k_sPassWd = "VAR12"
+
+'---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---=
+'---===---===---===---===--- Setup - Constants & Variables ---===---===---===---===---===---===---===---===---===---===
 
 'Oscillator States used in the oscOps command
 Enum OscStates
@@ -26,6 +30,20 @@ Enum OscStates
     oscStart
     oscStop
 End Enum
+
+'---===---===---===---===--- Setup - Constants & Variables ---===---===---===---===---===---===---===---===---===---===
+'---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---=
+
+
+
+
+
+
+
+
+
+'---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---=
+'---===---===---===---===--- Basic Functions - Initialize, Read-Only, Etc. ---===---===---===---===---===---===---===--
 
 Public Sub initOsc()
 
@@ -107,4 +125,5 @@ End Sub
 Public Sub stopOsc()
     Call c6kOps.c6kVarSet(c6k_bOscTaskOn, "b0")
 End Sub
+
 
