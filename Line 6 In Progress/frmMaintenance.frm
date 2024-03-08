@@ -31,6 +31,14 @@ Begin VB.Form frmMaintenance
       TabIndex        =   54
       Top             =   600
       Width           =   5535
+      Begin VB.TextBox Text_In_Vel 
+         Height          =   285
+         Left            =   4320
+         TabIndex        =   91
+         Text            =   "1.00"
+         Top             =   600
+         Width           =   975
+      End
       Begin VB.OptionButton Option_DistVel 
          BackColor       =   &H00C00000&
          Caption         =   "sec"
@@ -66,10 +74,10 @@ Begin VB.Form frmMaintenance
             Italic          =   0   'False
             Strikethrough   =   0   'False
          EndProperty
-         Height          =   3255
+         Height          =   855
          Left            =   4200
          TabIndex        =   88
-         Top             =   600
+         Top             =   3000
          Width           =   1095
       End
       Begin VB.CommandButton Button_Move_Axis 
@@ -1589,7 +1597,7 @@ End Sub
 
 Private Sub Button_Move_Axis_Click(Index As Integer)
 
-Const MoveVelocities = "1,1,1,1,1,1"
+Const MoveVelocities = "1,1,1,1,0,1,36"
 
 'Generate string of values for 6k with desired distance & GO command in correct position
 Dim tempD As String
@@ -1620,9 +1628,9 @@ Next i
 
 If Option_DistVel(0).value Then
     'Instruct 6k
-    c6k.Write ("@MC0:@V1:D" & tempD & ":GO" & tempGO & Chr(13))
+    c6k.Write ("@MC0:@V" & Format(CDbl(Text_In_Vel.Text), "0.000") & ":D" & tempD & ":GO" & tempGO & Chr(13))
 Else
-    c6k.Write ("@MC1:@V1:GO" & tempGO & Chr(13))
+    c6k.Write ("@MC1:@" & Format(CDbl(Text_In_Vel.Text), "0.000") & ":GO" & tempGO & Chr(13))
     For i = 0 To 250000000
     Next i
     c6k.Write ("!S" & tempGO & Chr(13))

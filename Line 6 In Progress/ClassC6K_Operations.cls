@@ -26,7 +26,7 @@ Private Const posCalX = 26495 'counts/in        '26550      '       and will con
 Private Const posCalY = 39790 'counts/in        '62500
 Private Const posCalZ = 249807 'counts/in       '39683
 Private Const posCalZa = 249896 'counts/in      '510204
-Private Const posCalO = 7987 'counts/in         '62500
+Private Const posCalO = 26624  '7987 'counts/in         '62500
 Private Const posCalR = 5009 'counts/degree     '62500
 
 Private revCal(6) As Long                'Array to store revolution calibration data. These following constant values will be stored upon initialization,
@@ -34,7 +34,7 @@ Private Const revCalX = 26495 'counts/in         '25000      '       and will co
 Private Const revCalY = 39790 'counts/in        '62500
 Private Const revCalZ = 249807 'counts/in       '39683
 Private Const revCalZa = 249896 'counts/in      '510204
-Private Const revCalO = 7987 'counts/in         '62500
+Private Const revCalO = 26624 '7987 'counts/in         '62500
 Private Const revCalR = 5009 'counts/degree     '62500
                                 
                                 
@@ -366,7 +366,7 @@ End Sub
 '-- homeMachine() -
 Public Sub setMachineHome()
     'Set position to 0 for all axes except the oscillator (drive #4)
-    c6k.Write "JOG000000:PSET0,0,0,x,0,0" & Chr$(13)
+    c6k.Write "JOG000000:PSET0,0,0,,0,0" & Chr$(13)
 End Sub
 
 '-- homeOsc() - Homes the oscillator
@@ -586,8 +586,8 @@ Call stopAllOut
 btnState (btnEstop)
 
 'Reset FSMs to return to WO Active State
-fsmMain.State = 1
-fsmRun.State = 0
+fsmMain.state = 1
+fsmRun.state = 0
 
 'Call not-finished on WO if start has been called
 If woMgr.isWOstarted Then Call woMgr.notfinishWO
@@ -631,14 +631,14 @@ End Function
 Public Sub strikeArc()
 
 'Capture position of z-axis - further z inputs will be relative to strike (which should be surface of blade)
-c6k.Write "PSETX,0,0,X:" & Chr$(13)
+c6k.Write "PSET,0,0:" & Chr$(13)
 
 'Capture current position based on pass type
 Select Case passType
     Case passBlade
-        c6k.Write "PSET0,X,X,X,X,0" & Chr$(13)  'Set X-Y to 0
+        c6k.Write "PSET0,,,,,0" & Chr$(13)  'Set X-Y to 0
     Case passAugFac
-        c6k.Write "PSET0,X,X,X,0,0" & Chr$(13)  'Set X-Y-R to 0
+        c6k.Write "PSET0,,,,0,0" & Chr$(13)  'Set X-Y-R to 0
     Case passAugEdg
     
         Dim tempSetPos As Double
@@ -646,7 +646,7 @@ Select Case passType
         
         If Auger.getHand = augerRight Then tempSetPos = -tempSetPos    'Facing Line6, a Right-Handed Auger will be impregnated on the Left Side such that the strike location will be -
             
-        c6k.Write "PSET" & Format(tempSetPos, "0.000") & ",X,X,X,0,0" & Chr$(13)     'Set Y-R to 0 and X to 1" from radial edge. This will be used in speed calcs
+        c6k.Write "PSET" & Format(tempSetPos, "0.000") & ",,,,0,0" & Chr$(13)     'Set Y-R to 0 and X to 1" from radial edge. This will be used in speed calcs
     
     Case Else
         MsgBox "Error in Strike Arc Pset Routine"

@@ -2334,7 +2334,7 @@ End If
             JogInput5 = 0
             Label7.Caption = ""
             Label7.Refresh
-            JogOn = False
+            jogOn = False
             Exit Do
         End If
         
@@ -2445,7 +2445,7 @@ End If
 
 'STRIKE ARC
 If ((fsinfo.ProgIn(1) And Input8) / Input8) = 0 Then
-    c6k.Write "PSET0,0,X,X:" & Chr$(13)
+    c6k.Write "PSET0,0:" & Chr$(13)
     c6k.Write "1OUT.12-1:1OUT.9-1:1OUT.30-1:A,10:AD,3:V,13:D,0.9:GO01:1OUT.16-1:WAIT(MOV=b000000):JOG100001" & Chr$(13)
     '9= Lens Fan / 12= Argon / 30= open test / 16= Welder Contact
     cutlist.Refresh
@@ -2875,7 +2875,7 @@ End If
             JogInput5 = 0
             Label7.Caption = ""
             Label7.Refresh
-            JogOn = False
+            jogOn = False
             Exit Do
         End If
         
@@ -2986,7 +2986,7 @@ End If
 
 'STRIKE ARC
 If ((fsinfo.ProgIn(1) And Input8) / Input8) = 0 Then
-    c6k.Write "PSET0,0,X,X:" & Chr$(13)
+    c6k.Write "PSET0,0:" & Chr$(13)
     c6k.Write "1OUT.12-1:1OUT.9-1:1OUT.30-1:A,10:AD,3:V,13:D,0.9:GO01:1OUT.16-1:WAIT(MOV=b0000000):JOG1000010" & Chr$(13)
     '9= Lens Fan / 12= Argon / 30= open test / 16= Welder Contact
     cutlist.Refresh
@@ -3052,7 +3052,7 @@ If Check1(i - 1).value = 1 Then
          
     'START TC AND X AXIS Move
     c6k.Write "JOG0:" & Chr$(13)
-    c6k.Write "JOG0:MC0000001:VAR4=0:VAR5=0:VAR3=1:1OUT.14-1:A,,,,,,10:V,,,,,,(VAR10):D,,,,,,-1:GO,,,,,,1:WAIT(1OUT.14=b1):PSET0,0,0,X,0,0,0:VAR1=1:INEN.2-1" & Chr$(13)
+    c6k.Write "JOG0:MC0000001:VAR4=0:VAR5=0:VAR3=1:1OUT.14-1:A,,,,,,10:V,,,,,,(VAR10):D,,,,,,-1:GO,,,,,,1:WAIT(1OUT.14=b1):PSET0,0,0,,0,0,0:VAR1=1:INEN.2-1" & Chr$(13)
     c6k.Write "VAR1=1:V,,,(VAR11),,:REPEAT:D,,," + Str$(passWidth) + ":GO0001000:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XXX):D,,,-" + Str$(passWidth) + ":GO0001000:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XXX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0:" & Chr$(13)
      
     'STOP X AXIS & FILL END / Jog
@@ -3343,7 +3343,7 @@ End If
             JogInput5 = 0
             Label7.Caption = ""
             Label7.Refresh
-            JogOn = False
+            jogOn = False
             Exit Do
         End If
         
@@ -3454,7 +3454,7 @@ End If
 
 'STRIKE ARC
 If ((fsinfo.ProgIn(1) And Input8) / Input8) = 0 Then
-    c6k.Write "PSET0,0,X,X:" & Chr$(13)
+    c6k.Write "PSET0,0:" & Chr$(13)
     c6k.Write "1OUT.12-1:1OUT.9-1:1OUT.30-1:A,10:AD,3:V,13:D,0.9:GO01:1OUT.16-1:WAIT(MOV=b0000000):JOG1000010" & Chr$(13)
     '9= Lens Fan / 12= Argon / 30= open test / 16= Welder Contact
     cutlist.Refresh
@@ -3520,7 +3520,7 @@ If Check1(i - 1).value = 1 Then
          
     'START TC AND X AXIS Move
     c6k.Write "JOG0:" & Chr$(13)
-    c6k.Write "JOG0:MC0000001:VAR4=0:VAR5=0:VAR3=1:1OUT.14-1:A,,,,,,10:V,,,,,,(VAR10):D,,,,,,-1:GO,,,,,,1:WAIT(1OUT.14=b1):PSET0,0,0,X,0,0,0:VAR1=1:INEN.2-1" & Chr$(13)
+    c6k.Write "JOG0:MC0000001:VAR4=0:VAR5=0:VAR3=1:1OUT.14-1:A,,,,,,10:V,,,,,,(VAR10):D,,,,,,-1:GO,,,,,,1:WAIT(1OUT.14=b1):PSET0,0,0,,0,0,0:VAR1=1:INEN.2-1" & Chr$(13)
     c6k.Write "VAR1=1:V,,,(VAR11),,:REPEAT:D,,," + Str$(passWidth) + ":GO0001000:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XXX):D,,,-" + Str$(passWidth) + ":GO0001000:REPEAT:GOSUB CHECK1:UNTIL(MOV=bXXX0XXX):UNTIL(1OUT.31=b1):WAIT(1IN.23=b1):1OUT.31-0:" & Chr$(13)
      
     'STOP X AXIS & FILL END / Jog
@@ -5021,7 +5021,7 @@ End If
             JogInput5 = 0
             Label7.Caption = ""
             Label7.Refresh
-            JogOn = False
+            jogOn = False
             Exit Do
         End If
 ' ------------------------------------------- Motor Position --------------------------
@@ -5571,9 +5571,9 @@ If MSComm1.PortOpen = False Then
         MSComm1.output = "a" & Chr$(13)
         ' Wait for data to come back to the serial port.
         Dummy = DoEvents()
-            For J = 1 To 1000
+            For j = 1 To 1000
 Beep
-            Next J
+            Next j
         ' Read the "OK" response data in the serial port.
 '        If Form4!Label1.Caption = "CLEAR" Then
 '        If RunCondition3 <> "OK" Then
