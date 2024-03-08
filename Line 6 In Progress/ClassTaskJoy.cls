@@ -37,12 +37,12 @@ Private Sub getPassSpeed()
             Case passBlade
                 Call setDriveSpeed(driveX, False, (basePassSpeed * userSpeedMult))
             Case passAugEdg
-                Call setDriveSpeed(driveY, False, (basePassSpeed * userSpeedMult * Auger.getEdgeVelMult))
-                Call setDriveSpeed(driveR, False, (basePassSpeed * userSpeedMult * Auger.getRotationMult))
+                Call setDriveSpeed(DriveY, False, (basePassSpeed * userSpeedMult * Auger.getEdgeVelMult))
+                Call setDriveSpeed(DriveR, False, (basePassSpeed * userSpeedMult * Auger.getRotationMult))
             Case passAugFac
-                Call setDriveSpeed(driveY, False, (basePassSpeed * userSpeedMult * Auger.getyMult))
-                Call setDriveSpeed(driveZ, False, (basePassSpeed * userSpeedMult * Auger.getzMult))
-                Call setDriveSpeed(driveR, False, (basePassSpeed * userSpeedMult * Auger.getRotationMult))
+                Call setDriveSpeed(DriveY, False, (basePassSpeed * userSpeedMult * Auger.getyMult))
+                Call setDriveSpeed(DriveZ, False, (basePassSpeed * userSpeedMult * Auger.getzMult))
+                Call setDriveSpeed(DriveR, False, (basePassSpeed * userSpeedMult * Auger.getRotationMult))
         End Select
     End If
 
@@ -80,12 +80,12 @@ Public Sub setDriveVelocities()
 
             If myJoy.AxisFnc(i) And aY Then
                 If myJoy.AxisFnc(i) And aYi Then tempInv = Not tempInv
-                Call setDriveSpeed(driveY, tempInv, getVel(driveX, myJoy.AxisFnc(i)))
+                Call setDriveSpeed(DriveY, tempInv, getVel(driveX, myJoy.AxisFnc(i)))
             End If
 
             If myJoy.AxisFnc(i) And aZ Then
                 If myJoy.AxisFnc(i) And aZi Then tempInv = Not tempInv
-                Call setDriveSpeed(driveZ, tempInv, getVel(driveX, myJoy.AxisFnc(i)))
+                Call setDriveSpeed(DriveZ, tempInv, getVel(driveX, myJoy.AxisFnc(i)))
             End If
 
             If myJoy.AxisFnc(i) And aZa Then
@@ -95,7 +95,7 @@ Public Sub setDriveVelocities()
 
             If myJoy.AxisFnc(i) And aR Then
                 If myJoy.AxisFnc(i) And aRi Then tempInv = Not tempInv
-                Call setDriveSpeed(driveR, tempInv, getVel(driveX, myJoy.AxisFnc(i)))
+                Call setDriveSpeed(DriveR, tempInv, getVel(driveX, myJoy.AxisFnc(i)))
             End If
             
             'Check if the axis is in run speed mode
@@ -153,21 +153,21 @@ Private Function getVel(drive As Integer, joyAxisFnc As Integer)
     Select Case drive
         Case driveX
             desiredVel = dJogX
-        Case driveY
+        Case DriveY
             desiredVel = dJogY
-            If joyAxisFnc And axisZpR Then
+            If joyAxisFnc And AxisZpR Then
                 desiredVel = desiredVel * Auger.getyMult()
-            ElseIf joyAxisFnc And axisYR Then
+            ElseIf joyAxisFnc And AxisYR Then
                 desiredVel = desiredVel * Auger.getEdgVelMult()
             End If
-        Case driveZ
+        Case DriveZ
             desiredVel = dJogZ
-            If joyAxisFnc And axisZpR Then desiredVel = desiredVel * Auger.getzMult()
+            If joyAxisFnc And AxisZpR Then desiredVel = desiredVel * Auger.getzMult()
         Case driveZa
             desiredVel = dJogZa
-        Case driveR
+        Case DriveR
             desiredVel = dJogR
-            If joyAxisFnc And axisYR Then desiredVel = desiredVel * Auger.getRotSpdMult()   'This will trip for both YR and ZpR
+            If joyAxisFnc And AxisYR Then desiredVel = desiredVel * Auger.getRotSpdMult()   'This will trip for both YR and ZpR
             
         Case Else
             MsgBox "Error in desiredVel Function"
@@ -187,11 +187,6 @@ Private Sub setDriveSpeed(drive As Integer, inv As Boolean, vel As Double)
     Else
         newDriveSpeed(drive) = newDriveSpeed(drive) + vel
     End If
-End Sub
-
-
-Private Sub set6kVelVars()
-
 End Sub
 
 

@@ -48,3 +48,9 @@ Public Enum sDefaultSpeeds         'Default jog speeds for primary axes
     dJogZa = 1
     dJogR = 36
 End Enum
+
+
+Public Const cJoySpeedAdjust As Single = 0.1
+Public Const cJoySpeedMin As Single = 0.4
+Public Const cJoySpeedMax As Single = 1.6
+
