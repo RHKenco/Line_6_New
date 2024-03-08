@@ -22,126 +22,173 @@ Attribute VB_Exposed = False
 
 Option Explicit
 
-'-- Class Constants & Variables ---------------------------------------------------------------------------------------
 
-Public Enum iMotionAxes                 'Integer Values for Motion Axes, for entering data into arrays
-    axisX = driveX
-    axisY = driveY
-    axisZ = driveZ
-    axisZa = driveZa
-    axisR = driveR
+'---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---=
+'---===---===---===---===--- Setup - Constants & Variables ---===---===---===---===---===---===---===---===---===---===
+
+'--------------------------- Class Enumerations & Constants -----------------------------------------------------------
     
-    axisrS = 9
+    Private Enum JoyButtonState
     
-    axisYR
-    axisZp
-    axisZpR
-End Enum
-
-Private Enum bMotionAxes                'Sets bits corresponding to the axes operated by the joystick
-    'The first byte of any axis status variable will correspond to the 8 axes on the 6k
-    aX = (2 ^ (driveX - 1))
-    aY = (2 ^ (driveY - 1))
-    aZ = (2 ^ (driveZ - 1))
-    aZa = (2 ^ (driveZa - 1))
-    aR = (2 ^ (driveR - 1))
-    aO = (2 ^ (driveO - 1))
+    'Single integer to describe the state of the buttons on the joystick. The integer is set as below:
+    '        Sel  Rel  Tog
+    '   0  -  0    0    0
+    '   1  -  1    0    0
+    '   2  -  0    1    0
+    '   3  -  1    1    0
+    '   4  -  0    0    1
+    '   5  -  1    0    1
+    '   6  -  0    1    1
+    '   7  -  1    1    1
     
-    'The Second byte of any axis status variable will correspond to the inversion state of each axis
-    aXi = (2 ^ (driveX + 7))
-    aYi = (2 ^ (driveY + 7))
-    aZi = (2 ^ (driveZ + 7))
-    aZai = (2 ^ (driveZa + 7))
-    aRi = (2 ^ (driveR + 7))
-    aOi = (2 ^ (driveO + 7))
+    joyNoBtn
+    joySelOnly
+    joyRelOnly
+    joySelRel
+    joyTogOnly
+    joySelTog
+    joyRelTog
+    joyPressAll
+
+    End Enum
     
-    'The first bit of the Third byte indicates if the axis is in speed-adjust mode
-    arS = (2 ^ (17 - 1))
+    Private Enum joyAxisState
+        joyOff = 0
+        joyPos
+        joyNeg = -1
+    End Enum
+
+    'Constants for strings associated with each axis
+    Private Const arSstr = "Run Speed"
+    Private Const aXstr = "X"
+    Private Const aYstr = "Y"
+    Private Const aZstr = "Z"
+    Private Const aZastr = "Za"
+    Private Const aRstr = "R"
+    Private Const aYRstr = "YR"
+    Private Const aZpstr = "Z'"
+    Private Const aZpRstr = "Z'R"
+
+'--------------------------- Class Variables --------------------------------------------------------------------------
+
+    'Public (Editable) Variables
+    Public Enabled As Boolean      'Enabled Boolean - true when the user activates the joystick
+
+    'Read-Only Varibles (Associated with a me.getXXXX() Function
+    Private Active As Boolean       'Active boolean - true when joystick is doing stuff
+    Private state As String         'State String - To display currently active axes
+
+    'Private Variables
+    Private lastInputs As Long      'Long to store the inputs previously seen by the joystick routine
+
+    Private AxisFnc(2) As Long      'Axis Function Array - contains data pairing joystick axes with c6k drives
+
+    Private AxisInv(2) As Boolean   'Axis Inversion Array
     
-    'The remainder of the Third byte contains status information
-    aUNASSIGNED = (2 ^ (18 - 1))
-    aINVERTED = (2 ^ (19 - 1))
+    Private joyMult As DriveAxes    'Custom Type containing array of drive values
     
-    
-    
-    'Multiple drive-axis virtual axes will contain all necessary drive axes
-    aYR = aY Or aR
-    aYRi = aYi
-    aZp = aY Or aZ
-    aZpi = aYi Or aZi
-    aZpR = aY Or aZ Or aR
-    aZpRi = aYi Or aZi Or aRi
-End Enum
-
-'Constants for strings associated with each axis
-Private Const arSstr = "Run Speed"
-Private Const aXstr = "X"
-Private Const aYstr = "Y"
-Private Const aZstr = "Z"
-Private Const aZastr = "Za"
-Private Const aRstr = "R"
-Private Const aYRstr = "YR"
-Private Const aZpstr = "Z'"
-Private Const aZpRstr = "Z'R"
-
-Public Enum joyAxisState
-    joyOff = 0
-    joyPos
-    joyNeg
-End Enum
-
-Public Enabled As Boolean      'Enabled Boolean - true when the user activates the joystick
-Private Active As Boolean       'Active boolean - true when joystick is doing stuff
-
-Private lastInputs As Long      'Long to store the inputs previously seen by the joystick routine
-
-Private state As String         'State String - To display currently active axes
-
-Private AxisFnc(2) As Long      'Axis Function Array - contains data pairing joystick axes with c6k drives
-
-Private AxisState(2) As Integer 'Axis State Array - See enum joyAxisState for options
+'---===---===---===---===--- Setup - Constants & Variables ---===---===---===---===---===---===---===---===---===---===
+'---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---=
 
 
-Public Function getActive() As Boolean
-    getActive = Active
-End Function
 
-Public Function getState() As String
-    getState = state
-End Function
 
-Private Function getStr(axisIn As Long) As String
 
-    Select Case axisIn
-        Case axisX
-            getStr = aXstr
-    
-        Case axisY
-            getStr = aYstr
 
-        Case axisZ
-            getStr = aZstr
-    
-        Case axisR
-            getStr = aRstr
 
-        Case axisYR
-            getStr = aYRstr
 
-        Case axisZp
-            getStr = aZpstr
-    
-        Case axisZpR
-            getStr = aZpRstr
-    
-        Case axisrS
-            getStr = arSstr
+
+'---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---=
+'---===---===---===---===--- Basic Functions - Initialize, Read-Only, Etc. ---===---===---===---===---===---===---===--
+
+'--------------------------- Init & Clear Functions -------------------------------------------------------------------
+
+    Public Sub ClearJoy()
+
+        If Active = True Then MsgBox ("Joystick Still Active!"): Exit Sub
         
-        Case Else
-            MsgBox "Error: " & axisIn & " does not correspond with a valid axis"
-    End Select
+        Active = False
+        Enabled = False
+        
+        lastInputs = 0
+        
+        For i = 0 To 2
+            AxisFnc(i) = 0
+            AxisInv(i) = False
+        Next i
 
-End Function
+    End Sub
+
+
+'---------------------------- Read-Only Set & Returns -----------------------------------------------------------------
+
+    Public Function getActive() As Boolean
+        getActive = Active
+    End Function
+
+    Public Function getState() As String
+        getState = state
+    End Function
+
+
+'---------------------------- Basic Internal Functions ----------------------------------------------------------------
+
+    Private Function getStr(axisIn As Long) As String
+
+        Select Case axisIn
+            Case axisX
+                getStr = aXstr
+        
+            Case axisY
+                getStr = aYstr
+
+            Case axisZ
+                getStr = aZstr
+        
+            Case axisR
+                getStr = aRstr
+
+            Case AxisYR
+                getStr = aYRstr
+
+            Case AxisZp
+                getStr = aZpstr
+        
+            Case AxisZpR
+                getStr = aZpRstr
+        
+            Case axisrS
+                getStr = arSstr
+            
+            Case Else
+                MsgBox "Error: " & axisIn & " does not correspond with a valid axis"
+                Enabled = False
+        End Select
+
+    End Function
+
+    Private Sub clearMult()
+    
+        'Clear Joystick Mult Values
+        Dim i As Integer
+        For i = 1 To 8
+            joyMult.Axis(i) = 0
+        Next i
+    
+    End Sub
+
+'---===---===---===---===--- Basic Functions - Initialize, Read-Only, Etc. ---===---===---===---===---===---===---===--
+'---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---=
+
+
+
+
+
+
+
+
+'---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---=
+'---===---===---===---===--- Advanced Functions - Joystick Operation ---===---===---===---===---===---===---===---===--
 
 Public Sub runJoy()
 
@@ -168,17 +215,6 @@ Public Sub runJoy()
             If myJoy.stateNow(joySelect) Then buttons = buttons Or (2 ^ (1 - 1))
             If myJoy.stateNow(joyRelease) Then buttons = buttons Or (2 ^ (2 - 1))
             If myJoy.stateNow(joyToggle) Then buttons = buttons Or (2 ^ (3 - 1))
-            
-            'Single integer to describe the state of the buttons on the joystick. The integer is set as below:
-                '        Sel  Rel  Tog
-                '   0  -  0    0    0
-                '   1  -  1    0    0
-                '   2  -  0    1    0
-                '   3  -  1    1    0
-                '   4  -  0    0    1
-                '   5  -  1    0    1
-                '   6  -  0    1    1
-                '   7  -  1    1    1
                 
             If Not setJoy(buttons) Then GoTo ReleaseJoystick
   
@@ -186,7 +222,21 @@ Public Sub runJoy()
 
         'Only run the velocity set algorithm if the joystick input state has changed
         If (currentInputs Xor bJoyAxes) <> (lastInputs Xor bJoyAxes) Then
-            Call Drives.setDriveVelocities
+            
+            Call clearMult
+            
+            Dim Direction As Integer
+            
+            'Set each axis according to the axis state
+            If currentInputs and bjoyLeft Then direction = joyNeg Elif currentInputs and bjoyRight Then direction = joyPos Else direction = joyOff
+            Call runAxis(AxisFnc(1), Direction, AxisInv(1))
+            If currentInputs and bjoyBack Then direction = joyNeg Elif currentInputs and bjoyFront Then direction = joyPos Else direction = joyOff
+            Call runAxis(AxisFnc(2), Direction, AxisInv(2))
+            If currentInputs and bjoyDown Then direction = joyNeg Elif currentInputs and bjoyUp Then direction = joyPos Else direction = joyOff
+            Call runAxis(AxisFnc(3), Direction, AxisInv(3))
+            
+            
+            
         End If
 
     End If
@@ -195,10 +245,45 @@ Public Sub runJoy()
 
 ReleaseJoystick:
 
+    Call clearMult
+    Enabled = False
     Active = False
     lastInputs = 0
     
 
+
+End Sub
+
+
+Private Sub runAxis(Axis As Integer, Direction As Integer, Inversion As Boolean)
+
+    Dim temp As Single
+
+    temp = Direction
+    
+    If Axis < 8 Then
+
+        If Inversion Then temp = -1 * temp
+
+        joyMult.Axis(Axis) = joyMult.Axis(Axis) + temp
+    
+    Elif Axis = 9
+        joyMult.Axis(0) = joyMult.Axis(0) + Direction * cJoySpeedAdjust
+        joyMult.Axis(0) = Trim(joyMult.Axis(0), cJoySpeedMin, cJoySpeedMax)
+    Else
+        
+        Dim AugVels As myDriveVels
+        
+        AugVels = Auger.getVels(Axis)
+        
+        For i = 1 To 7
+            If Inversion Then AugVels.Axis(i) = -1 * AugVels.Axis(i)
+        
+            joyMult.Axis(i) = joyMult.Axis(i) + AugVels.Axis(i)
+        
+        Next i
+        
+    End If
 
 End Sub
 
@@ -213,7 +298,7 @@ Public Function setJoy(buttons As Integer) As Boolean
         Case passNone, passStrike  '------------------------------------------------------------------------- FREE -------------------
         
             Select Case buttons
-                Case 0, 4  ' No Keys Pressed or Toggle Only
+                Case joyNoBtn, joyTogOnly  ' No Keys Pressed or Toggle Only
                     Select Case passType
                         Case passBlade
                             AxisFnc(0) = aX
@@ -231,7 +316,7 @@ Public Function setJoy(buttons As Integer) As Boolean
                             AxisFnc(2) = aZp
                     End Select
                     
-                Case 1, 5 ' Select Key Pressed - Machine Coordinate Mode
+                Case joySelOnly, joySelTog ' Select Key Pressed - Machine Coordinate Mode
                     Select Case passType
                         Case passBlade, passAugEdg, passAugFac
                             AxisFnc(0) = aX
@@ -239,7 +324,7 @@ Public Function setJoy(buttons As Integer) As Boolean
                             AxisFnc(2) = aZa
                     End Select
                 
-                Case 2, 3, 6, 7 ' Release pressed in any combination
+                Case joyRelOnly, joySelRel, joyRelTog, joyPressAll ' Release pressed in any combination
                     
                     GoTo joyRelease
                     
@@ -347,5 +432,7 @@ End Function
 
 
 
+'---===---===---===---===--- Advanced Functions - Joystick Operation ---===---===---===---===---===---===---===---===--
+'---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---=
 
 
