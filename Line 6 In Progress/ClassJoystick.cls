@@ -227,15 +227,42 @@ Public Sub runJoy()
             
             Dim Direction As Integer
             
+            '-- Left-Right --
             'Set each axis according to the axis state
-            If currentInputs and bjoyLeft Then direction = joyNeg Elif currentInputs and bjoyRight Then direction = joyPos Else direction = joyOff
+            If currentInputs And bjoyLeft Then
+                Direction = joyNeg
+            ElseIf currentInputs And bjoyRight Then
+                Direction = joyPos
+            Else
+                Direction = joyOff
+            End If
+                
+            'And set adjust the desired velocity accordingly
             Call runAxis(AxisFnc(1), Direction, AxisInv(1))
-            If currentInputs and bjoyBack Then direction = joyNeg Elif currentInputs and bjoyFront Then direction = joyPos Else direction = joyOff
+            
+            
+            '-- Front-Back --
+            If currentInputs And bjoyBack Then
+                Direction = joyNeg
+            ElseIf currentInputs And bjoyFront Then
+                Direction = joyPos
+            Else
+                Direction = joyOff
+            End If
+            
             Call runAxis(AxisFnc(2), Direction, AxisInv(2))
-            If currentInputs and bjoyDown Then direction = joyNeg Elif currentInputs and bjoyUp Then direction = joyPos Else direction = joyOff
+            
+            
+            '-- Up-Down --
+            If currentInputs And bjoyDown Then
+                Direction = joyNeg
+            ElseIf currentInputs And bjoyUp Then
+                Direction = joyPos
+            Else
+                Direction = joyOff
+            End If
+            
             Call runAxis(AxisFnc(3), Direction, AxisInv(3))
-            
-            
             
         End If
 
